@@ -1,3 +1,175 @@
+"""
+======================================================
+Assessment Question API Fetcher
+======================================================
+
+Description:
+------------
+This script is used to fetch assessment question data
+from the Alef Education Assessment Question API using
+Question IDs stored inside multiple CSV files.
+
+The script processes each CSV file subject-wise,
+extracts unique Question IDs, sends asynchronous API
+requests, and stores all responses in structured JSON
+files.
+
+The implementation is optimized for large-scale data
+migration and supports:
+    - Concurrent API requests
+    - Retry mechanism
+    - Batch processing
+    - Partial progress saving
+    - Failure tracking
+    - Async file writing
+
+------------------------------------------------------
+Workflow:
+------------------------------------------------------
+
+1. Reads all CSV files from INPUT_FOLDER
+
+2. For each CSV file:
+    - Creates a dedicated output folder
+    - Reads Question IDs from "Question Id" column
+    - Removes duplicates and empty values
+
+3. Processes Question IDs in batches
+
+4. Sends asynchronous GET requests to:
+       https://shared.alefed.com/
+       assessment-question-service/api/questions/{id}
+
+5. Stores:
+    - Successful responses
+    - Failed requests
+    - Partial progress during execution
+
+6. Saves final JSON outputs for each subject
+
+------------------------------------------------------
+Required Environment Variable:
+------------------------------------------------------
+
+ACCESS_TOKEN
+    Bearer token used for API authorization.
+
+Example:
+    export ACCESS_TOKEN="your_token"
+
+or on Windows:
+    set ACCESS_TOKEN=your_token
+
+------------------------------------------------------
+Input:
+------------------------------------------------------
+
+Folder:
+    INPUT_FOLDER
+
+Expected Files:
+    Multiple .csv files
+
+Expected CSV Format:
+    - UTF-16 encoded
+    - Tab separated
+    - Must contain column:
+          "Question Id"
+
+------------------------------------------------------
+Configuration Parameters:
+------------------------------------------------------
+
+INPUT_FOLDER
+    Directory containing input CSV files.
+
+OUTPUT_FOLDER
+    Root directory where output JSON files
+    will be stored.
+
+BASE_URL
+    API endpoint template for fetching questions.
+
+CONCURRENT_REQUESTS
+    Maximum simultaneous API requests.
+
+SAVE_EVERY
+    Saves partial progress after every N records.
+
+BATCH_SIZE
+    Number of Question IDs processed per batch.
+
+MAX_RETRIES
+    Number of retries for temporary failures.
+
+------------------------------------------------------
+Output Structure:
+------------------------------------------------------
+
+output/
+│
+├── subject_name/
+│   ├── all_questions.json
+│   ├── failed_questions.json
+│   └── all_questions_partial.json
+│
+
+------------------------------------------------------
+Output Files:
+------------------------------------------------------
+
+1. all_questions.json
+    Contains all API responses.
+
+2. failed_questions.json
+    Contains failed Question IDs with:
+        - status_code
+        - error details
+
+3. all_questions_partial.json
+    Intermediate checkpoint file saved periodically.
+
+------------------------------------------------------
+Response Format:
+------------------------------------------------------
+
+Successful Response:
+{
+    "question_id": "...",
+    "status_code": 200,
+    "response": {...}
+}
+
+Failed Response:
+{
+    "question_id": "...",
+    "status_code": 500,
+    "error": "..."
+}
+
+------------------------------------------------------
+Libraries Used:
+------------------------------------------------------
+
+- asyncio
+- aiohttp
+- aiofiles
+- pandas
+- tqdm
+
+------------------------------------------------------
+Performance Notes:
+------------------------------------------------------
+
+- Uses asyncio for high-speed concurrent requests
+- Uses semaphore to limit request overload
+- Handles temporary server failures with retries
+- Suitable for large datasets and migration pipelines
+
+======================================================
+"""
+
+
 import os
 import json
 import asyncio
