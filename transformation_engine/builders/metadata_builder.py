@@ -1,0 +1,166 @@
+from helpers.annotation_mapper import (
+    build_annotation_tags
+)
+
+
+def build_metadata(raw):
+
+    metadata = raw.get("metadata", {})
+
+    outcomes = metadata.get(
+        "curriculumOutcomes",
+        []
+    )
+
+    first = outcomes[0] if outcomes else {}
+
+    return {
+
+        "general": {
+
+            "code": raw.get("code"),
+
+            "externalId": raw.get("id"),
+
+            "title": None,
+
+            "language": raw.get("language"),
+
+            "keywords":
+                build_keywords(metadata),
+
+            "parentReference": None,
+
+            "source":
+                metadata.get("author")
+                or raw.get(
+                    "createdByUser",
+                    {}
+                ).get("email")
+        },
+
+        "lifecycle": {
+            "status": raw.get("status")
+        },
+
+        "technical": {
+            "penAndPaper":
+                metadata.get(
+                    "penAndPaper",
+                    False
+                )
+        },
+
+        "educational": {
+
+            "resourceType":
+                metadata.get("resourceType"),
+
+            "difficultyLevel":
+                metadata.get(
+                    "difficultyLevel"
+                ),
+
+            "cognitiveDimensions":
+                metadata.get(
+                    "cognitiveDimensions",
+                    []
+                ),
+
+            "knowledgeDimensions":
+                metadata.get(
+                    "knowledgeDimensions",
+                    []
+                ),
+
+            "summativeAssessment":
+                metadata.get(
+                    "summativeAssessment",
+                    False
+                ),
+
+            "cefrLevel":
+                metadata.get("cefrLevel"),
+
+            "proficiency":
+                metadata.get("proficiency"),
+
+            "lexileLevel":
+                metadata.get("lexileLevel"),
+
+            "logitValue":
+                metadata.get("logitValue")
+        },
+
+        "rights": {
+            "copyrights":
+                metadata.get(
+                    "copyrights",
+                    []
+                )
+        },
+
+        "classification": {
+
+            "grade":
+                first.get("grade"),
+
+            "subject":
+                first.get("subject"),
+
+            "curriculum":
+                first.get("curriculum") ,
+
+            "curriculumOutcomes":
+                outcomes,
+
+            "subDomain":
+                build_subdomain(metadata) or None
+        },
+
+        "annotation": {
+            "tags":
+                build_annotation_tags(raw) or {}
+        }
+    }
+
+
+def build_keywords(metadata):
+
+    keywords = metadata.get(
+        "keywords",
+        []
+    )
+
+    skill_id = metadata.get("skillId")
+
+    sub_skill = metadata.get("subSkill")
+
+    if skill_id:
+        keywords.append(
+            f"skillId:{skill_id}"
+        )
+
+    if sub_skill:
+        keywords.append(
+            f"subSkill:{sub_skill}"
+        )
+
+    return keywords
+
+
+def build_subdomain(metadata):
+
+    domains = metadata.get(
+        "domains",
+        []
+    ) or []
+
+    sub_skill = metadata.get(
+        "subSkill"
+    )
+
+    if sub_skill:
+        domains.append(sub_skill)
+
+    return domains

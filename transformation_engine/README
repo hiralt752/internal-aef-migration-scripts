@@ -1,0 +1,5 @@
+Folder - Input_SystemB
+The above folder contains the request body for the POST API after the Transformation.
+
+Folder - Output_SystemA
+The above folder contains the response received from System A. The response includes data for two question types: "MULTIPLE_CHOICE" and "MULTIPLE_SELECTION".
