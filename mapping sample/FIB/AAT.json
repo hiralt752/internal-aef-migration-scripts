@@ -1,0 +1,623 @@
+[
+  {
+    "question_id": "0036d828-fdc8-4305-9918-751f575c6528",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "was",
+          "past tense",
+          "third person plural pronoun"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "APPLYING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "PROCEDURAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ],
+        "conditionsOfUse": [
+          "https://www.shutterstock.com/image-photo/girl-biking-on-forest-trails-161444495"
+        ],
+        "formatType": "QUESTION",
+        "author": "ELL_Writer_11@qbslearning.com",
+        "authoredDate": "2019-12-22T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "570091",
+            "name": "En5.G.Future tenses.14.1.",
+            "description": "future time (going to)",
+            "curriculum": "UAE MOE",
+            "grade": "5",
+            "subject": "English Access MOE"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "EA5_MLO_040_Q_22",
+      "createdByUser": null,
+      "language": "EN_GB",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK",
+      "body": {
+        "prompt": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Read the text and complete the sentence. \\n\\nStacey and her friend were going to ride their bikes in the park. Stacey was so happy.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:0,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"{&quot;1&quot;:0}[null,65,{&quot;5&quot;:1}]{&quot;1&quot;:70}\">Read the text. Complete the sentence from the word bank below to show what has already happened.</span></p>\n<p>&nbsp;</p>\n<p style=\"text-align: center;\"><em>Word Bank</em></p>\n<table style=\"border-collapse: collapse; width: 100%; height: 27px;\" border=\"1\">\n<tbody>\n<tr style=\"height: 27px;\">\n<td style=\"width: 25%; height: 27px; text-align: center;\">was</td>\n<td style=\"width: 25%; height: 27px; text-align: center;\">were</td>\n<td style=\"width: 25%; height: 27px; text-align: center;\">is</td>\n<td style=\"width: 25%; height: 27px; text-align: center;\">am</td>\n</tr>\n</tbody>\n</table>\n<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Read the text and complete the sentence. \\n\\nStacey and her friend were going to ride their bikes in the park. Stacey was so happy.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:0,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"{&quot;1&quot;:0}[null,65,{&quot;5&quot;:1}]{&quot;1&quot;:70}\"><br />Mary and her friend <blank-field id=\"702\" class=\"mceNonEditable\">were</blank-field> going to ride their bikes in the park. Mary was so happy.</span></p>\n<p>&nbsp;</p>",
+        "blanks": [
+          {
+            "type": "TEXT_BLANK",
+            "id": 702,
+            "weight": 100.0,
+            "feedback": "<p>Mary and her friend <em>were</em> going to ride their bikes in the park. Mary was so happy.</p>",
+            "rules": [],
+            "decimalNotation": null,
+            "periodNotation": null
+          }
+        ],
+        "hints": [
+          "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Which pronoun could you use to replace Stacey and her friend?\\n\\nDoes the sentence use a singular or a plural noun?&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:1,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"{&quot;1&quot;:0}[null,39,{&quot;6&quot;:1}]{&quot;1&quot;:60}\">You will use the pronoun <em>they</em> for Stacey and her friend.<br /></span></p>",
+          "<p><em>They</em> is a third-person plural pronoun.</p>"
+        ],
+        "generalFeedback": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Was and were are words that tell you about something that has already happened.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:1,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"[null,0,{&quot;6&quot;:1}]{&quot;1&quot;:3}[null,8,{&quot;6&quot;:1}]{&quot;1&quot;:12}\">You use the word <em>were</em> with <em>they</em> to talk about what has already happened in the past.</span></p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2019-12-22T13:14:03.696",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_GB",
+      "rubricId": null,
+      "id": "0036d828-fdc8-4305-9918-751f575c6528",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK",
+          "answerMapping": [
+            {
+              "blankId": 702,
+              "correctAnswer": "were",
+              "alternateAnswers": []
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2020-12-07T08:57:26.691",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "shareef@alefeducation.com",
+      "maxScore": 1,
+      "version": 9,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "ell_writer_11@qbslearning.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "0036d828-fdc8-4305-9918-751f575c6528",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "was",
+          "past tense",
+          "third person plural pronoun"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "APPLYING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "PROCEDURAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ],
+        "conditionsOfUse": [
+          "https://www.shutterstock.com/image-photo/girl-biking-on-forest-trails-161444495"
+        ],
+        "formatType": "QUESTION",
+        "author": "ELL_Writer_11@qbslearning.com",
+        "authoredDate": "2019-12-22T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "570091",
+            "name": "En5.G.Future tenses.14.1.",
+            "description": "future time (going to)",
+            "curriculum": "UAE MOE",
+            "grade": "5",
+            "subject": "English Access MOE"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "EA5_MLO_040_Q_22",
+      "createdByUser": null,
+      "language": "EN_GB",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK",
+      "body": {
+        "prompt": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Read the text and complete the sentence. \\n\\nStacey and her friend were going to ride their bikes in the park. Stacey was so happy.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:0,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"{&quot;1&quot;:0}[null,65,{&quot;5&quot;:1}]{&quot;1&quot;:70}\">Read the text. Complete the sentence from the word bank below to show what has already happened.</span></p>\n<p>&nbsp;</p>\n<p style=\"text-align: center;\"><em>Word Bank</em></p>\n<table style=\"border-collapse: collapse; width: 100%; height: 27px;\" border=\"1\">\n<tbody>\n<tr style=\"height: 27px;\">\n<td style=\"width: 25%; height: 27px; text-align: center;\">was</td>\n<td style=\"width: 25%; height: 27px; text-align: center;\">were</td>\n<td style=\"width: 25%; height: 27px; text-align: center;\">is</td>\n<td style=\"width: 25%; height: 27px; text-align: center;\">am</td>\n</tr>\n</tbody>\n</table>\n<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Read the text and complete the sentence. \\n\\nStacey and her friend were going to ride their bikes in the park. Stacey was so happy.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:0,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"{&quot;1&quot;:0}[null,65,{&quot;5&quot;:1}]{&quot;1&quot;:70}\"><br />Mary and her friend <blank-field id=\"702\" class=\"mceNonEditable\">were</blank-field> going to ride their bikes in the park. Mary was so happy.</span></p>\n<p>&nbsp;</p>",
+        "blanks": [
+          {
+            "type": "TEXT_BLANK",
+            "id": 702,
+            "weight": 100.0,
+            "feedback": "<p>Mary and her friend <em>were</em> going to ride their bikes in the park. Mary was so happy.</p>",
+            "rules": [],
+            "decimalNotation": null,
+            "periodNotation": null
+          }
+        ],
+        "hints": [
+          "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Which pronoun could you use to replace Stacey and her friend?\\n\\nDoes the sentence use a singular or a plural noun?&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:1,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"{&quot;1&quot;:0}[null,39,{&quot;6&quot;:1}]{&quot;1&quot;:60}\">You will use the pronoun <em>they</em> for Stacey and her friend.<br /></span></p>",
+          "<p><em>They</em> is a third-person plural pronoun.</p>"
+        ],
+        "generalFeedback": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;Was and were are words that tell you about something that has already happened.&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:15339,&quot;3&quot;:{&quot;1&quot;:0},&quot;4&quot;:[null,2,11982760],&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:[null,2,0]},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;9&quot;:1,&quot;10&quot;:1,&quot;11&quot;:4,&quot;12&quot;:0,&quot;14&quot;:[null,2,0],&quot;15&quot;:&quot;Calibri&quot;,&quot;16&quot;:12}\" data-sheets-textstyleruns=\"[null,0,{&quot;6&quot;:1}]{&quot;1&quot;:3}[null,8,{&quot;6&quot;:1}]{&quot;1&quot;:12}\">You use the word <em>were</em> with <em>they</em> to talk about what has already happened in the past.</span></p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2019-12-22T13:14:03.696",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_GB",
+      "rubricId": null,
+      "id": "0036d828-fdc8-4305-9918-751f575c6528",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK",
+          "answerMapping": [
+            {
+              "blankId": 702,
+              "correctAnswer": "were",
+              "alternateAnswers": []
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2020-12-07T08:57:26.691",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "shareef@alefeducation.com",
+      "maxScore": 1,
+      "version": 9,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "ell_writer_11@qbslearning.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "00563945-b350-49f2-be76-c427be8c4ef2",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "functional language",
+          "modal verbs",
+          "grammar",
+          "expressing opinion"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "REMEMBERING",
+          "UNDERSTANDING",
+          "APPLYING",
+          "CREATING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "7",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "vd08_ar@test.com",
+        "authoredDate": "2020-01-14T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "883448",
+            "name": "En7.4.G.Modals.11.2",
+            "description": "could/couldn’t",
+            "curriculum": "UAE MOE",
+            "grade": "7",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "333409",
+            "name": "En7.4.G.Modals.11.3",
+            "description": "should",
+            "curriculum": "UAE MOE",
+            "grade": "7",
+            "subject": "English MOE"
+          },
+          {
+            "type": "standard",
+            "id": "576279",
+            "name": "En7.4.FL.16",
+            "description": "Expressing opinion, language of agreement and disagreement ",
+            "curriculum": "UAE MOE",
+            "grade": "7",
+            "subject": "English MOE"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "EN7_MLO_165_Q_38",
+      "createdByUser": null,
+      "language": "EN_GB",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK",
+      "body": {
+        "prompt": "<p>Read the passage. Complete the sentence using either <em>could</em> or <em>should</em>.</p>\n<p>&nbsp;</p>\n<p>You <blank-field id=\"615\" class=\"mceNonEditable\">could</blank-field> go for a run in the park, but you <blank-field id=\"122\" class=\"mceNonEditable\">should</blank-field> have a glass of water first. It’s very hot today, and you need to drink lots in this weather.</p>",
+        "blanks": [
+          {
+            "type": "TEXT_BLANK",
+            "id": 615,
+            "weight": 50.0,
+            "feedback": "<p>You could go for a run in the park, but you _____ have a glass of water first.</p>\n<p><em>Could</em> is a modal verb that means <em>This is one choice of many.</em></p>",
+            "rules": [],
+            "decimalNotation": null,
+            "periodNotation": null
+          },
+          {
+            "type": "TEXT_BLANK",
+            "id": 122,
+            "weight": 50.0,
+            "feedback": "<p>You _____ go for a run in the park, but you should have a glass of water first.</p>\n<p><em>Should</em> is a modal verb that means <em>I think this is the best option.</em></p>",
+            "rules": [],
+            "decimalNotation": null,
+            "periodNotation": null
+          }
+        ],
+        "hints": [
+          "<p>A <em>modal verb</em> tells that something is needed or possible.</p>",
+          "<p>Examples of modal verbs include <em>could </em>and <em>should</em>.</p>"
+        ],
+        "generalFeedback": "<p><em>Modal verbs</em> are used to make suggestions and express opinions, e.g. you <em>should&nbsp;</em>do your homework now, we <em>could&nbsp;</em>go to the cinema later.</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2020-01-14T20:14:58.32",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_GB",
+      "rubricId": null,
+      "id": "00563945-b350-49f2-be76-c427be8c4ef2",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK",
+          "answerMapping": [
+            {
+              "blankId": 615,
+              "correctAnswer": "could",
+              "alternateAnswers": []
+            },
+            {
+              "blankId": 122,
+              "correctAnswer": "should",
+              "alternateAnswers": []
+            }
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2020-12-08T10:14:46.217",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "isaac@alefeducation.com",
+      "maxScore": 1,
+      "version": 3,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "vd08_ar@test.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "005dfc47-ccdd-49ec-96ae-f0ad6d2edb25",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "Preposition",
+          "Describing places",
+          "At home"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "REMEMBERING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Va11",
+        "authoredDate": "2020-07-30T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "275551",
+            "name": "En5.2.R.CS.1.",
+            "description": "Read and understand the overall meaning of short, simple texts on familiar topics.",
+            "curriculum": "UAE MOE",
+            "grade": "5",
+            "subject": "English Access MOE"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": "A2",
+        "proficiency": "READING",
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "EA5_MLO_117_Q_2",
+      "createdByUser": null,
+      "language": "EN_GB",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK",
+      "body": {
+        "prompt": "<p>Fill in the blank with the right preposition.</p>\n<table style=\"border-collapse: collapse; width: 100%;\" border=\"1\">\n<tbody>\n<tr>\n<td style=\"width: 25%; text-align: center;\" colspan=\"4\">Word Bank</td>\n</tr>\n<tr>\n<td style=\"width: 25%; text-align: center;\">in</td>\n<td style=\"width: 25%; text-align: center;\">under</td>\n<td style=\"width: 25%; text-align: center;\">next to</td>\n<td style=\"width: 25%; text-align: center;\">on</td>\n</tr>\n</tbody>\n</table>\n<p>The lamp is &nbsp;<blank-field id=\"405\" class=\"mceNonEditable\">on</blank-field>&nbsp; the desk.</p>",
+        "blanks": [
+          {
+            "type": "TEXT_BLANK",
+            "id": 405,
+            "weight": 100.0,
+            "feedback": "",
+            "rules": [],
+            "decimalNotation": null,
+            "periodNotation": null
+          }
+        ],
+        "hints": [
+          "<p>Think about where a lamp sits.</p>",
+          "<p>The lamp cannot fit in a desk.</p>"
+        ],
+        "generalFeedback": "<p>The prepositions <em>on, in, under, </em>and <em>next to </em>are used to show the location of something.</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2020-07-30T18:58:17.612",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_GB",
+      "rubricId": null,
+      "id": "005dfc47-ccdd-49ec-96ae-f0ad6d2edb25",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK",
+          "answerMapping": [
+            {
+              "blankId": 405,
+              "correctAnswer": "on",
+              "alternateAnswers": []
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2020-08-04T18:38:30.927",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "fajir@alefeducation.com",
+      "maxScore": 1,
+      "version": 2,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "va11@allthingsresearchllc.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "006793e3-fd73-4d69-b2f9-b550a52b3f3a",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "the past",
+          "describe",
+          "past simple"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "REMEMBERING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": "6",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "vd15_ar@test.com",
+        "authoredDate": "2020-01-30T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "329324",
+            "name": "En6.3.R.CS.2",
+            "description": "Read and identify specific information in simple texts on familiar topics.",
+            "curriculum": "UAE MOE",
+            "grade": "6",
+            "subject": "English Access"
+          },
+          {
+            "type": "sub_standard",
+            "id": "358387",
+            "name": "En6.3.L.CS.4",
+            "description": "Listen and identify some details in simple texts on familiar topics.",
+            "curriculum": "UAE MOE",
+            "grade": "6",
+            "subject": "English Access"
+          },
+          {
+            "type": "sub_standard",
+            "id": "835830",
+            "name": "En6.3.W.WS.3",
+            "description": "Apply spelling rules and conventions when writing.",
+            "curriculum": "UAE MOE",
+            "grade": "6",
+            "subject": "English Access"
+          },
+          {
+            "type": "sub_standard",
+            "id": "403093",
+            "name": "En6.G.Past tense.13.1.",
+            "description": "past simple",
+            "curriculum": "UAE MOE",
+            "grade": "6",
+            "subject": "English Access MOE"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "EA6_MLO_144_Q_1",
+      "createdByUser": null,
+      "language": "EN_GB",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK",
+      "body": {
+        "prompt": "<p><em>Use the word bank to choose the correct option to complete the following sentence.</em></p>\n<p>&nbsp;</p>\n<table style=\"border-collapse: collapse; width: 100%;\" border=\"1\">\n<tbody>\n<tr>\n<td style=\"width: 25%; text-align: center;\" colspan=\"4\">Word Bank</td>\n</tr>\n<tr>\n<td style=\"width: 25%; text-align: center;\">future</td>\n<td style=\"width: 25%; text-align: center;\">present</td>\n<td style=\"width: 25%; text-align: center;\">past</td>\n<td style=\"width: 25%; text-align: center;\">time to come</td>\n</tr>\n</tbody>\n</table>\n<p>&nbsp;</p>\n<p>The past simple talks about the <blank-field id=\"715\" class=\"mceNonEditable\">past</blank-field>.</p>\n<p>&nbsp;</p>",
+        "blanks": [
+          {
+            "type": "TEXT_BLANK",
+            "id": 715,
+            "weight": 100.0,
+            "feedback": "<p>The <em>past simple</em> talks about the past. It describes things that happened in <em>the past.</em></p>",
+            "rules": [],
+            "decimalNotation": null,
+            "periodNotation": null
+          }
+        ],
+        "hints": [
+          "<p>The <em>past simple</em> does not talk about the future.</p>",
+          "<p><em>I went to Japan on my holidays</em> is an example of the past simple.</p>"
+        ],
+        "generalFeedback": "<p>The <em>past simple</em> describes things that happened in<em> the</em> <em>past.</em></p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2020-01-30T11:00:56.215",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_GB",
+      "rubricId": null,
+      "id": "006793e3-fd73-4d69-b2f9-b550a52b3f3a",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK",
+          "answerMapping": [
+            {
+              "blankId": 715,
+              "correctAnswer": "past",
+              "alternateAnswers": []
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2020-12-13T07:14:07.958",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "isaac@alefeducation.com",
+      "maxScore": 1,
+      "version": 5,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "vd15_ar@test.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  }
+]

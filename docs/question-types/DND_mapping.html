@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>DnD — AAT to Question API Mapping</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; font-size: 0.9em; }
+  th, td { border: 1px solid #dddddd; text-align: left; padding: 10px; vertical-align: top; }
+  th { background-color: #f8f9fa; color: #333; }
+  code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; color: #d63384; }
+  h1, h2, h3, h4 { color: #2c3e50; }
+  h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+  h3 { color: #34495e; margin-top: 25px; }
+  .status-direct { font-weight: bold; color: #198754; }
+  .status-possible { font-weight: bold; color: #fd7e14; }
+  .status-none { font-weight: bold; color: #dc3545; }
+  .status-hardcode { font-weight: bold; color: #6f42c1; }
+  .status-note { font-weight: bold; color: #20c997; }
+  .note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+  .info { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
+  .danger { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
+  .success { background-color: #d1e7dd; border-left: 4px solid #198754; padding: 10px; margin: 15px 0; }
+  .schema-ref { font-size: 0.85em; color: #6c757d; font-style: italic; }
+  .required { color: #dc3545; font-weight: bold; font-size: 0.8em; }
+  .toc { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+  .toc a { color: #0d6efd; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+  .enum-badge {
+    position: relative; cursor: help;
+    border-bottom: 2px dotted #0d6efd; padding: 2px 0;
+  }
+  .tooltip {
+    display: none; position: absolute; bottom: 125%; left: 50%;
+    transform: translateX(-50%); background: #1a1a1a; color: #fff;
+    padding: 10px 12px; border-radius: 6px; white-space: nowrap;
+    z-index: 1000; font-size: 11px; border: 1px solid #0d6efd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .tooltip::after {
+    content: ''; position: absolute; top: 100%; left: 50%;
+    margin-left: -5px; border: 5px solid transparent; border-top-color: #1a1a1a;
+  }
+  .enum-badge:hover .tooltip { display: block; }
+  .enum-values { font-family: monospace; font-size: 10px; display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid #444; }
+  .enum-values div { padding: 2px 0; }
+  .rule-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.88em; }
+  .rule-table th { background: #e8eaf6; }
+  .rule-table td.cond { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
+  .rule-table td.result { background: #e8f5e9; font-family: monospace; font-size: 0.85em; }
+  .flow-step { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 14px; margin: 6px 0; font-size: 0.92em; }
+  .flow-step strong { color: #e65100; }
+</style>
+</head>
+<body>
+
+<div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 18px; margin-bottom:20px; font-size:0.9em;">
+  <strong>Part of:</strong> <a href="../migration_mapping.html">migration_mapping.html</a> (general mapping doc) —
+  This sub-doc covers <strong>DnD (Drag-and-Drop Fill-in-the-Blank)</strong> specific fields only.
+  Shared sections (Metadata, Hints, ModalFeedback, SeeWhy) are defined in the main doc.
+</div>
+
+<h1>DnD — AAT → Question API Mapping (<code>application/json</code>)</h1>
+<p>Maps legacy AAT <code>FILL_IN_THE_BLANK_DRAG_DROP</code> questions to <code>DnDQuestionResource</code> for
+<code>POST /api/v1/questions</code>.</p>
+
+<div class="info">
+  <strong>Status Legend:</strong>
+  <ul style="margin:8px 0 0 18px; padding:0;">
+    <li><span class="status-direct">Direct</span> — direct copy from legacy field</li>
+    <li><span class="status-possible">Transform</span> — requires processing/logic</li>
+    <li><span class="status-hardcode">Hardcode</span> — fixed value, no legacy source</li>
+    <li><span class="status-none">No Data</span> — not present in legacy system</li>
+  </ul>
+</div>
+
+<div class="toc">
+  <strong>Table of Contents</strong>
+  <ol>
+    <li><a href="#sec0">Key Transformation Rules</a>
+      <ul>
+        <li><a href="#sec0-type">Type &amp; SubType Mapping</a></li>
+        <li><a href="#sec0-prompt">Prompt Processing (shared with MCQ)</a></li>
+        <li><a href="#sec0-options">Option Content Extraction — <code>value</code> vs <code>answer</code></a></li>
+      </ul>
+    </li>
+    <li><a href="#sec1">Base Structure — shared</a></li>
+    <li><a href="#sec2">Metadata — shared (see main doc)</a></li>
+    <li><a href="#sec3">DnD-Specific: itemBody (DnDItemBodyResource)</a>
+      <ul>
+        <li><a href="#sec3-top">Top-level fields</a></li>
+        <li><a href="#sec3-statement">statement — ContentItem[] (same as MCQ)</a></li>
+        <li><a href="#sec3-sentence">sentence — text-only prompt</a></li>
+        <li><a href="#sec3-targets">targets[] — from body.blanks</a></li>
+        <li><a href="#sec3-options">options[] — from body.choices.choiceItems</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec4">responseDeclaration</a></li>
+    <li><a href="#sec5">outcomeDeclaration</a>
+      <ul>
+        <li><a href="#sec5-scoring">scoringType &amp; scoring</a></li>
+        <li><a href="#sec5-seewhy">seeWhy — shared</a></li>
+        <li><a href="#sec5-feedback">feedback</a></li>
+        <li><a href="#sec5-valid">validResponse — DnD structure</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec6">modalFeedback — shared</a></li>
+    <li><a href="#sec7">DnD vs MCQ — Key Differences</a></li>
+    <li><a href="#sec8">Unmapped / Ignored Legacy Fields</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec0">0. Key Transformation Rules</h2>
+
+<h3 id="sec0-type">0.1 Type &amp; SubType Mapping</h3>
+
+<table class="rule-table">
+  <thead><tr><th>Legacy <code>type</code></th><th>→ API <code>type</code></th><th>→ API <code>subType</code></th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td>
+    <td class="result">DND</td>
+    <td class="result">BLANK_ON_QUESTION</td>
+    <td>Type is remapped. SubType is always hardcoded — not auto-detected. All AAT DnD questions map to <code>BLANK_ON_QUESTION</code> during migration.</td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Available DnD subTypes in QB:</strong>
+  <code>BLANK_ON_QUESTION</code>, <code>TEXT_ON_IMAGE</code>, <code>BLANK_ON_SENTENCE</code>, <code>IMAGE_ON_IMAGE</code>, <code>IMAGE_ON_SPACE</code>, <code>IMAGE_TO_FIXED_1</code>, <code>IMAGE_TO_FIXED_2</code>, <code>SEQUENCE_IMAGE</code>, <code>SEQUENCE_TEXT</code>, <code>SPLIT_SCREEN</code>.
+  None except <code>BLANK_ON_QUESTION</code> are assigned during migration.
+</div>
+
+<h3 id="sec0-prompt">0.2 Prompt Processing — sentence construction &amp; <code>@_@</code> replacement</h3>
+
+<p>DnD processes <code>body.prompt</code> the same way as FIB — the full prompt HTML goes into <code>itemBody.sentence.text</code> with <code>&lt;blank-field&gt;</code> tags replaced by <code>@_@</code>. <code>itemBody.statement</code> is always <code>null</code>.</p>
+
+<div class="flow-step"><strong>Step 1 — Find all blank-field tags:</strong> Scan <code>body.prompt</code> for all <code>&lt;blank-field id="N" ...&gt;&lt;/blank-field&gt;</code> tags in DOM order.</div>
+<div class="flow-step"><strong>Step 2 — Replace each with <code>@_@</code>:</strong> Strip the entire tag and insert the literal string <code>@_@</code> in its place.</div>
+<div class="flow-step"><strong>Step 3 — Audio/Video extraction:</strong> Extracted <code>&lt;audio&gt;</code> → <code>itemBody.audio</code>. Extracted <code>&lt;video&gt;</code> → <code>itemBody.video</code>. Tags removed from the HTML.</div>
+<div class="flow-step"><strong>Step 4 — Result → <code>itemBody.sentence.text</code>:</strong> The full modified HTML string becomes <code>sentence.text</code>. <code>null</code> if prompt is empty.</div>
+<div class="flow-step"><strong>Step 5 — <code>itemBody.statement</code>:</strong> Always <code>null</code>. Prompt content goes into <code>sentence</code>.</div>
+
+<div class="note">
+  <strong>Images in DnD prompt:</strong> Unlike FIB (which has a dedicated <code>fibImage</code> field), DnD has no equivalent. Prompt images stay embedded in the <code>sentence.text</code> HTML as-is — the <code>&lt;img&gt;</code> tag is not extracted. <code>itemBody.image</code> is always <code>null</code>.
+</div>
+
+<h3 id="sec0-options">0.3 Option Content Extraction — <code>value</code> vs <code>answer</code></h3>
+
+<div class="danger">
+  <strong>DnD uses <code>.value</code>, MCQ uses <code>.answer</code>.</strong> The choice item field name is different between types. Using the wrong field will silently produce empty options.
+</div>
+
+<table class="rule-table">
+  <thead><tr><th>Question type</th><th>QB option id</th><th>AAT id source (lookup only)</th><th>Choice content field</th></tr></thead>
+  <tbody>
+  <tr><td class="cond">MCQ</td><td class="result">Direct from <code>choiceItems[].choiceId</code></td><td class="result">—</td><td class="result"><code>choiceItems[].answer</code></td></tr>
+  <tr><td class="cond">DnD</td><td class="result">Incremental (1, 2, 3…) by order</td><td class="result"><code>choiceItems[].id</code> used to resolve <code>correctAnswers[].optionIds</code></td><td class="result"><code>choiceItems[].value</code></td></tr>
+  </tbody>
+</table>
+
+<p>The DnD option content is parsed — media extracted, text cleaned — producing the same <code>ContentItem</code> array format as MCQ options.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec1">1. Base Structure — shared</h2>
+<p>Root fields identical to all other question types. See <a href="../migration_mapping.html#sec1">main doc §1</a>.</p>
+
+<pre><code>{
+  "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },
+  "type": "DND",
+  "subType": "BLANK_ON_QUESTION",
+  "metadata": { ... },
+  "itemBody": { ... },
+  "responseDeclaration": { ... },
+  "outcomeDeclaration": { ... },
+  "modalFeedback": { ... }    ← omitted when no hints/passage
+}</code></pre>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>schemaVersion</code></td><td>SemanticVersion</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>{ "major": 1, "minor": 0, "patch": 0 }</code>.</td></tr>
+  <tr>
+    <td><code>type</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">API value:<div class="enum-values"><div>DND</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>type</code></td>
+    <td>Legacy <code>FILL_IN_THE_BLANK_DRAG_DROP</code> → <code>DND</code>.</td>
+  </tr>
+  <tr>
+    <td><code>subType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">All DnD subType values:<div class="enum-values"><div>BLANK_ON_QUESTION</div><div>TEXT_ON_IMAGE</div><div>BLANK_ON_SENTENCE</div><div>IMAGE_ON_IMAGE</div><div>IMAGE_ON_SPACE</div><div>IMAGE_TO_FIXED_1</div><div>IMAGE_TO_FIXED_2</div><div>SEQUENCE_IMAGE</div><div>SEQUENCE_TEXT</div><div>SPLIT_SCREEN</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>"BLANK_ON_QUESTION"</code>.</td>
+  </tr>
+  <tr><td><code>metadata</code></td><td>MetadataResource</td><td class="required">YES</td><td class="status-possible">Transform</td><td>(Section 2)</td><td>Identical to MCQ. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</td></tr>
+  <tr><td><code>modalFeedback</code></td><td>ModalFeedback</td><td></td><td class="status-possible">Transform</td><td><code>body.hints</code> / <code>body.passage</code></td><td>Identical to MCQ. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec2">2. Metadata — shared</h2>
+<p>All <code>metadata.*</code> sub-objects identical to MCQ. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec3">3. DnD-Specific: <code>itemBody</code> <span class="schema-ref">— DnDItemBodyResource</span></h2>
+
+<h3 id="sec3-top">3.1 Top-level <code>itemBody</code> fields</h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.version</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"1.0"</code>.</td></tr>
+  <tr><td><code>itemBody.title</code></td><td>StringTitle</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.subTitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.instruction</code></td><td>Html</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. Prompt content goes to <code>statement</code>/<code>sentence</code>.</td></tr>
+  <tr><td><code>itemBody.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;audio src="..."&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.video</code></td><td>Video</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;video src="..."&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.image</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. Prompt images go into <code>statement.content[]</code> instead.</td></tr>
+  <tr>
+    <td><code>itemBody.showDragHandle</code></td><td>Boolean</td><td></td><td class="status-direct">Direct</td>
+    <td><code>body.choices.showDragHandle</code></td>
+    <td>Direct copy. Defaults to <code>true</code> if absent.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.shuffled</code></td><td>Boolean</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>body.choices.shuffle</code></td>
+    <td>Direct copy. Defaults to <code>true</code> if absent.</td>
+  </tr>
+  <tr><td><code>itemBody.optionsStyle</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"option-style-1"</code>.</td></tr>
+  <tr><td><code>itemBody.dropLimit</code></td><td>Integer (≥1)</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1</code>.</td></tr>
+  <tr><td><code>itemBody.optionsPosition</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"bottom"</code>.</td></tr>
+  <tr><td><code>itemBody.sideImage</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.backgroundLayout</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.splitContent</code></td><td>SplitContent</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.timeSpentConfig</code></td><td>TimeSpentConfig</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-statement">3.2 <code>itemBody.statement</code></h3>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>itemBody.statement</code></td>
+    <td>DnDStatement</td><td></td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>null</code>. Prompt content goes entirely into <code>sentence.text</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-sentence">3.3 <code>itemBody.sentence</code> <span class="schema-ref">— Sentence</span></h3>
+
+<p>The full <code>body.prompt</code> HTML with each <code>&lt;blank-field&gt;</code> tag replaced by <code>@_@</code>. Same approach as FIB.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>itemBody.sentence</code></td>
+    <td>Sentence</td><td></td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td><code>null</code> if prompt is empty/null.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sentence.text</code></td>
+    <td>String</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td>
+      Full prompt HTML with every <code>&lt;blank-field id="N" class="mceNonEditable"&gt;&lt;/blank-field&gt;</code> replaced by <code>@_@</code>. All other HTML (tables, images, spans, paragraphs) preserved as-is.<br><br>
+      <strong>Example:</strong><br>
+      <code>...using &nbsp;&lt;blank-field id="790" ...&gt;&lt;/blank-field&gt; , avoiding...</code><br>
+      → <code>...using &nbsp;@_@ , avoiding...</code>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-targets">3.4 <code>itemBody.targets[]</code> <span class="schema-ref">— Target</span></h3>
+<p>One <code>Target</code> per <code>&lt;blank-field&gt;</code> tag found in the prompt, in DOM order. IDs are assigned incrementally (1, 2, 3…) — same rule as FIB <code>items[]</code>. The original AAT blank id is only used as a lookup key to pull weight data from <code>body.blanks[]</code>.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.targets</code></td><td>Array&lt;Target&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td><td><code>body.prompt</code> + <code>body.blanks</code></td><td>One target per <code>&lt;blank-field&gt;</code> in prompt order. Count and order from HTML; weight from matching <code>body.blanks[]</code> entry.</td></tr>
+  <tr>
+    <td><code>itemBody.targets[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code> (blank-field order)</td>
+    <td>Incremental: first blank-field → <code>1</code>, second → <code>2</code>, etc. <strong>Not</strong> from <code>blank-field[id]</code> attribute. The original blank-field <code>id</code> attr is only used to look up the matching <code>body.blanks[]</code> entry for weight. Must match <code>correctAnswers[].targetId</code>.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.targets[].weight</code></td><td>Float</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.blanks[].weight</code></td>
+    <td>Matched via blank-field <code>id</code> attr → <code>body.blanks[].id</code>. Normalize: divide by 100 (e.g. <code>100.0 → 1.0</code>, <code>33.33 → 0.3333</code>).</td>
+  </tr>
+  <tr><td><code>itemBody.targets[].swappable</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>false</code>.</td></tr>
+  <tr><td><code>itemBody.targets[].swapGroupId</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>0</code>.</td></tr>
+  <tr><td><code>itemBody.targets[].position</code></td><td>ItemPosition</td><td></td><td class="status-none">No Data</td><td>—</td><td>Not present in legacy. Always <code>null</code>.</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-options">3.5 <code>itemBody.options[]</code> <span class="schema-ref">— DnDOption</span></h3>
+<p>One <code>DnDOption</code> per entry in <code>body.choices.choiceItems[]</code>. Uses <code>.id</code> and <code>.value</code> — both differ from MCQ.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.options</code></td><td>Array&lt;DnDOption&gt;</td><td class="required">YES (min 1)</td><td class="status-direct">Direct</td><td><code>body.choices.choiceItems</code></td><td>One option per choice item.</td></tr>
+  <tr>
+    <td><code>itemBody.options[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.choices.choiceItems</code> (order)</td>
+    <td>Incremental: first choiceItem → <code>1</code>, second → <code>2</code>, etc. The original AAT <code>choiceItems[].id</code> is only used as a lookup bridge when resolving <code>correctAnswers[].optionIds</code>. Must match <code>correctAnswers[].optionIds[]</code> values.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.options[].content</code></td>
+    <td>OptionsContentConfig</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.choices.choiceItems[].value</code></td>
+    <td>
+      Uses <code>.value</code>, <strong>not</strong> <code>.answer</code> (which MCQ uses).<br>
+      Parsed — media extracted, text cleaned.<br>
+      Text → <code>{ type:"text", text:"..." }</code>, image → <code>{ type:"image", image:{ url } }</code>.
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec4">4. <code>responseDeclaration</code></h2>
+
+<p>DnD has only <code>maxAttempts</code> — no <code>maxChoice</code>, <code>minChoice</code>, or <code>multipleAnswer</code> (those are MCQ-only).</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>responseDeclaration.maxAttempts</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1</code>.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec5">5. <code>outcomeDeclaration</code></h2>
+
+<h3 id="sec5-scoring">5.1 <code>scoringType</code> &amp; <code>scoring</code></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>outcomeDeclaration.scoringType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>EXACT_MATCH</div><div>PARTIAL_MATCH</div><div>MANUAL</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>validation.scoringType</code></td>
+    <td>Defaults to <code>"EXACT_MATCH"</code> if absent.</td>
+  </tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMin</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMax</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>1</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.defaultNormalizedValue</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec5-seewhy">5.2 <code>seeWhy</code> — shared</h3>
+<p>Identical to MCQ. Built from <code>body.generalFeedback</code>. See <a href="../migration_mapping.html#sec3">main doc §3.3</a>. Omitted if empty.</p>
+
+<h3 id="sec5-feedback">5.3 <code>feedback</code></h3>
+
+<div class="info">
+  <strong>DnD feedback is optional</strong> — the entire <code>feedback</code> object is omitted when all sub-fields are absent. This differs from FIB where <code>feedback</code> is required.
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.feedback.general</code></td><td>FeedbackContent</td><td class="status-none">No Data</td><td>—</td><td>Never populated. <code>body.generalFeedback</code> goes to <code>seeWhy</code>.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.correct</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.correctAnswerFeedback</code></td><td>Omitted if null/empty. Same as MCQ.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.incorrect</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.wrongAnswerFeedback</code> + <code>body.hints[]</code></td><td>Via hint-mapper rules. See <a href="../migration_mapping.html#sec0-hintmapper">main doc §0.4</a>.</td></tr>
+  <tr>
+    <td><code>outcomeDeclaration.feedback.partial</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td>
+    <td><code>body.partialAnswerFeedback</code></td>
+    <td>Populated for DnD when <code>body.partialAnswerFeedback</code> is non-empty. Relevant for multi-blank with <code>PARTIAL_MATCH</code> scoring.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec5-valid">5.4 <code>outcomeDeclaration.validResponse</code> <span class="schema-ref">— DnDValidResponse</span></h3>
+
+<div class="info">
+  <strong>DnD <code>validResponse</code> is at the top level</strong> of <code>outcomeDeclaration</code>, same as MCQ. It is <strong>not</strong> nested inside a <code>validation</code> wrapper (that structure is FIB-only). DnD adds one field MCQ does not have: <code>shouldAutoGraded</code>.
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>outcomeDeclaration.validResponse.shouldAutoGraded</code></td>
+    <td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>true</code>. <strong>DnD-only</strong> — this field does not exist in MCQ or FIB.</td>
+  </tr>
+  <tr>
+    <td><code>outcomeDeclaration.validResponse.correctAnswers</code></td>
+    <td>Array&lt;DnDCorrectAnswer&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.answerMapping</code></td>
+    <td>One <code>DnDCorrectAnswer</code> per entry in <code>answerMapping[]</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h4>5.4.1 <code>DnDCorrectAnswer</code> structure</h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>correctAnswers[].targetId</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.answerMapping[].blankId</code></td>
+    <td>The incremental QB id (1, 2, 3…) — not the AAT <code>blankId</code> value. Use the AAT <code>blankId</code> to find the blank-field's position in the prompt, then use that position's incremental id. Must match <code>itemBody.targets[].id</code>.</td>
+  </tr>
+  <tr>
+    <td><code>correctAnswers[].optionIds</code></td><td>Array&lt;Integer&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.answerMapping[].choiceId</code></td>
+    <td>Use the AAT <code>choiceId</code> to find the position of that choice in <code>body.choices.choiceItems[]</code>, then use that position's incremental QB option id. Wrap in array: <code>[incrementalOptionId]</code>.</td>
+  </tr>
+  <tr>
+    <td><code>correctAnswers[].matchMode</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>ALL</div><div>ANY</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>"ALL"</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec6">6. <code>modalFeedback</code> — shared</h2>
+<p>Identical to MCQ. Driven by the hint-mapper. Omitted when no hints reach <code>needHelp</code> and no passage. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec7">7. DnD vs MCQ — Key Differences</h2>
+
+<table class="rule-table">
+  <thead><tr><th>Area</th><th>MCQ</th><th>DnD</th></tr></thead>
+  <tbody>
+  <tr><td><strong>type</strong></td><td class="cond">MULTIPLE_CHOICE</td><td class="result">DND</td></tr>
+  <tr><td><strong>subType</strong></td><td class="cond">Auto-detected: TEXT / IMAGE / IMAGE_TEXT</td><td class="result">Always hardcoded: BLANK_ON_QUESTION</td></tr>
+  <tr><td><strong>itemBody schema</strong></td><td class="cond">MCQItemBodyResource</td><td class="result">DnDItemBodyResource</td></tr>
+  <tr><td><strong>itemBody prompt destination</strong></td><td class="cond">statement.content[] only</td><td class="result">sentence.text only (full HTML with @_@ blanks). statement = null.</td></tr>
+  <tr><td><strong>itemBody image field</strong></td><td class="cond">stemImage (always null)</td><td class="result">image (always null)</td></tr>
+  <tr><td><strong>itemBody video field</strong></td><td class="cond">stemVideo</td><td class="result">video</td></tr>
+  <tr><td><strong>itemBody option id source</strong></td><td class="cond">Direct from choiceItems[].choiceId</td><td class="result">Incremental (1, 2, 3…) by choiceItems order. AAT choiceItems[].id used only as lookup bridge.</td></tr>
+  <tr><td><strong>itemBody choice content field</strong></td><td class="cond">choiceItems[].answer</td><td class="result">choiceItems[].value</td></tr>
+  <tr><td><strong>itemBody blanks / targets</strong></td><td class="cond">— (none)</td><td class="result">targets[] from body.blanks[]</td></tr>
+  <tr><td><strong>responseDeclaration</strong></td><td class="cond">maxAttempts + maxChoice + minChoice + multipleAnswer</td><td class="result">maxAttempts only</td></tr>
+  <tr><td><strong>outcomeDeclaration.feedback</strong></td><td class="cond">Present (at minimum empty {})</td><td class="result">Optional — omitted when all sub-fields empty</td></tr>
+  <tr><td><strong>validResponse location</strong></td><td class="cond">outcomeDeclaration.validResponse (top level)</td><td class="result">outcomeDeclaration.validResponse (top level — same)</td></tr>
+  <tr><td><strong>validResponse.shouldAutoGraded</strong></td><td class="cond">— (does not exist)</td><td class="result">true (hardcoded, DnD-only)</td></tr>
+  <tr><td><strong>correctAnswer structure</strong></td><td class="cond">MCQCorrectAnswer: { optionId, weight:1.0 }</td><td class="result">DnDCorrectAnswer: { targetId, optionIds:[], matchMode:"ALL" }</td></tr>
+  <tr><td><strong>MCQ-only itemBody fields</strong></td><td class="cond">shuffled, columns, listType, allowTryAgain, hasActiveVideoBreakpoint, stemImage, stemVideo, options[].feedback</td><td class="result">— (absent)</td></tr>
+  <tr><td><strong>DnD-only itemBody fields</strong></td><td class="cond">— (absent)</td><td class="result">showDragHandle, dropLimit, optionsPosition, sideImage, image, targets[]</td></tr>
+  <tr><td><strong>sentence.text content</strong></td><td class="cond">N/A (MCQ has no sentence field)</td><td class="result">Full prompt HTML with @_@ blank markers. Same approach as FIB.</td></tr>
+  <tr><td><strong>targets[].id / items[].id</strong></td><td class="cond">N/A</td><td class="result">Incremental (1, 2, 3…) by blank-field order in prompt. Same rule as FIB items[].</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec8">8. Unmapped / Ignored Legacy Fields</h2>
+
+<table>
+  <thead><tr><th>Legacy Field</th><th>Type</th><th>Reason</th></tr></thead>
+  <tbody>
+  <tr><td><code>validation.validResponse.type</code></td><td>String</td><td>Always echoes the question type. Redundant with root <code>type</code>.</td></tr>
+  <tr><td><code>toolkits</code>, <code>constraints</code>, <code>rubricId</code>, <code>scoring</code></td><td>Various</td><td>Always null/empty. No QB target.</td></tr>
+  <tr><td><code>stage</code>, <code>version</code>, <code>adt</code></td><td>Various</td><td>No QB target fields.</td></tr>
+  <tr><td><code>summative</code>, <code>variant</code>, <code>variants</code>, <code>maxScore</code></td><td>Various</td><td>Redundant or unused.</td></tr>
+  <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>ISO DateTime</td><td><code>createdAt</code> preserved in <code>annotation.tags["migration:originalCreatedAt"]</code>. <code>updatedAt</code> dropped.</td></tr>
+  <tr><td><code>body.blanks[].feedback</code></td><td>String</td><td>DnD targets have no per-target feedback field in QB. Dropped.</td></tr>
+  <tr><td><code>body.blanks[].weight</code></td><td>Float</td><td>DnD targets all hardcode <code>weight: 1.0</code>. Source value dropped.</td></tr>
+  <tr><td><code>body.blanks[].type</code></td><td>String</td><td>No QB target field on DnD targets.</td></tr>
+  <tr><td><code>body.blanks[].rules</code>, <code>decimalNotation</code>, <code>periodNotation</code></td><td>Various</td><td>No QB target fields on DnD targets.</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>
