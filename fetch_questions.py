@@ -40,13 +40,6 @@ IMPORTANT:
 - Keep CSV files in same folder
 - Add Bearer Token in .env file
 
-FOLDER STRUCTURE SHOULD BE:
-|-- Scripts/
-|--|------- fetch_questions.py
-|--|------- Arabic.csv
-|--|------- Biology.csv
-...
-
 ========================================================
 """
 
