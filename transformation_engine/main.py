@@ -4,8 +4,8 @@ from transformers.mcq_transformer import MCQTransformer
 from transformers.msq_transformer import MSQTransformer
 
 
-INPUT_FILE = "output_SystemA/question.json"
-OUTPUT_FILE = "Input_SystemB/output.json"
+INPUT_FILE = "data_source/transformation/transformation_question.json"
+OUTPUT_FILE = "data_source/transformation/transformation_output.json"
 
 
 def get_transformer(question_type, raw):
