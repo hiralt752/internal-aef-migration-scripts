@@ -1,0 +1,262 @@
+{
+    "metadata": {
+        "keywords": [
+            "Place Value",
+            "Digits",
+            "Millions",
+            "Thousands"
+        ],
+        "resourceType": "TEQ3",
+        "summativeAssessment": true,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+            "CREATING",
+            "EVALUATING"
+        ],
+        "knowledgeDimensions": [
+            "PROCEDURAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+            "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "tamer.abdelazeem",
+        "authoredDate": "2021-07-11T00:00:00.000",
+        "curriculumOutcomes": [],
+        "skillId": "b7d18f6c-45a5-4770-9ddc-aff2f2e7bfb4",
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+    },
+    "code": "MA5_MLO_001_M1_Q_2",
+    "createdByUser": null,
+    "language": "EN_US",
+    "variants": [
+        {
+            "id": "5a9fe30f-7efb-444b-832d-de29384fe023",
+            "code": "MA5_MLO_001_M1_Q_2",
+            "variant": "AR",
+            "language": "AR",
+            "version": 10
+        }
+    ],
+    "type": "IMAGE_LABELLING_DRAG_DROP",
+    "body": {
+        "prompt": "<p>Saleem passes a high level in his game. He needs to solve the following puzzle to obtain extra points.&nbsp;<br /><br />Write the smallest 9-digit number formed from the digits 6, 0, 1, 9, 8, 5, 4, 7, and 3.</p>\n<p>&nbsp;</p>\n<p>Drag and drop each digit into its proper place to help Saleem win.</p>",
+        "blanks": [
+            {
+                "id": 904,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.16929698708751795,
+                    "y": 0.44481845270941395
+                }
+            },
+            {
+                "id": 756,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.06743185078909612,
+                    "y": 0.4479008939410661
+                }
+            },
+            {
+                "id": 799,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.2704447632711621,
+                    "y": 0.4565014899017769
+                }
+            },
+            {
+                "id": 963,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.4096126255380201,
+                    "y": 0.4375113122171945
+                }
+            },
+            {
+                "id": 794,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.5129124820659972,
+                    "y": 0.47370268182319836
+                }
+            },
+            {
+                "id": 380,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.6140602582496413,
+                    "y": 0.4657488135967332
+                }
+            },
+            {
+                "id": 553,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.7482065997130559,
+                    "y": 0.4302041717249752
+                }
+            },
+            {
+                "id": 66,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.8472022955523673,
+                    "y": 0.42225030349851017
+                }
+            },
+            {
+                "id": 750,
+                "weight": 11.11,
+                "position": {
+                    "x": 0.9354375896700143,
+                    "y": 0.45844167310451384
+                }
+            }
+        ],
+        "choices": {
+            "shuffle": true,
+            "showDragHandle": false,
+            "choiceItems": [
+                {
+                    "id": 836,
+                    "value": "7",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 191,
+                    "value": "9",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 715,
+                    "value": "1",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 785,
+                    "value": "0",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 455,
+                    "value": "6",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 749,
+                    "value": "5",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 157,
+                    "value": "3",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 561,
+                    "value": "4",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 359,
+                    "value": "8",
+                    "feedback": "",
+                    "alternateChoiceIds": null
+                }
+            ]
+        },
+        "backgroundImage": {
+            "src": "/data/ccl/assessment/questions/2021/07/12/12/17/WrG2dcYdDb.JPG",
+            "width": 100,
+            "height": 13
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+    },
+    "constraints": null,
+    "createdAt": "2021-07-12T00:51:35.735",
+    "organisations": [
+        "shared"
+    ],
+    "variant": "EN_US",
+    "rubricId": null,
+    "id": "a870e3a7-5c2a-4386-9844-87caab5352f6",
+    "validation": {
+        "validResponse": {
+            "type": "IMAGE_LABELLING_DRAG_DROP",
+            "answerMapping": [
+                {
+                    "blankId": 904,
+                    "choiceId": 785
+                },
+                {
+                    "blankId": 756,
+                    "choiceId": 715
+                },
+                {
+                    "blankId": 799,
+                    "choiceId": 157
+                },
+                {
+                    "blankId": 963,
+                    "choiceId": 561
+                },
+                {
+                    "blankId": 794,
+                    "choiceId": 749
+                },
+                {
+                    "blankId": 380,
+                    "choiceId": 455
+                },
+                {
+                    "blankId": 553,
+                    "choiceId": 836
+                },
+                {
+                    "blankId": 66,
+                    "choiceId": 359
+                },
+                {
+                    "blankId": 750,
+                    "choiceId": 191
+                }
+            ]
+        },
+        "scoringType": "EXACT_MATCH"
+    },
+    "updatedAt": "2022-10-13T07:25:07.186",
+    "toolkits": null,
+    "updatedByUser": null,
+    "scoring": null,
+    "updatedBy": "cclteam@alefeducation.com",
+    "maxScore": 1,
+    "version": 9,
+    "tags": null,
+    "adt": false,
+    "stage": "APPROVED",
+    "createdBy": "ahmed.hussein@alefeducation.com",
+    "status": "PUBLISHED",
+    "summative": true
+}

@@ -1,0 +1,262 @@
+{
+  "schemaVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+
+  "type": "DND",
+
+  "subType": "IMAGE_ON_IMAGE",
+
+  "metadata": {
+    "general": {
+      "code": "EN6_MLO_000_1",
+      "externalId": "2e5a1d55-956c-458d-8437-9d75eccceefc",
+      "title": null,
+      "language": "EN_GB",
+      "keywords": [
+        "your learning path"
+      ],
+      "parentReference": null,
+      "source": "Sarween Zaza"
+    },
+
+    "lifecycle": {
+      "status": "PUBLISHED"
+    },
+
+    "technical": {
+      "penAndPaper": false
+    },
+
+    "educational": {
+      "resourceType": "TEQ1",
+      "difficultyLevel": "MEDIUM",
+      "cognitiveDimensions": [
+        "REMEMBERING"
+      ],
+      "knowledgeDimensions": [
+        "CONCEPTUAL"
+      ],
+      "summativeAssessment": false,
+      "cefrLevel": null,
+      "proficiency": null,
+      "lexileLevel": "1",
+      "logitValue": null
+    },
+
+    "rights": {
+      "copyrights": [
+        "ALEF"
+      ]
+    },
+
+    "classification": {
+      "grade": "6",
+      "subject": "English CC",
+      "curriculum": "UAE MOE",
+
+      "curriculumOutcomes": [
+        {
+          "type": "strand",
+          "id": "188776",
+          "name": "EN6_STUDY_SKILLS",
+          "description": "Study Skills (for Onboarding MLO's)",
+          "curriculum": "UAE MOE",
+          "grade": "6",
+          "subject": "English CC"
+        }
+      ],
+
+      "subDomain": []
+    },
+
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",
+        "migration:originalCreatedAt": "2019-08-24T11:11:32.192",
+        "migration:authoredDate": "2019-08-24T00:00:00.000"
+      }
+    }
+  },
+
+  "itemBody": {
+    "version": "1.0",
+
+    "title": null,
+
+    "subTitle": null,
+
+    "instruction": null,
+
+    "audio": null,
+
+    "video": null,
+
+    "statement": null,
+
+    "sentence": null,
+
+    "backgroundImage": {
+      "src": "/data/ccl/assessment/questions/2020/08/22/12/22/xhEDmfqyCx.PNG",
+      "width": 73,
+      "height": 20
+    },
+
+    "showDragHandle": true,
+
+    "shuffled": true,
+
+    "optionsStyle": "option-style-1",
+
+    "dropLimit": 1,
+
+    "optionsPosition": "bottom",
+
+    "sideImage": null,
+
+    "backgroundLayout": null,
+
+    "splitContent": null,
+
+    "timeSpentConfig": null,
+
+    "targets": [
+      {
+        "id": 1,
+        "weight": 0.3333,
+        "position": {
+          "x": 0.14067252359099,
+          "y": 0.14038429832514507
+        }
+      },
+      {
+        "id": 2,
+        "weight": 0.3333,
+        "position": {
+          "x": 0.5088787485113412,
+          "y": 0.14318009717055707
+        }
+      },
+      {
+        "id": 3,
+        "weight": 0.3333,
+        "position": {
+          "x": 0.8535306231396595,
+          "y": 0.13919732034777996
+        }
+      }
+    ],
+
+    "options": [
+      {
+        "id": 1,
+        "content": [
+          {
+            "type": "text",
+            "text": "Learning Path"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "content": [
+          {
+            "type": "text",
+            "text": "Activity Center"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "content": [
+          {
+            "type": "text",
+            "text": "Homepage"
+          }
+        ]
+      }
+    ]
+  },
+
+  "responseDeclaration": {
+    "maxAttempts": 0
+  },
+
+  "outcomeDeclaration": {
+    "scoringType": "EXACT_MATCH",
+
+    "scoring": null,
+
+    "seeWhy": null,
+
+    "feedback": {
+      "correct": {
+        "content": [
+          {
+            "type": "text",
+            "text": "......"
+          }
+        ]
+      },
+
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",
+            "text": "......"
+          }
+        ]
+      },
+
+      "partial": {
+        "content": [
+          {
+            "type": "text",
+            "text": "......"
+          }
+        ]
+      },
+
+      "general": {
+        "content": [
+          {
+            "type": "text",
+            "text": "......"
+          }
+        ]
+      }
+    },
+
+    "validResponse": {
+      "shouldAutoGraded": true,
+
+      "correctAnswers": [
+        {
+          "targetId": 1,
+          "optionIds": [
+            3
+          ],
+          "matchMode": "ALL"
+        },
+        {
+          "targetId": 2,
+          "optionIds": [
+            1
+          ],
+          "matchMode": "ALL"
+        },
+        {
+          "targetId": 3,
+          "optionIds": [
+            2
+          ],
+          "matchMode": "ALL"
+        }
+      ]
+    }
+  },
+
+  "modalFeedback": null
+}
