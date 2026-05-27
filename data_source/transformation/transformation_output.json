@@ -80,14 +80,7 @@
         "content": [
           {
             "type": "text",
-            "text": "Read the text. Then, complete the sentence. Jasmine rushed to her room and laid the paper on her desk. For the next two hours, Jasmine tried to figure out what the words and symbols meant. She developed a chart and tried to match each symbol to a letter, then tried to make the words and phrases match the code. But nothing worked. She finally gave up in frustration because this situation was ridiculous! She stuffed the paper in her backpack to look at tomorrow. How does Jasmine feel after working hard to solve the code? Choose two."
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "../alef-assessment-content/data/ccl/assessment/questions/2025/06/19/06/16/IMRBEQ9EW3.jpg",
-              "zoom": true
-            }
+            "text": "<p>Read the text. Then, complete the sentence.</p>\n<p><br/><em>Jasmine rushed to her room and laid the paper on her desk. For the next two hours, Jasmine tried to figure out what the words and symbols meant. She developed a chart and tried to match each symbol to a letter, then tried to make the words and phrases match the code. But nothing worked. She finally gave up in frustration because this situation was ridiculous! She stuffed the paper in her backpack to look at tomorrow.</em></p>\n<p> </p>\n<p>How does Jasmine feel after working hard to solve the code? Choose two.</p>"
           }
         ]
       },
@@ -112,7 +105,7 @@
           "content": [
             {
               "type": "text",
-              "text": "tired"
+              "text": "<p>tired</p>"
             }
           ],
           "feedback": null
@@ -122,7 +115,7 @@
           "content": [
             {
               "type": "text",
-              "text": "frustrated"
+              "text": "<p>frustrated</p>"
             }
           ],
           "feedback": null
@@ -132,7 +125,7 @@
           "content": [
             {
               "type": "text",
-              "text": "delighted"
+              "text": "<p>delighted</p>"
             }
           ],
           "feedback": null
@@ -142,7 +135,7 @@
           "content": [
             {
               "type": "text",
-              "text": "confident"
+              "text": "<p>confident</p>"
             }
           ],
           "feedback": null
@@ -152,7 +145,7 @@
           "content": [
             {
               "type": "text",
-              "text": "sad"
+              "text": "<p>sad</p>"
             }
           ],
           "feedback": null
@@ -162,7 +155,7 @@
           "content": [
             {
               "type": "text",
-              "text": "scared"
+              "text": "<p>scared</p>"
             }
           ],
           "feedback": null
@@ -199,7 +192,7 @@
           "content": [
             {
               "type": "text",
-              "text": "Look for words in the text that show how Jasmine feels after trying to solve the mystery."
+              "text": "<p>Look for words in the text that show how Jasmine feels after trying to solve the mystery.</p>"
             }
           ]
         }
@@ -277,21 +270,7 @@
         "content": [
           {
             "type": "text",
-            "text": "Choose the correct option. Tank A has 170 liters of water is emptied at a rate of liters per second. Tank B has 100 liters of water and is filled at a rate of liters per second. After how many seconds will the two tanks have the same amount of water?"
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2225%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E3%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2220.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2252%22%3E3%3C%2Ftext%3E%3C%2Fsvg%3E",
-              "zoom": true
-            }
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2225%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E4%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2220.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2252%22%3E4%3C%2Ftext%3E%3C%2Fsvg%3E",
-              "zoom": true
-            }
+            "text": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct option.</span></p>\n<p>Tank A has 170 liters of water is emptied at a rate of \\(1 third\\) liters per second. Tank B has 100 liters of water and is filled at a rate of \\(1 fourth\\) liters per second.</p>\n<p>After how many seconds will the two tanks have the same amount of water? </p>"
           }
         ]
       },
@@ -316,7 +295,7 @@
           "content": [
             {
               "type": "text",
-              "text": "120"
+              "text": "<p>120</p>"
             }
           ],
           "feedback": null
@@ -326,7 +305,7 @@
           "content": [
             {
               "type": "text",
-              "text": "12"
+              "text": "<p>12</p>"
             }
           ],
           "feedback": null
@@ -336,7 +315,7 @@
           "content": [
             {
               "type": "text",
-              "text": "280"
+              "text": "<p>280</p>"
             }
           ],
           "feedback": null
@@ -346,7 +325,7 @@
           "content": [
             {
               "type": "text",
-              "text": "70"
+              "text": "<p>70</p>"
             }
           ],
           "feedback": null
@@ -384,7 +363,7 @@
       "patch": 0
     },
     "type": "MULTIPLE_CHOICE",
-    "subType": "IMAGE",
+    "subType": "TEXT",
     "metadata": {
       "general": {
         "code": "MA5_MLO_301_Q4",
@@ -448,7 +427,7 @@
         "content": [
           {
             "type": "text",
-            "text": "Which shapes are two-dimensional?"
+            "text": "<p>Which shapes are two-dimensional?</p>\n<p> </p>\n<p> </p>"
           }
         ]
       },
@@ -472,11 +451,8 @@
           "optionId": 0,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/52/ygfIxw3giB.jpg",
-                "zoom": true
-              }
+              "type": "text",
+              "text": "<p> </p>"
             }
           ],
           "feedback": null
@@ -485,11 +461,8 @@
           "optionId": 1,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/52/CTWewHW0A1.jpg",
-                "zoom": true
-              }
+              "type": "text",
+              "text": "<p> </p>"
             }
           ],
           "feedback": null
@@ -498,11 +471,8 @@
           "optionId": 2,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/53/Aqz3fV8Wlb.jpg",
-                "zoom": true
-              }
+              "type": "text",
+              "text": "<p> </p>"
             }
           ],
           "feedback": null
@@ -511,11 +481,8 @@
           "optionId": 3,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/53/CU9iL1w6MS.jpg",
-                "zoom": true
-              }
+              "type": "text",
+              "text": "<p> </p>"
             }
           ],
           "feedback": null
@@ -552,21 +519,7 @@
         "content": [
           {
             "type": "text",
-            "text": "These two shapes are two-dimensional."
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/54/ZlCeyuEo6n.jpg",
-              "zoom": true
-            }
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/54/4dEReI3o1M.jpg",
-              "zoom": true
-            }
+            "text": "<p>These two shapes are two-dimensional.</p>\n<p>                       </p>"
           }
         ]
       },
@@ -575,7 +528,7 @@
           "content": [
             {
               "type": "text",
-              "text": "Three-dimensional shapes have volume."
+              "text": "<p>Three-dimensional shapes have volume.</p>"
             }
           ]
         }
@@ -588,7 +541,7 @@
           "content": [
             {
               "type": "text",
-              "text": "Two-dimensional shapes do not have volume."
+              "text": "<p>Two-dimensional shapes do not have volume.</p>"
             }
           ]
         }
@@ -602,7 +555,7 @@
       "patch": 0
     },
     "type": "MULTIPLE_CHOICE",
-    "subType": "IMAGE_TEXT",
+    "subType": "TEXT",
     "metadata": {
       "general": {
         "code": "MA5_MLO_307_Q_3",
@@ -667,14 +620,7 @@
         "content": [
           {
             "type": "text",
-            "text": "Select the correct answer Choose two different ways to describe the relationship between the digit 8 in the number 3.882"
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/28/12/05/1YqgQpQqTO.jpg",
-              "zoom": true
-            }
+            "text": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Select the correct answer</span></p>\n<p>Choose two different ways to describe the relationship between the digit 8 in the number 3.882  </p>"
           }
         ]
       },
@@ -699,7 +645,7 @@
           "content": [
             {
               "type": "text",
-              "text": "8 in the tenths place is 10 times as much as 8 in the hundredths place."
+              "text": "<p>8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>"
             }
           ],
           "feedback": null
@@ -709,7 +655,7 @@
           "content": [
             {
               "type": "text",
-              "text": "8 in the tenths place is 100 times as much as 8 in the hundredths place."
+              "text": "<p>8 in the tenths place is 100 times as much as 8 in the hundredths place.</p>"
             }
           ],
           "feedback": null
@@ -719,7 +665,7 @@
           "content": [
             {
               "type": "text",
-              "text": "8 in the hundredths  place is 10 times as much as 8 in the tenths place."
+              "text": "<p>8 in the hundredths  place is 10 times as much as 8 in the tenths place.</p>"
             }
           ],
           "feedback": null
@@ -728,15 +674,8 @@
           "optionId": 3,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E",
-                "zoom": true
-              }
-            },
-            {
               "type": "text",
-              "text": "8 in the hundredths place is of 8 in the tenths place."
+              "text": "<p>8 in the hundredths place is \\(1 over 10\\)of 8 in the tenths place.</p>"
             }
           ],
           "feedback": null
@@ -745,15 +684,8 @@
           "optionId": 96,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2253%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E100%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2248.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2226.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2226.5%22%20y%3D%2252%22%3E100%3C%2Ftext%3E%3C%2Fsvg%3E",
-                "zoom": true
-              }
-            },
-            {
               "type": "text",
-              "text": "8 in the hundredths place is of 8 in the tenths place."
+              "text": "<p>8 in the hundredths place is \\(1 over 100\\)of 8 in the tenths place.</p>"
             }
           ],
           "feedback": null
@@ -762,15 +694,8 @@
           "optionId": 686,
           "content": [
             {
-              "type": "image",
-              "image": {
-                "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E",
-                "zoom": true
-              }
-            },
-            {
               "type": "text",
-              "text": "8 in the tenths place is of 8 in the hundredths place."
+              "text": "<p>8 in the tenths place is \\(1 over 10\\)of 8 in the hundredths place.</p>"
             }
           ],
           "feedback": null
@@ -807,28 +732,7 @@
         "content": [
           {
             "type": "text",
-            "text": "The value of each place is 10 times the value of the place to its right. So, in number 3.882, the digit 8 in the tenths place is 10 times as much as 8 in the hundredths place. The value of each place is of the value of the place to its left. So, in number 3.882, 8 in the hundredths place is of 8 in the tenths place."
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/28/12/05/1YqgQpQqTO.jpg",
-              "zoom": true
-            }
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E",
-              "zoom": true
-            }
-          },
-          {
-            "type": "image",
-            "image": {
-              "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E",
-              "zoom": true
-            }
+            "text": "<p>The value of each place is 10 times the value of the place to its right.  </p>\n<p>So, in number 3.882, the digit 8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>\n<p>The value of each place is \\(1 over 10\\) of the value of the place to its left.</p>\n<p>So, in number 3.882, 8 in the hundredths place is \\(1 over 10\\)of 8 in the tenths place.</p>"
           }
         ]
       },
@@ -837,7 +741,7 @@
           "content": [
             {
               "type": "text",
-              "text": "8 in the tenths place is 10 times as much as 8 in the hundredths place."
+              "text": "<p>8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>"
             }
           ]
         }
@@ -850,14 +754,7 @@
           "content": [
             {
               "type": "text",
-              "text": "The value of each place is 10 times the value of the place to its right. The value of each place is of the value of the place to its left."
-            },
-            {
-              "type": "image",
-              "image": {
-                "url": "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E",
-                "zoom": true
-              }
+              "text": "<p>The value of each place is 10 times the value of the place to its right.</p>\n<p>The value of each place is \\(1 over 10\\) of the value of the place to its left.</p>"
             }
           ]
         }
@@ -942,7 +839,7 @@
         "content": [
           {
             "type": "text",
-            "text": "اخترِ الإجابَةَ الصَّحيحةَ: مَا هُمَا المَصْدَرَانِ الرَّئيسِيَّانِ للتَّشريعِ الإِسْلَامِيِّ؟ Choose the correct option."
+            "text": "<p>اخترِ الإجابَةَ الصَّحيحةَ: مَا هُمَا المَصْدَرَانِ الرَّئيسِيَّانِ للتَّشريعِ الإِسْلَامِيِّ؟<br/><br/><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct option.</span><br/></p>"
           }
         ]
       },
@@ -967,7 +864,7 @@
           "content": [
             {
               "type": "text",
-              "text": "القُرآنُ والسُّنَّةُ"
+              "text": "<p>القُرآنُ والسُّنَّةُ</p>"
             }
           ],
           "feedback": null
@@ -977,7 +874,7 @@
           "content": [
             {
               "type": "text",
-              "text": "القُرآنُ والتَّفسيرُ"
+              "text": "<p>القُرآنُ والتَّفسيرُ</p>"
             }
           ],
           "feedback": null
@@ -987,7 +884,7 @@
           "content": [
             {
               "type": "text",
-              "text": "السُّنَّةُ والتَّاريخُ"
+              "text": "<p>السُّنَّةُ والتَّاريخُ</p>"
             }
           ],
           "feedback": null
@@ -997,7 +894,7 @@
           "content": [
             {
               "type": "text",
-              "text": "القُرآنُ والفِقْهُ"
+              "text": "<p>القُرآنُ والفِقْهُ</p>"
             }
           ],
           "feedback": null
@@ -1030,7 +927,7 @@
         "content": [
           {
             "type": "text",
-            "text": "المصدران الرئيسيان للتشريع الإسلامي هما القرآن والسنة. اجتهد علماء الأمة في حفظ كل ما صدر عن الرسول ﷺ من قول أو فعل أو تقرير أو صفة، وهذا يشمل السنة النبوية التي تعتبر المصدر الثاني بعد القرآن في التشريع الإسلامي. لذلك، الإجابة الصحيحة هي الخيار الأول: القرآن والسنة."
+            "text": "<p>المصدران الرئيسيان للتشريع الإسلامي هما القرآن والسنة.<br/>اجتهد علماء الأمة في حفظ كل ما صدر عن الرسول ﷺ من قول أو فعل أو تقرير أو صفة، وهذا يشمل السنة النبوية التي تعتبر المصدر الثاني بعد القرآن في التشريع الإسلامي.<br/>لذلك، الإجابة الصحيحة هي الخيار الأول: القرآن والسنة.</p>"
           }
         ]
       },
@@ -1039,7 +936,7 @@
           "content": [
             {
               "type": "text",
-              "text": "فكر في المصدرين الأساسيين للتشريع الإسلامي، وهما الكتاب والسنة."
+              "text": "<p>فكر في المصدرين الأساسيين للتشريع الإسلامي، وهما الكتاب والسنة.</p>"
             }
           ]
         }
@@ -1052,7 +949,7 @@
           "content": [
             {
               "type": "text",
-              "text": "فكّر في المصادر التي جاءت عن الله تعالى ورسوله ﷺ."
+              "text": "<p>فكّر في المصادر التي جاءت عن الله تعالى ورسوله ﷺ.</p>"
             }
           ]
         }

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import urllib.parse
 
 
 def parse_html_content(html):
@@ -10,23 +11,32 @@ def parse_html_content(html):
 
     contents = []
 
-    text = soup.get_text(
-        separator=" ",
-        strip=True
-    )
+    for img in soup.find_all("img"):
 
-    if text:
+        src = img.get("src", "")
 
-        contents.append({
-            "type": "text",
-            "text": text
-        })
+        if not src:
+            continue
+
+        if (
+            src.startswith("data:image/svg+xml")
+            and "mathml" in urllib.parse.unquote(src).lower()
+        ):
+
+            latex = (
+                img.get("data-latex")
+                or img.get("alt")
+                or ""
+            ).strip()
+
+            img.replace_with(f"\\({latex}\\)")
 
     for img in soup.find_all("img"):
 
         src = img.get("src")
 
-        if src:
+        if not src:
+            continue
 
             contents.append({
                 "type": "image",
@@ -35,6 +45,17 @@ def parse_html_content(html):
                     "zoom": True
                 }
             })
+
+        img.decompose()
+
+    remaining_html = str(soup).strip()
+
+    if remaining_html:
+
+        contents.insert(0, {
+            "type": "text",
+            "text": remaining_html
+        })
 
     for audio in soup.find_all("audio"):
 
