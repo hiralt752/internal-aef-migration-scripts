@@ -94,7 +94,7 @@
         <li><a href="#sec3-statement">statement — always null</a></li>
         <li><a href="#sec3-sentence">sentence — always null</a></li>
         <li><a href="#sec3-backgroundImage">backgroundImage — source image for labelling</a></li>
-        <li><a href="#sec3-targets">targets[] — from body.hotspots / body.blanks</a></li>
+        <li><a href="#sec3-targets">targets[] — from body.blank / body.blanks</a></li>
         <li><a href="#sec3-options">options[] — from body.choices.choiceItems</a></li>
       </ul>
     </li>
@@ -126,16 +126,16 @@
   <tr>
     <td class="cond">IMAGE_LABELLING_DRAG_DROP</td>
     <td class="result">DND</td>
-    <td class="result">IMAGE_ON_IMAGE</td>
-    <td>Type is remapped. SubType is always hardcoded to <code>IMAGE_ON_IMAGE</code> — not auto-detected. All AAT Image Labelling DnD questions map to this subType during migration.</td>
+    <td class="result">BLANK_ON_QUESTION</td>
+    <td>Type is remapped. SubType is always hardcoded to <code>BLANK_ON_QUESTION</code> — not auto-detected. All AAT Image Labelling DnD questions map to this subType during migration.</td>
   </tr>
   </tbody>
 </table>
 
 <div class="note">
   <strong>Available DnD subTypes in QB:</strong>
-  <code>BLANK_ON_QUESTION</code>, <code>TEXT_ON_IMAGE</code>, <code>BLANK_ON_SENTENCE</code>, <code>IMAGE_ON_IMAGE</code>, <code>IMAGE_ON_SPACE</code>, <code>IMAGE_TO_FIXED_1</code>, <code>IMAGE_TO_FIXED_2</code>, <code>SEQUENCE_IMAGE</code>, <code>SEQUENCE_TEXT</code>, <code>SPLIT_SCREEN</code>.
-  Only <code>IMAGE_ON_IMAGE</code> is assigned for this question type during migration. Other subTypes are not used.
+  <code>BLANK_ON_QUESTION</code>, <code>TEXT_ON_IMAGE</code>, <code>BLANK_ON_SENTENCE</code>, <code>BLANK_ON_QUESTION</code>, <code>IMAGE_ON_SPACE</code>, <code>IMAGE_TO_FIXED_1</code>, <code>IMAGE_TO_FIXED_2</code>, <code>SEQUENCE_IMAGE</code>, <code>SEQUENCE_TEXT</code>, <code>SPLIT_SCREEN</code>.
+  Only <code>BLANK_ON_QUESTION</code> is assigned for this question type during migration. Other subTypes are not used.
 </div>
 
 <h3 id="sec0-image">0.2 Background Image Processing</h3>
@@ -145,7 +145,8 @@
 <div class="flow-step"><strong>Step 1 — Check <code>body.backgroundImage</code>:</strong> If present and non-empty, use directly as <code>itemBody.backgroundImage.url</code>.</div>
 <div class="flow-step"><strong>Step 2 — Fallback to prompt:</strong> If <code>body.backgroundImage</code> is absent/null, scan <code>body.prompt</code> for the first <code>&lt;img src="..."&gt;</code> tag and extract its <code>src</code> as the background image URL.</div>
 <div class="flow-step"><strong>Step 3 — Dimensions:</strong> Extract <code>width</code> and <code>height</code> from <code>body.backgroundImageDimensions</code> (if present) or from the <code>&lt;img&gt;</code> tag attributes. Both fields are optional — set to <code>null</code> if unavailable.</div>
-<div class="flow-step"><strong>Step 4 — <code>itemBody.sentence</code> and <code>itemBody.statement</code>:</strong> Both are always <code>null</code>. There is no text prompt for this question type — the image itself is the question.</div>
+<div class="flow-step"><strong>Step 4 — Result → <code>itemBody.sentence.text</code>:</strong> The full modified HTML string becomes <code>sentence.text</code>. <code>null</code> if prompt is empty.</div>
+<div class="flow-step"><strong>Step 5 — <code>itemBody.statement</code>:</strong> Always <code>null</code>. Prompt content goes into <code>sentence</code>.</div>
 
 <div class="note">
   <strong>No <code>@_@</code> replacement:</strong> Unlike standard DnD, Image Labelling DnD does not use <code>@_@</code> markers in a sentence. Hotspot/blank positions on the image are encoded in <code>targets[].position</code> using pixel coordinates instead.
@@ -177,7 +178,7 @@
 <pre><code>{
   "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },
   "type": "DND",
-  "subType": "IMAGE_ON_IMAGE",
+  "subType": "BLANK_ON_QUESTION",
   "metadata": { ... },
   "itemBody": { ... },
   "responseDeclaration": { ... },
@@ -198,10 +199,10 @@
   </tr>
   <tr>
     <td><code>subType</code></td>
-    <td>String <span class="enum-badge">(enum)<div class="tooltip">All DnD subType values:<div class="enum-values"><div>BLANK_ON_QUESTION</div><div>TEXT_ON_IMAGE</div><div>BLANK_ON_SENTENCE</div><div>IMAGE_ON_IMAGE</div><div>IMAGE_ON_SPACE</div><div>IMAGE_TO_FIXED_1</div><div>IMAGE_TO_FIXED_2</div><div>SEQUENCE_IMAGE</div><div>SEQUENCE_TEXT</div><div>SPLIT_SCREEN</div></div></div></span></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">All DnD subType values:<div class="enum-values"><div>BLANK_ON_QUESTION</div><div>TEXT_ON_IMAGE</div><div>BLANK_ON_SENTENCE</div><div>BLANK_ON_QUESTION</div><div>IMAGE_ON_SPACE</div><div>IMAGE_TO_FIXED_1</div><div>IMAGE_TO_FIXED_2</div><div>SEQUENCE_IMAGE</div><div>SEQUENCE_TEXT</div><div>SPLIT_SCREEN</div></div></div></span></td>
     <td class="required">YES</td><td class="status-hardcode">Hardcode</td>
     <td>—</td>
-    <td>Always <code>"IMAGE_ON_IMAGE"</code>.</td>
+    <td>Always <code>"BLANK_ON_QUESTION"</code>.</td>
   </tr>
   <tr><td><code>metadata</code></td><td>MetadataResource</td><td class="required">YES</td><td class="status-possible">Transform</td><td>(Section 2)</td><td>Identical to MCQ/DnD. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</td></tr>
   <tr><td><code>modalFeedback</code></td><td>ModalFeedback</td><td></td><td class="status-possible">Transform</td><td><code>body.hints</code> / <code>body.passage</code></td><td>Identical to MCQ/DnD. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</td></tr>
@@ -268,23 +269,36 @@
   </tbody>
 </table>
 
-<h3 id="sec3-sentence">3.3 <code>itemBody.sentence</code></h3>
+<h3 id="sec3-sentence">3.3 <code>itemBody.sentence</code> <span class="schema-ref">— Sentence</span></h3>
+
+<p>The full <code>body.prompt</code> HTML with each <code>&lt;blank-field&gt;</code> tag replaced by <code>@_@</code>. Same approach as FIB.</p>
 
 <table>
   <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
     <td><code>itemBody.sentence</code></td>
-    <td>Sentence</td><td></td><td class="status-hardcode">Hardcode</td>
-    <td>—</td>
-    <td>Always <code>null</code>. Unlike standard DnD (BLANK_ON_QUESTION), there is no sentence with <code>@_@</code> markers. Target positions are expressed via pixel coordinates in <code>targets[].position</code>.</td>
+    <td>Sentence</td><td></td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td><code>null</code> if prompt is empty/null.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sentence.text</code></td>
+    <td>String</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td>
+      Full prompt HTML with every <code>&lt;blank-field id="N" class="mceNonEditable"&gt;&lt;/blank-field&gt;</code> replaced by <code>@_@</code>. All other HTML (tables, images, spans, paragraphs) preserved as-is.<br><br>
+      <strong>Example:</strong><br>
+      <code>...using &nbsp;&lt;blank-field id="790" ...&gt;&lt;/blank-field&gt; , avoiding...</code><br>
+      → <code>...using &nbsp;@_@ , avoiding...</code>
+    </td>
   </tr>
   </tbody>
 </table>
 
-<div class="info">
+<!-- <div class="info">
   <strong>Key distinction from BLANK_ON_QUESTION:</strong> Standard DnD encodes blank positions using <code>@_@</code> tokens in <code>sentence.text</code>. Image Labelling DnD encodes drop-zone positions using <code>x</code> / <code>y</code> pixel coordinates in each <code>target.position</code>. Both <code>statement</code> and <code>sentence</code> are <code>null</code> here.
-</div>
+</div> -->
 
 <h3 id="sec3-backgroundImage">3.4 <code>itemBody.backgroundImage</code> <span class="schema-ref">— Image</span></h3>
 
@@ -318,7 +332,7 @@
 
 <h3 id="sec3-targets">3.5 <code>itemBody.targets[]</code> <span class="schema-ref">— Target</span></h3>
 
-<p>One <code>Target</code> per hotspot defined in <code>body.hotspots[]</code> (or <code>body.blanks[]</code>, depending on legacy schema version). IDs are assigned incrementally (1, 2, 3…) in the order hotspots appear in the legacy array — the same incremental rule as standard DnD <code>targets[]</code>. The original AAT hotspot/blank id is used only as a lookup key to match weight and position data.</p>
+<p>One <code>Target</code> per hotspot defined in <code>body.blank[]</code> (or <code>body.blanks[]</code>, depending on legacy schema version). IDs are assigned incrementally (1, 2, 3…) in the order blank appear in the legacy array — the same incremental rule as standard DnD <code>targets[]</code>. The original AAT hotspot/blank id is used only as a lookup key to match weight and position data.</p>
 
 <div class="danger">
   <strong>Coordinate system:</strong> Hotspot positions (<code>x</code>, <code>y</code>) are pixel offsets from the top-left corner of the background image. They must be within image bounds (0 ≤ x ≤ width, 0 ≤ y ≤ height). Values outside bounds should be clamped and flagged in the migration log.
@@ -329,32 +343,32 @@
   <tbody>
   <tr>
     <td><code>itemBody.targets</code></td><td>Array&lt;Target&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots</code> / <code>body.blanks</code></td>
-    <td>One target per hotspot, in array order. Count and order from <code>body.hotspots[]</code>; weight and position from matching entries.</td>
+    <td><code>body.blank</code> / <code>body.blanks</code></td>
+    <td>One target per hotspot, in array order. Count and order from <code>body.blank[]</code>; weight and position from matching entries.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots</code> (order)</td>
-    <td>Incremental: first hotspot → <code>1</code>, second → <code>2</code>, etc. <strong>Not</strong> from the hotspot's own <code>id</code> attribute. The original hotspot <code>id</code> is only used to look up the matching <code>body.hotspots[]</code> entry for weight and position. Must match <code>correctAnswers[].targetId</code>.</td>
+    <td><code>body.blank</code> (order)</td>
+    <td>Incremental: first hotspot → <code>1</code>, second → <code>2</code>, etc. <strong>Not</strong> from the hotspot's own <code>id</code> attribute. The original hotspot <code>id</code> is only used to look up the matching <code>body.blank[]</code> entry for weight and position. Must match <code>correctAnswers[].targetId</code>.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].weight</code></td><td>Float</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots[].weight</code></td>
+    <td><code>body.blank[].weight</code></td>
     <td>Normalize: divide by 100 (e.g. <code>100.0 → 1.0</code>, <code>50.0 → 0.5</code>). If absent, default to equal-weight distribution across all targets so they sum to <code>1.0</code>.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].position</code></td><td>ItemPosition</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots[].x</code>, <code>body.hotspots[].y</code></td>
+    <td><code>body.blank[].x</code>, <code>body.blank[].y</code></td>
     <td>Pixel coordinates of the drop zone on the background image. <strong>Required for Image Labelling DnD</strong> — unlike standard DnD where <code>position</code> is always <code>null</code>.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].position.x</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td>
-    <td><code>body.hotspots[].x</code></td>
+    <td><code>body.blank[].x</code></td>
     <td>Horizontal pixel offset from image left edge.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].position.y</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td>
-    <td><code>body.hotspots[].y</code></td>
+    <td><code>body.blank[].y</code></td>
     <td>Vertical pixel offset from image top edge.</td>
   </tr>
   <tr><td><code>itemBody.targets[].swappable</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>false</code>.</td></tr>
@@ -478,7 +492,7 @@
   <tr>
     <td><code>correctAnswers[].targetId</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
     <td><code>validation.validResponse.answerMapping[].hotspotId</code> / <code>.blankId</code></td>
-    <td>The incremental QB id (1, 2, 3…) — not the AAT <code>hotspotId</code> value. Use the AAT <code>hotspotId</code> to find the hotspot's position in <code>body.hotspots[]</code>, then use that position's incremental id. Must match <code>itemBody.targets[].id</code>.</td>
+    <td>The incremental QB id (1, 2, 3…) — not the AAT <code>hotspotId</code> value. Use the AAT <code>hotspotId</code> to find the hotspot's position in <code>body.blank[]</code>, then use that position's incremental id. Must match <code>itemBody.targets[].id</code>.</td>
   </tr>
   <tr>
     <td><code>correctAnswers[].optionIds</code></td><td>Array&lt;Integer&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td>
@@ -507,20 +521,20 @@
 <h2 id="sec7">7. Image Labelling DnD vs DnD (BLANK_ON_QUESTION) — Key Differences</h2>
 
 <table class="rule-table">
-  <thead><tr><th>Area</th><th>DnD (BLANK_ON_QUESTION)</th><th>Image Labelling DnD (IMAGE_ON_IMAGE)</th></tr></thead>
+  <thead><tr><th>Area</th><th>DnD (BLANK_ON_QUESTION)</th><th>Image Labelling DnD (BLANK_ON_QUESTION)</th></tr></thead>
   <tbody>
   <tr><td><strong>Legacy type</strong></td><td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td><td class="result">IMAGE_LABELLING_DRAG_DROP</td></tr>
   <tr><td><strong>type</strong></td><td class="cond">DND</td><td class="result">DND</td></tr>
-  <tr><td><strong>subType</strong></td><td class="cond">BLANK_ON_QUESTION (hardcoded)</td><td class="result">IMAGE_ON_IMAGE (hardcoded)</td></tr>
+  <tr><td><strong>subType</strong></td><td class="cond">BLANK_ON_QUESTION (hardcoded)</td><td class="result">BLANK_ON_QUESTION (hardcoded)</td></tr>
   <tr><td><strong>itemBody schema</strong></td><td class="cond">DnDItemBodyResource</td><td class="result">ImageLabellingDnDItemBodyResource</td></tr>
   <tr><td><strong>Question stem</strong></td><td class="cond"><code>sentence.text</code> — HTML with <code>@_@</code> blank markers</td><td class="result"><code>backgroundImage</code> — pixel image. No sentence. No statement.</td></tr>
   <tr><td><strong>statement</strong></td><td class="cond">Always <code>null</code></td><td class="result">Always <code>null</code></td></tr>
   <tr><td><strong>sentence</strong></td><td class="cond">From <code>body.prompt</code> with <code>@_@</code> markers</td><td class="result">Always <code>null</code></td></tr>
   <tr><td><strong>backgroundImage</strong></td><td class="cond">Always <code>null</code> (images stay inline in sentence)</td><td class="result">Required — from <code>body.backgroundImage</code></td></tr>
-  <tr><td><strong>Target source</strong></td><td class="cond"><code>&lt;blank-field&gt;</code> tags in <code>body.prompt</code> HTML</td><td class="result"><code>body.hotspots[]</code> (or <code>body.blanks[]</code>)</td></tr>
+  <tr><td><strong>Target source</strong></td><td class="cond"><code>&lt;blank-field&gt;</code> tags in <code>body.prompt</code> HTML</td><td class="result"><code>body.blank[]</code> (or <code>body.blanks[]</code>)</td></tr>
   <tr><td><strong>targets[].id source</strong></td><td class="cond">Incremental by blank-field DOM order</td><td class="result">Incremental by hotspot array order</td></tr>
   <tr><td><strong>targets[].position</strong></td><td class="cond">Always <code>null</code></td><td class="result"><strong>Required</strong> — pixel (x, y) on background image</td></tr>
-  <tr><td><strong>targets[].weight source</strong></td><td class="cond"><code>body.blanks[].weight</code> (normalize ÷ 100)</td><td class="result"><code>body.hotspots[].weight</code> (normalize ÷ 100)</td></tr>
+  <tr><td><strong>targets[].weight source</strong></td><td class="cond"><code>body.blanks[].weight</code> (normalize ÷ 100)</td><td class="result"><code>body.blank[].weight</code> (normalize ÷ 100)</td></tr>
   <tr><td><strong>options[].content source</strong></td><td class="cond"><code>choiceItems[].value</code></td><td class="result"><code>choiceItems[].value</code> (same)</td></tr>
   <tr><td><strong>options[].id</strong></td><td class="cond">Incremental by choiceItems order</td><td class="result">Incremental by choiceItems order (same)</td></tr>
   <tr><td><strong>correctAnswers[].targetId source</strong></td><td class="cond"><code>answerMapping[].blankId</code> → incremental blank position</td><td class="result"><code>answerMapping[].hotspotId</code> → incremental hotspot position</td></tr>
@@ -545,9 +559,9 @@
   <tr><td><code>stage</code>, <code>version</code>, <code>adt</code></td><td>Various</td><td>No QB target fields.</td></tr>
   <tr><td><code>summative</code>, <code>variant</code>, <code>variants</code>, <code>maxScore</code></td><td>Various</td><td>Redundant or unused.</td></tr>
   <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>ISO DateTime</td><td><code>createdAt</code> preserved in <code>annotation.tags["migration:originalCreatedAt"]</code>. <code>updatedAt</code> dropped.</td></tr>
-  <tr><td><code>body.hotspots[].feedback</code></td><td>String</td><td>Image Labelling DnD targets have no per-target feedback field in QB. Dropped.</td></tr>
-  <tr><td><code>body.hotspots[].type</code></td><td>String</td><td>No QB target field on Image Labelling DnD targets.</td></tr>
-  <tr><td><code>body.hotspots[].rules</code></td><td>Various</td><td>No QB target fields on Image Labelling DnD targets.</td></tr>
+  <tr><td><code>body.blank[].feedback</code></td><td>String</td><td>Image Labelling DnD targets have no per-target feedback field in QB. Dropped.</td></tr>
+  <tr><td><code>body.blank[].type</code></td><td>String</td><td>No QB target field on Image Labelling DnD targets.</td></tr>
+  <tr><td><code>body.blank[].rules</code></td><td>Various</td><td>No QB target fields on Image Labelling DnD targets.</td></tr>
   <tr><td><code>body.backgroundImageDimensions</code></td><td>Object</td><td>Width/height used if present; the wrapper object itself is not mapped — only the <code>width</code> and <code>height</code> scalars are extracted.</td></tr>
   <tr><td><code>body.prompt</code> (after image extraction)</td><td>HTML String</td><td>The background image URL is extracted from the first <code>&lt;img&gt;</code> if <code>body.backgroundImage</code> is absent. Remaining prompt HTML is dropped — there is no <code>sentence.text</code> for this question type.</td></tr>
   </tbody>
