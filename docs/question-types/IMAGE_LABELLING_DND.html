@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Image Labelling DnD — AAT to QB Mapping (v2 — Verified against real data)</title>
+<title>Image Labelling DnD — AAT to Question API Mapping</title>
 <style>
   body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
   table { border-collapse: collapse; width: 100%; margin-bottom: 30px; font-size: 0.9em; }
@@ -12,33 +12,26 @@
   h1, h2, h3, h4 { color: #2c3e50; }
   h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
   h3 { color: #34495e; margin-top: 25px; }
-
-  .status-direct   { font-weight: bold; color: #198754; }
+  .status-direct { font-weight: bold; color: #198754; }
   .status-possible { font-weight: bold; color: #fd7e14; }
-  .status-none     { font-weight: bold; color: #dc3545; }
+  .status-none { font-weight: bold; color: #dc3545; }
   .status-hardcode { font-weight: bold; color: #6f42c1; }
-
-  /* Three-tier confidence system */
-  .conf-known   { display:inline-block; background:#d1e7dd; color:#0a3622; border:1px solid #a3cfbb; border-radius:4px; padding:2px 7px; font-size:0.78em; font-weight:bold; white-space:nowrap; }
-  .conf-assumed { display:inline-block; background:#fff3cd; color:#664d03; border:1px solid #ffe08a; border-radius:4px; padding:2px 7px; font-size:0.78em; font-weight:bold; white-space:nowrap; }
-  .conf-unknown { display:inline-block; background:#f8d7da; color:#58151c; border:1px solid #f1aeb5; border-radius:4px; padding:2px 7px; font-size:0.78em; font-weight:bold; white-space:nowrap; }
-
-  .note       { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
-  .info       { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
-  .danger     { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
-  .success    { background-color: #d1e7dd; border-left: 4px solid #198754; padding: 10px; margin: 15px 0; }
-  .assume-box { background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0; font-size:0.9em; }
-  .known-box  { background-color: #e8f5e9; border-left: 4px solid #43a047; padding: 10px; margin: 10px 0; font-size:0.9em; }
-  .data-box   { background-color: #e8f0fe; border-left: 4px solid #3d5afe; padding: 10px; margin: 10px 0; font-size:0.9em; font-family: monospace; font-size: 0.85em; }
-
+  .status-note { font-weight: bold; color: #20c997; }
+  .note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+  .info { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
+  .danger { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
+  .success { background-color: #d1e7dd; border-left: 4px solid #198754; padding: 10px; margin: 15px 0; }
   .schema-ref { font-size: 0.85em; color: #6c757d; font-style: italic; }
-  .required   { color: #dc3545; font-weight: bold; font-size: 0.8em; }
+  .required { color: #dc3545; font-weight: bold; font-size: 0.8em; }
   .toc { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
   .toc a { color: #0d6efd; text-decoration: none; }
   .toc a:hover { text-decoration: underline; }
   .toc li { margin: 4px 0; }
-  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
-  .enum-badge { position: relative; cursor: help; border-bottom: 2px dotted #0d6efd; padding: 2px 0; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+  .enum-badge {
+    position: relative; cursor: help;
+    border-bottom: 2px dotted #0d6efd; padding: 2px 0;
+  }
   .tooltip {
     display: none; position: absolute; bottom: 125%; left: 50%;
     transform: translateX(-50%); background: #1a1a1a; color: #fff;
@@ -55,81 +48,32 @@
   .enum-values div { padding: 2px 0; }
   .rule-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.88em; }
   .rule-table th { background: #e8eaf6; }
-  .rule-table td.cond   { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
+  .rule-table td.cond { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
   .rule-table td.result { background: #e8f5e9; font-family: monospace; font-size: 0.85em; }
   .flow-step { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 14px; margin: 6px 0; font-size: 0.92em; }
   .flow-step strong { color: #e65100; }
-  .verify-list { background:#fce4ec; border:1px solid #f48fb1; border-radius:6px; padding:12px 18px; margin:10px 0; font-size:0.9em; }
-  .verify-list li { margin: 4px 0; }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════════ -->
-<!--  TRANSPARENCY BANNER                                          -->
-<!-- ══════════════════════════════════════════════════════════════ -->
-<div style="background:#fff3cd; border:2px solid #ffc107; border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:0.92em;">
-  <strong>⚠️ Transparency Notice — v2 (updated with real data)</strong><br><br>
-  This document was generated by an AI (Claude). Three evidence tiers are used on every field:
-  <ul style="margin:8px 0 0 18px;">
-    <li><span class="conf-known">✓ KNOWN</span> — confirmed from a real source. The exact source is stated inline.</li>
-    <li><span class="conf-assumed">~ ASSUMED</span> — inferred by analogy or convention. The assumption is stated inline. Must be verified.</li>
-    <li><span class="conf-unknown">? UNKNOWN</span> — no basis. Placeholder only. Must be filled in by your team.</li>
-  </ul>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════ -->
-<!--  WHAT CHANGED IN v2                                           -->
-<!-- ══════════════════════════════════════════════════════════════ -->
-<div style="background:#e8f0fe; border:2px solid #3d5afe; border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:0.92em;">
-  <strong>📋 What changed in v2 — after receiving AAT.json + QB.json</strong><br><br>
-
-  <strong>What the provided files confirmed (upgraded to ✓ KNOWN):</strong>
-  <ul style="margin:6px 0 0 18px;">
-    <li>The complete AAT field structure for <code>FILL_IN_THE_BLANK_DRAG_DROP</code> — blanks, choices, validation, answerMapping</li>
-    <li>The complete QB output structure for <code>DND / BLANK_ON_QUESTION</code> — all fields, all hardcode values, all transforms</li>
-    <li>Exact <code>weight</code> normalization rule: AAT <code>33.33</code> → QB <code>0.3333</code> (÷100), confirmed from real data</li>
-    <li>Exact incremental ID rule for targets and options — confirmed from real data (AAT choiceItem ids 220,109,221 → QB option ids 1,2,3)</li>
-    <li>Exact <code>answerMapping[].blankId</code> / <code>.choiceId</code> field names in AAT validation</li>
-    <li><code>seeWhy</code>, <code>feedback</code>, <code>modalFeedback</code> all absent when source fields are empty — confirmed from real data (QB output has none of these)</li>
-    <li>All ignored legacy fields confirmed as absent in QB output</li>
-  </ul>
-
-  <br>
-  <strong>⚠️ Critical gap — what the files did NOT provide:</strong>
-  <ul style="margin:6px 0 0 18px;">
-    <li><strong>No <code>IMAGE_LABELLING_DRAG_DROP</code> AAT record was provided.</strong> All 5 AAT records in the file are <code>FILL_IN_THE_BLANK_DRAG_DROP</code>.</li>
-    <li><strong>No migrated <code>IMAGE_LABELLING_DRAG_DROP</code> QB output was provided.</strong></li>
-    <li>Therefore, all image-labelling-specific fields (backgroundImage, hotspot positions, subType, etc.) remain <span class="conf-assumed">~ ASSUMED</span> or <span class="conf-unknown">? UNKNOWN</span>.</li>
-  </ul>
-
-  <br>
-  <strong>To fully verify this document, your team still needs to provide:</strong>
-  <ol style="margin:6px 0 0 18px;">
-    <li>One real <code>IMAGE_LABELLING_DRAG_DROP</code> question from AAT</li>
-    <li>Its corresponding migrated QB output (or the QB schema for that resource type)</li>
-  </ol>
-</div>
-
 <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 18px; margin-bottom:20px; font-size:0.9em;">
-  <strong>Part of:</strong> <a href="../migration_mapping.html">migration_mapping.html</a> —
-  This sub-doc covers <strong>Image Labelling DnD</strong> specific fields only.
-  Shared sections (Metadata, Hints, ModalFeedback, SeeWhy) are in the main doc.
+  <strong>Part of:</strong> <a href="../migration_mapping.html">migration_mapping.html</a> (general mapping doc) —
+  This sub-doc covers <strong>Image Labelling DnD (Image Labelling Drag-and-Drop)</strong> specific fields only.
+  Shared sections (Metadata, Hints, ModalFeedback, SeeWhy) are defined in the main doc.
 </div>
 
 <h1>Image Labelling DnD — AAT → Question API Mapping (<code>application/json</code>)</h1>
-<p>Maps legacy AAT <code>IMAGE_LABELLING_DRAG_DROP</code> questions to <code>DnDQuestionResource</code> for <code>POST /api/v1/questions</code>.</p>
+<p>Maps legacy AAT <code>IMAGE_LABELLING_DRAG_DROP</code> questions to <code>DnDQuestionResource</code> for
+<code>POST /api/v1/questions</code>.</p>
 
 <div class="info">
   <strong>Status Legend:</strong>
-  <span class="status-direct">Direct</span> — direct copy &nbsp;|&nbsp;
-  <span class="status-possible">Transform</span> — requires logic &nbsp;|&nbsp;
-  <span class="status-hardcode">Hardcode</span> — fixed value &nbsp;|&nbsp;
-  <span class="status-none">No Data</span> — not in legacy &nbsp;&nbsp;&nbsp;
-  <strong>Confidence:</strong>
-  <span class="conf-known">✓ KNOWN</span> source stated &nbsp;|&nbsp;
-  <span class="conf-assumed">~ ASSUMED</span> inferred &nbsp;|&nbsp;
-  <span class="conf-unknown">? UNKNOWN</span> no basis
+  <ul style="margin:8px 0 0 18px; padding:0;">
+    <li><span class="status-direct">Direct</span> — direct copy from legacy field</li>
+    <li><span class="status-possible">Transform</span> — requires processing/logic</li>
+    <li><span class="status-hardcode">Hardcode</span> — fixed value, no legacy source</li>
+    <li><span class="status-none">No Data</span> — not present in legacy system</li>
+  </ul>
 </div>
 
 <div class="toc">
@@ -139,26 +83,32 @@
       <ul>
         <li><a href="#sec0-type">Type &amp; SubType Mapping</a></li>
         <li><a href="#sec0-image">Background Image Processing</a></li>
-        <li><a href="#sec0-options">Option Content Extraction</a></li>
-        <li><a href="#sec0-ids">Incremental ID Rules</a></li>
+        <li><a href="#sec0-options">Option Content Extraction — <code>value</code> vs <code>answer</code></a></li>
       </ul>
     </li>
-    <li><a href="#sec1">Base Structure</a></li>
-    <li><a href="#sec2">Metadata</a></li>
-    <li><a href="#sec3">itemBody</a>
+    <li><a href="#sec1">Base Structure — shared</a></li>
+    <li><a href="#sec2">Metadata — shared (see main doc)</a></li>
+    <li><a href="#sec3">Image Labelling DnD-Specific: itemBody (ImageLabellingDnDItemBodyResource)</a>
       <ul>
         <li><a href="#sec3-top">Top-level fields</a></li>
-        <li><a href="#sec3-statement">statement</a></li>
-        <li><a href="#sec3-sentence">sentence</a></li>
-        <li><a href="#sec3-bg">backgroundImage</a></li>
-        <li><a href="#sec3-targets">targets[]</a></li>
-        <li><a href="#sec3-options">options[]</a></li>
+        <li><a href="#sec3-statement">statement — always null</a></li>
+        <li><a href="#sec3-sentence">sentence — always null</a></li>
+        <li><a href="#sec3-backgroundImage">backgroundImage — source image for labelling</a></li>
+        <li><a href="#sec3-targets">targets[] — from body.hotspots / body.blanks</a></li>
+        <li><a href="#sec3-options">options[] — from body.choices.choiceItems</a></li>
       </ul>
     </li>
     <li><a href="#sec4">responseDeclaration</a></li>
-    <li><a href="#sec5">outcomeDeclaration</a></li>
-    <li><a href="#sec6">modalFeedback</a></li>
-    <li><a href="#sec7">Image Labelling DnD vs BLANK_ON_QUESTION — Key Differences</a></li>
+    <li><a href="#sec5">outcomeDeclaration</a>
+      <ul>
+        <li><a href="#sec5-scoring">scoringType &amp; scoring</a></li>
+        <li><a href="#sec5-seewhy">seeWhy — shared</a></li>
+        <li><a href="#sec5-feedback">feedback</a></li>
+        <li><a href="#sec5-valid">validResponse — Image Labelling DnD structure</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec6">modalFeedback — shared</a></li>
+    <li><a href="#sec7">Image Labelling DnD vs DnD (BLANK_ON_QUESTION) — Key Differences</a></li>
     <li><a href="#sec8">Unmapped / Ignored Legacy Fields</a></li>
   </ol>
 </div>
@@ -170,497 +120,270 @@
 
 <h3 id="sec0-type">0.1 Type &amp; SubType Mapping</h3>
 
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — QB.json</span>
-  The QB output for <code>FILL_IN_THE_BLANK_DRAG_DROP</code> has <code>"type": "DND"</code> and <code>"subType": "BLANK_ON_QUESTION"</code> confirmed at the top of the provided QB.json file.
-  The enum list of all valid subTypes was also confirmed from DND_mapping.html.
-</div>
-<div class="assume-box">
-  <span class="conf-assumed">~ ASSUMED</span>
-  <code>subType: "IMAGE_ON_IMAGE"</code> for <code>IMAGE_LABELLING_DRAG_DROP</code> is an inference — it is the most semantically matching name from the known enum list.
-  Could also be <code>IMAGE_ON_SPACE</code>. <strong>Must be verified with a real migrated image labelling question.</strong>
-</div>
-
 <table class="rule-table">
-  <thead><tr><th>Legacy <code>type</code></th><th>→ API <code>type</code></th><th>→ API <code>subType</code></th><th>Confidence</th></tr></thead>
+  <thead><tr><th>Legacy <code>type</code></th><th>→ API <code>type</code></th><th>→ API <code>subType</code></th><th>Notes</th></tr></thead>
   <tbody>
-  <tr>
-    <td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td>
-    <td class="result">DND</td>
-    <td class="result">BLANK_ON_QUESTION</td>
-    <td><span class="conf-known">✓ KNOWN — QB.json top-level fields</span></td>
-  </tr>
   <tr>
     <td class="cond">IMAGE_LABELLING_DRAG_DROP</td>
     <td class="result">DND</td>
-    <td class="result">IMAGE_ON_IMAGE <em>(assumed)</em></td>
-    <td>type: <span class="conf-known">✓ KNOWN</span> (pattern) / subType: <span class="conf-assumed">~ ASSUMED</span></td>
+    <td class="result">IMAGE_ON_IMAGE</td>
+    <td>Type is remapped. SubType is always hardcoded to <code>IMAGE_ON_IMAGE</code> — not auto-detected. All AAT Image Labelling DnD questions map to this subType during migration.</td>
   </tr>
   </tbody>
 </table>
 
 <div class="note">
-  <strong>All known DnD subTypes</strong> <span class="conf-known">✓ KNOWN — DND_mapping.html enum tooltip</span>:<br>
-  <code>BLANK_ON_QUESTION</code>, <code>TEXT_ON_IMAGE</code>, <code>BLANK_ON_SENTENCE</code>, <code>IMAGE_ON_IMAGE</code>,
-  <code>IMAGE_ON_SPACE</code>, <code>IMAGE_TO_FIXED_1</code>, <code>IMAGE_TO_FIXED_2</code>,
-  <code>SEQUENCE_IMAGE</code>, <code>SEQUENCE_TEXT</code>, <code>SPLIT_SCREEN</code>
+  <strong>Available DnD subTypes in QB:</strong>
+  <code>BLANK_ON_QUESTION</code>, <code>TEXT_ON_IMAGE</code>, <code>BLANK_ON_SENTENCE</code>, <code>IMAGE_ON_IMAGE</code>, <code>IMAGE_ON_SPACE</code>, <code>IMAGE_TO_FIXED_1</code>, <code>IMAGE_TO_FIXED_2</code>, <code>SEQUENCE_IMAGE</code>, <code>SEQUENCE_TEXT</code>, <code>SPLIT_SCREEN</code>.
+  Only <code>IMAGE_ON_IMAGE</code> is assigned for this question type during migration. Other subTypes are not used.
 </div>
-
 
 <h3 id="sec0-image">0.2 Background Image Processing</h3>
 
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json (question 000f8d02)</span>
-  The second AAT record shows an image <em>embedded inside</em> <code>body.prompt</code> as an <code>&lt;img&gt;</code> tag — not in a dedicated field.
-  This is a <code>FILL_IN_THE_BLANK_DRAG_DROP</code> record, so the image stays in <code>sentence.text</code> for that type.
-  For <code>IMAGE_LABELLING_DRAG_DROP</code>, the image must serve as the question background — but how it is stored in AAT (dedicated field vs inside prompt) is unknown because no image labelling AAT record was provided.
-</div>
-<div class="assume-box">
-  <span class="conf-assumed">~ ASSUMED</span>
-  For <code>IMAGE_LABELLING_DRAG_DROP</code>, a dedicated <code>body.backgroundImage</code> field is assumed to exist in AAT.
-  If it does not, the image URL would need to be extracted from the first <code>&lt;img&gt;</code> in <code>body.prompt</code> (as seen in question 000f8d02).
-  <strong>Check a real image labelling AAT record to confirm.</strong>
+<p>Unlike standard DnD (which embeds images inline in <code>sentence.text</code>), Image Labelling DnD uses a dedicated <code>itemBody.backgroundImage</code> field. The source image URL is extracted from <code>body.backgroundImage</code> or the first <code>&lt;img&gt;</code> found in <code>body.prompt</code>.</p>
+
+<div class="flow-step"><strong>Step 1 — Check <code>body.backgroundImage</code>:</strong> If present and non-empty, use directly as <code>itemBody.backgroundImage.url</code>.</div>
+<div class="flow-step"><strong>Step 2 — Fallback to prompt:</strong> If <code>body.backgroundImage</code> is absent/null, scan <code>body.prompt</code> for the first <code>&lt;img src="..."&gt;</code> tag and extract its <code>src</code> as the background image URL.</div>
+<div class="flow-step"><strong>Step 3 — Dimensions:</strong> Extract <code>width</code> and <code>height</code> from <code>body.backgroundImageDimensions</code> (if present) or from the <code>&lt;img&gt;</code> tag attributes. Both fields are optional — set to <code>null</code> if unavailable.</div>
+<div class="flow-step"><strong>Step 4 — <code>itemBody.sentence</code> and <code>itemBody.statement</code>:</strong> Both are always <code>null</code>. There is no text prompt for this question type — the image itself is the question.</div>
+
+<div class="note">
+  <strong>No <code>@_@</code> replacement:</strong> Unlike standard DnD, Image Labelling DnD does not use <code>@_@</code> markers in a sentence. Hotspot/blank positions on the image are encoded in <code>targets[].position</code> using pixel coordinates instead.
 </div>
 
-<div class="flow-step"><strong>Step 1 [ASSUMED]:</strong> Check <code>body.backgroundImage</code>. If present and non-empty, use as <code>itemBody.backgroundImage.url</code>.</div>
-<div class="flow-step"><strong>Step 2 [ASSUMED — based on AAT question 000f8d02 pattern]:</strong> If <code>body.backgroundImage</code> is absent, extract the first <code>&lt;img src="..."&gt;</code> from <code>body.prompt</code>.</div>
-<div class="flow-step"><strong>Step 3 [UNKNOWN]:</strong> Width/height dimensions — unknown whether AAT stores these separately or in the img tag attributes.</div>
-<div class="flow-step"><strong>Step 4 [ASSUMED]:</strong> <code>itemBody.sentence</code> and <code>itemBody.statement</code> are both <code>null</code> — no text prompt for this type.</div>
+<h3 id="sec0-options">0.3 Option Content Extraction — <code>value</code> vs <code>answer</code></h3>
 
-
-<h3 id="sec0-options">0.3 Option Content Extraction — <code>.value</code> field</h3>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  Confirmed end-to-end from real data:<br>
-  AAT <code>body.choices.choiceItems[0].value = "clear, concise language"</code> (id: 220)<br>
-  → QB <code>itemBody.options[0].content[0].text = "clear, concise language"</code> (id: 1)<br>
-  The field is <code>.value</code>, not <code>.answer</code>. Confirmed.
-</div>
-
-<div class="data-box">
-  <strong>Real data proof (AAT → QB, question 000b5509):</strong><br>
-  AAT choiceItems[0]: { "id": 220, "value": "clear, concise language" }<br>
-  AAT choiceItems[1]: { "id": 109, "value": "jargon" }<br>
-  AAT choiceItems[2]: { "id": 221, "value": "audience's interests" }<br>
-  → QB options[0]: { "id": 1, "content": [{ "type": "text", "text": "clear, concise language" }] }<br>
-  → QB options[1]: { "id": 2, "content": [{ "type": "text", "text": "jargon" }] }<br>
-  → QB options[2]: { "id": 3, "content": [{ "type": "text", "text": "audience's interests" }] }
+<div class="danger">
+  <strong>Image Labelling DnD uses <code>.value</code>, MCQ uses <code>.answer</code>.</strong> The choice item field name differs between types. Using the wrong field will silently produce empty options. This rule is identical to standard DnD.
 </div>
 
 <table class="rule-table">
-  <thead><tr><th>Question type</th><th>QB option id</th><th>AAT id source</th><th>Content field</th><th>Confidence</th></tr></thead>
+  <thead><tr><th>Question type</th><th>QB option id</th><th>AAT id source (lookup only)</th><th>Choice content field</th></tr></thead>
   <tbody>
-  <tr>
-    <td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td>
-    <td class="result">Incremental (1,2,3…) by choiceItems order</td>
-    <td class="result"><code>choiceItems[].id</code> — lookup bridge only</td>
-    <td class="result"><code>choiceItems[].value</code></td>
-    <td><span class="conf-known">✓ KNOWN — AAT.json + QB.json</span></td>
-  </tr>
-  <tr>
-    <td class="cond">IMAGE_LABELLING_DRAG_DROP</td>
-    <td class="result">Incremental (1,2,3…) by choiceItems order</td>
-    <td class="result"><code>choiceItems[].id</code> — lookup bridge only</td>
-    <td class="result"><code>choiceItems[].value</code></td>
-    <td><span class="conf-assumed">~ ASSUMED</span> — by analogy</td>
-  </tr>
+  <tr><td class="cond">MCQ</td><td class="result">Direct from <code>choiceItems[].choiceId</code></td><td class="result">—</td><td class="result"><code>choiceItems[].answer</code></td></tr>
+  <tr><td class="cond">DnD (BLANK_ON_QUESTION)</td><td class="result">Incremental (1, 2, 3…) by order</td><td class="result"><code>choiceItems[].id</code> used to resolve <code>correctAnswers[].optionIds</code></td><td class="result"><code>choiceItems[].value</code></td></tr>
+  <tr><td class="cond">Image Labelling DnD</td><td class="result">Incremental (1, 2, 3…) by order</td><td class="result"><code>choiceItems[].id</code> used to resolve <code>correctAnswers[].optionIds</code></td><td class="result"><code>choiceItems[].value</code></td></tr>
   </tbody>
 </table>
 
-
-<h3 id="sec0-ids">0.4 Incremental ID Rules</h3>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  Confirmed from real data. AAT blank-field ids (790, 483, 726) do not match QB target ids (1, 2, 3).
-  AAT choiceItem ids (220, 109, 221, 89, 357) do not match QB option ids (1, 2, 3, 4, 5).
-  Both use strict positional ordering — first in array = id 1, second = id 2, etc.
-</div>
-
-<div class="data-box">
-  <strong>Real data proof — targets (question 000b5509):</strong><br>
-  AAT blank-field ids in prompt: 790 (1st), 483 (2nd), 726 (3rd)<br>
-  → QB targets[].id:             1,          2,          3<br><br>
-  <strong>Real data proof — options:</strong><br>
-  AAT choiceItems[].id: 220 (1st), 109 (2nd), 221 (3rd), 89 (4th), 357 (5th)<br>
-  → QB options[].id:      1,          2,          3,         4,          5
-</div>
-
-<div class="data-box">
-  <strong>Real data proof — answerMapping resolution (question 000b5509):</strong><br>
-  AAT: answerMapping[0] = { blankId: 790, choiceId: 220 }<br>
-  → blankId 790 is the 1st blank-field in prompt → targetId = 1<br>
-  → choiceId 220 is position 0 in choiceItems → optionId = 1<br>
-  → QB: correctAnswers[0] = { targetId: 1, optionIds: [1], matchMode: "ALL" } ✓<br><br>
-  AAT: answerMapping[1] = { blankId: 483, choiceId: 109 }<br>
-  → blankId 483 is the 2nd blank-field → targetId = 2<br>
-  → choiceId 109 is position 1 in choiceItems → optionId = 2<br>
-  → QB: correctAnswers[1] = { targetId: 2, optionIds: [2], matchMode: "ALL" } ✓
-</div>
+<p>The Image Labelling DnD option content is parsed — media extracted, text cleaned — producing the same <code>ContentItem</code> array format as standard DnD options. Options may contain image URLs (draggable label images) or plain text labels.</p>
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <hr>
-<h2 id="sec1">1. Base Structure</h2>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — QB.json top level</span>
-  All root fields confirmed from real QB output: <code>schemaVersion</code>, <code>type</code>, <code>subType</code>, <code>metadata</code>, <code>itemBody</code>, <code>responseDeclaration</code>, <code>outcomeDeclaration</code>.
-  <code>modalFeedback</code> is absent in this QB output because the source AAT had no hints/passage — consistent with DND_mapping.html which says it is omitted in that case.
-</div>
+<h2 id="sec1">1. Base Structure — shared</h2>
+<p>Root fields identical to all other question types. See <a href="../migration_mapping.html#sec1">main doc §1</a>.</p>
 
 <pre><code>{
-  "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },   // ✓ KNOWN — QB.json
-  "type": "DND",                                               // ✓ KNOWN — QB.json
-  "subType": "IMAGE_ON_IMAGE",                                 // ~ ASSUMED (see §0.1)
-  "metadata": { ... },                                         // ✓ KNOWN — QB.json
-  "itemBody": { ... },                                         // ✓ KNOWN — QB.json
-  "responseDeclaration": { ... },                              // ✓ KNOWN — QB.json
-  "outcomeDeclaration": { ... },                               // ✓ KNOWN — QB.json
-  "modalFeedback": { ... }   // omitted when no hints/passage — ✓ KNOWN from QB.json (absent)
+  "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },
+  "type": "DND",
+  "subType": "IMAGE_ON_IMAGE",
+  "metadata": { ... },
+  "itemBody": { ... },
+  "responseDeclaration": { ... },
+  "outcomeDeclaration": { ... },
+  "modalFeedback": { ... }    ← omitted when no hints/passage
 }</code></pre>
 
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
+  <tr><td><code>schemaVersion</code></td><td>SemanticVersion</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>{ "major": 1, "minor": 0, "patch": 0 }</code>.</td></tr>
   <tr>
-    <td><code>schemaVersion</code></td><td>SemanticVersion</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>{ "major": 1, "minor": 0, "patch": 0 }</code></td>
+    <td><code>type</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">API value:<div class="enum-values"><div>DND</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>type</code></td>
+    <td>Legacy <code>IMAGE_LABELLING_DRAG_DROP</code> → <code>DND</code>.</td>
   </tr>
   <tr>
-    <td><code>type</code></td><td>String (enum)</td><td class="required">YES</td><td class="status-possible">Transform</td><td><code>type</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms <code>"DND"</code>. AAT <code>FILL_IN_THE_BLANK_DRAG_DROP</code> → <code>DND</code> confirmed. Same pattern assumed for <code>IMAGE_LABELLING_DRAG_DROP</code>.</td>
+    <td><code>subType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">All DnD subType values:<div class="enum-values"><div>BLANK_ON_QUESTION</div><div>TEXT_ON_IMAGE</div><div>BLANK_ON_SENTENCE</div><div>IMAGE_ON_IMAGE</div><div>IMAGE_ON_SPACE</div><div>IMAGE_TO_FIXED_1</div><div>IMAGE_TO_FIXED_2</div><div>SEQUENCE_IMAGE</div><div>SEQUENCE_TEXT</div><div>SPLIT_SCREEN</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>"IMAGE_ON_IMAGE"</code>.</td>
   </tr>
-  <tr>
-    <td><code>subType</code></td><td>String (enum)</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-assumed">~ ASSUMED</span></td>
-    <td>Assumed <code>"IMAGE_ON_IMAGE"</code>. Confirmed enum list from DND_mapping.html but the correct value for this type needs verification.</td>
-  </tr>
-  <tr>
-    <td><code>metadata</code></td><td>MetadataResource</td><td class="required">YES</td><td class="status-possible">Transform</td><td>multiple fields</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>Full metadata structure confirmed from QB.json. Assumed identical for image labelling.</td>
-  </tr>
-  <tr>
-    <td><code>modalFeedback</code></td><td>ModalFeedback</td><td></td><td class="status-possible">Transform</td><td><code>body.hints</code> / <code>body.passage</code></td>
-    <td><span class="conf-known">✓ KNOWN (absence)</span> / <span class="conf-assumed">~ ASSUMED (presence)</span></td>
-    <td>QB.json has no <code>modalFeedback</code> because AAT source has empty hints and null passage. Omission rule confirmed. Presence/structure assumed same for image labelling.</td>
-  </tr>
+  <tr><td><code>metadata</code></td><td>MetadataResource</td><td class="required">YES</td><td class="status-possible">Transform</td><td>(Section 2)</td><td>Identical to MCQ/DnD. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</td></tr>
+  <tr><td><code>modalFeedback</code></td><td>ModalFeedback</td><td></td><td class="status-possible">Transform</td><td><code>body.hints</code> / <code>body.passage</code></td><td>Identical to MCQ/DnD. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</td></tr>
   </tbody>
 </table>
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <hr>
-<h2 id="sec2">2. Metadata</h2>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — QB.json metadata block</span>
-  Full metadata structure confirmed from real QB output. Fields: <code>general</code>, <code>lifecycle</code>, <code>technical</code>, <code>educational</code>, <code>rights</code>, <code>classification</code>, <code>annotation</code>.
-  Annotation confirms the migration tag pattern: <code>annotation.tags["migration:source"] = "AAT"</code>, <code>annotation.tags["migration:originalCreatedAt"]</code> = AAT <code>createdAt</code> value.
-</div>
-<div class="assume-box">
-  <span class="conf-assumed">~ ASSUMED</span> Metadata rules are identical for image labelling. This is a safe assumption since metadata is question-type-agnostic, but not formally confirmed.
-</div>
-<p>See <a href="../migration_mapping.html#sec2">main doc §2</a> for full metadata mapping.</p>
+<h2 id="sec2">2. Metadata — shared</h2>
+<p>All <code>metadata.*</code> sub-objects identical to MCQ and DnD. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</p>
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <hr>
-<h2 id="sec3">3. <code>itemBody</code> <span class="schema-ref">— ImageLabellingDnDItemBodyResource (schema name assumed)</span></h2>
+<h2 id="sec3">3. Image Labelling DnD-Specific: <code>itemBody</code> <span class="schema-ref">— ImageLabellingDnDItemBodyResource</span></h2>
 
-<h3 id="sec3-top">3.1 Top-level fields</h3>
-
+<h3 id="sec3-top">3.1 Top-level <code>itemBody</code> fields</h3>
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes / Evidence</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
+  <tr><td><code>itemBody.version</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"1.0"</code>.</td></tr>
+  <tr><td><code>itemBody.title</code></td><td>StringTitle</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.subTitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.instruction</code></td><td>Html</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. No text instruction field for image labelling.</td></tr>
+  <tr><td><code>itemBody.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;audio src="..."&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.video</code></td><td>Video</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;video src="..."&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
   <tr>
-    <td><code>itemBody.version</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"version": "1.0"</code> in itemBody.</td>
+    <td><code>itemBody.backgroundImage</code></td><td>Image</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.backgroundImage</code> / <code>body.prompt</code></td>
+    <td>The image students label. See §3.4. Must not be <code>null</code> — a missing image is a migration error.</td>
   </tr>
   <tr>
-    <td><code>itemBody.title</code></td><td>StringTitle</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"title": null</code>.</td>
+    <td><code>itemBody.showDragHandle</code></td><td>Boolean</td><td></td><td class="status-direct">Direct</td>
+    <td><code>body.choices.showDragHandle</code></td>
+    <td>Direct copy. Defaults to <code>true</code> if absent.</td>
   </tr>
   <tr>
-    <td><code>itemBody.subTitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"subTitle": null</code>.</td>
+    <td><code>itemBody.shuffled</code></td><td>Boolean</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>body.choices.shuffle</code></td>
+    <td>Direct copy. Defaults to <code>true</code> if absent.</td>
   </tr>
-  <tr>
-    <td><code>itemBody.instruction</code></td><td>Html</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"instruction": null</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td>
-    <td><span class="conf-known">✓ KNOWN (rule)</span> / <span class="conf-assumed">~ ASSUMED (applies here)</span></td>
-    <td>QB.json confirms: <code>"audio": null</code> (no audio in source). DND_mapping.html describes extraction rule. Assumed same for image labelling.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.video</code></td><td>Video</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td>
-    <td><span class="conf-known">✓ KNOWN (rule)</span> / <span class="conf-assumed">~ ASSUMED (applies here)</span></td>
-    <td>QB.json confirms: <code>"video": null</code>. Same as audio above.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.image</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"image": null</code> for BLANK_ON_QUESTION. For IMAGE_ON_IMAGE this field is still expected to be null — the background image goes in <code>backgroundImage</code> (assumed).</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.backgroundImage</code></td><td>Image</td><td class="required">YES (assumed)</td><td class="status-possible">Transform</td><td><code>body.backgroundImage</code> <em>(assumed field name)</em></td>
-    <td><span class="conf-unknown">? UNKNOWN</span></td>
-    <td>No QB or AAT image labelling data was provided. Field name, source, and structure are all guesses. <strong>Must verify with real data.</strong></td>
-  </tr>
-  <tr>
-    <td><code>itemBody.showDragHandle</code></td><td>Boolean</td><td></td><td class="status-direct">Direct</td><td><code>body.choices.showDragHandle</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>AAT.json confirms: <code>"showDragHandle": true</code>. QB.json confirms: <code>"showDragHandle": true</code>. Direct copy confirmed.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.shuffled</code></td><td>Boolean</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>body.choices.shuffle</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>AAT.json confirms: <code>"shuffle": true</code>. QB.json confirms: <code>"shuffled": true</code>. Note field name changes: <code>shuffle</code> → <code>shuffled</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.optionsStyle</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"optionsStyle": "option-style-1"</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.dropLimit</code></td><td>Integer</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"dropLimit": 1</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.optionsPosition</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"optionsPosition": "bottom"</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.sideImage</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"sideImage": null</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.backgroundLayout</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"backgroundLayout": null</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.splitContent</code></td><td>SplitContent</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"splitContent": null</code>.</td>
-  </tr>
-  <tr>
-    <td><code>itemBody.timeSpentConfig</code></td><td>TimeSpentConfig</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>"timeSpentConfig": null</code>.</td>
-  </tr>
+  <tr><td><code>itemBody.optionsStyle</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"option-style-1"</code>.</td></tr>
+  <tr><td><code>itemBody.dropLimit</code></td><td>Integer (≥1)</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1</code>.</td></tr>
+  <tr><td><code>itemBody.optionsPosition</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"bottom"</code>.</td></tr>
+  <tr><td><code>itemBody.sideImage</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.backgroundLayout</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.splitContent</code></td><td>SplitContent</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.timeSpentConfig</code></td><td>TimeSpentConfig</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
   </tbody>
 </table>
-
 
 <h3 id="sec3-statement">3.2 <code>itemBody.statement</code></h3>
 
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — QB.json</span>
-  QB.json confirms: <code>"statement": null</code> for BLANK_ON_QUESTION. DND_mapping.html explains the reason: prompt content goes into <code>sentence.text</code> instead. For image labelling, statement is also expected to be null — but for a different reason (the image is the stem, not text).
-</div>
-
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
-    <td><code>itemBody.statement</code></td><td>DnDStatement</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN (for DnD)</span> / <span class="conf-assumed">~ ASSUMED (for image labelling)</span></td>
-    <td>Always <code>null</code>. Confirmed for BLANK_ON_QUESTION in QB.json. Assumed same for image labelling.</td>
+    <td><code>itemBody.statement</code></td>
+    <td>DnDStatement</td><td></td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>null</code>. Image Labelling DnD has no text statement — the background image serves as the question stem.</td>
   </tr>
   </tbody>
 </table>
-
 
 <h3 id="sec3-sentence">3.3 <code>itemBody.sentence</code></h3>
 
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  Full <code>@_@</code> replacement confirmed from real data:<br>
-  AAT prompt contained three <code>&lt;blank-field id="790"&gt;</code>, <code>&lt;blank-field id="483"&gt;</code>, <code>&lt;blank-field id="726"&gt;</code> tags.<br>
-  QB sentence.text has all three replaced with <code>@_@</code>. All other HTML preserved exactly.
-</div>
-
-<div class="data-box">
-  <strong>Real data proof (question 000b5509):</strong><br>
-  AAT: "...using &nbsp;&lt;blank-field id="790" class="mceNonEditable"&gt;&lt;/blank-field&gt; , avoiding..."<br>
-  QB:  "...using &nbsp;@_@ , avoiding..."
-</div>
-
-<div class="assume-box">
-  <span class="conf-assumed">~ ASSUMED</span>
-  For <code>IMAGE_LABELLING_DRAG_DROP</code>, <code>sentence</code> is assumed to be <code>null</code> — there is no text with blanks; the image itself is the question. This is the key structural difference from BLANK_ON_QUESTION.
-</div>
-
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
-    <td><code>itemBody.sentence</code></td><td>Sentence</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td>
-    <td><span class="conf-known">✓ KNOWN (for DnD)</span> / <span class="conf-assumed">~ ASSUMED (null for image labelling)</span></td>
-    <td>
-      For BLANK_ON_QUESTION: <code>body.prompt</code> HTML with each <code>&lt;blank-field&gt;</code> replaced by <code>@_@</code>. <span class="conf-known">✓ KNOWN</span><br>
-      For IMAGE_LABELLING: assumed <code>null</code> — no text sentence exists. <span class="conf-assumed">~ ASSUMED</span>
-    </td>
-  </tr>
-  <tr>
-    <td><code>itemBody.sentence.text</code></td><td>String</td><td class="required">YES</td><td class="status-possible">Transform</td><td><code>body.prompt</code></td>
-    <td><span class="conf-known">✓ KNOWN (for DnD)</span></td>
-    <td>Full HTML with <code>@_@</code> markers. Confirmed from real data. Not applicable for image labelling (parent is null).</td>
+    <td><code>itemBody.sentence</code></td>
+    <td>Sentence</td><td></td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>null</code>. Unlike standard DnD (BLANK_ON_QUESTION), there is no sentence with <code>@_@</code> markers. Target positions are expressed via pixel coordinates in <code>targets[].position</code>.</td>
   </tr>
   </tbody>
 </table>
 
-
-<h3 id="sec3-bg">3.4 <code>itemBody.backgroundImage</code> <span class="schema-ref">— Image</span></h3>
-
-<div class="danger">
-  <span class="conf-unknown">? UNKNOWN — entire section.</span>
-  No <code>IMAGE_LABELLING_DRAG_DROP</code> AAT record or QB output was provided. Everything in this section is inferred.
-  The AAT records that were provided (question 000f8d02) show images embedded in <code>body.prompt</code> as <code>&lt;img&gt;</code> tags — but those are FILL_IN_THE_BLANK_DRAG_DROP, not IMAGE_LABELLING_DRAG_DROP.
-  <strong>All field names, source paths, and transform rules below must be verified against real data.</strong>
+<div class="info">
+  <strong>Key distinction from BLANK_ON_QUESTION:</strong> Standard DnD encodes blank positions using <code>@_@</code> tokens in <code>sentence.text</code>. Image Labelling DnD encodes drop-zone positions using <code>x</code> / <code>y</code> pixel coordinates in each <code>target.position</code>. Both <code>statement</code> and <code>sentence</code> are <code>null</code> here.
 </div>
 
+<h3 id="sec3-backgroundImage">3.4 <code>itemBody.backgroundImage</code> <span class="schema-ref">— Image</span></h3>
+
+<p>The image displayed to the student. Labels (options) are dragged onto hotspot positions on this image. This field is <strong>required</strong> for Image Labelling DnD — a missing image should be treated as a migration error.</p>
+
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
-    <td><code>itemBody.backgroundImage</code></td><td>Image</td><td class="required">YES (assumed)</td><td class="status-possible">Transform</td>
-    <td><code>body.backgroundImage</code> <em>(guessed)</em></td>
-    <td><span class="conf-unknown">? UNKNOWN</span></td>
-    <td>Field name guessed. AAT source field name guessed. Verify both.</td>
+    <td><code>itemBody.backgroundImage</code></td><td>Image</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.backgroundImage</code> or <code>body.prompt</code> (first <code>&lt;img&gt;</code>)</td>
+    <td>Prefer <code>body.backgroundImage</code>; fall back to first <code>&lt;img src="..."&gt;</code> in <code>body.prompt</code>. Must not be null.</td>
   </tr>
   <tr>
-    <td><code>itemBody.backgroundImage.url</code></td><td>String (URL)</td><td class="required">YES (assumed)</td><td class="status-possible">Transform</td>
-    <td><code>body.backgroundImage</code> or first <code>&lt;img src&gt;</code> in <code>body.prompt</code></td>
-    <td><span class="conf-unknown">? UNKNOWN</span></td>
-    <td>Fallback logic (use prompt img if no dedicated field) is based on pattern seen in AAT question 000f8d02, but that's a different question type.</td>
+    <td><code>itemBody.backgroundImage.url</code></td><td>String (URL)</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.backgroundImage</code></td>
+    <td>Direct URL string. No transformation beyond extraction.</td>
   </tr>
   <tr>
     <td><code>itemBody.backgroundImage.width</code></td><td>Integer</td><td></td><td class="status-possible">Transform</td>
-    <td><code>body.backgroundImageDimensions.width</code> <em>(guessed)</em></td>
-    <td><span class="conf-unknown">? UNKNOWN</span></td>
-    <td>Field name completely guessed. May not exist.</td>
+    <td><code>body.backgroundImageDimensions.width</code></td>
+    <td>Pixel width of the image. <code>null</code> if not provided in legacy data.</td>
   </tr>
   <tr>
     <td><code>itemBody.backgroundImage.height</code></td><td>Integer</td><td></td><td class="status-possible">Transform</td>
-    <td><code>body.backgroundImageDimensions.height</code> <em>(guessed)</em></td>
-    <td><span class="conf-unknown">? UNKNOWN</span></td>
-    <td>Same as width — field name guessed.</td>
+    <td><code>body.backgroundImageDimensions.height</code></td>
+    <td>Pixel height of the image. <code>null</code> if not provided in legacy data.</td>
   </tr>
   </tbody>
 </table>
-
 
 <h3 id="sec3-targets">3.5 <code>itemBody.targets[]</code> <span class="schema-ref">— Target</span></h3>
 
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  For BLANK_ON_QUESTION the complete target structure is confirmed:<br>
-  — Incremental ids (1,2,3) confirmed<br>
-  — Weight normalization (÷100): AAT <code>33.33</code> → QB <code>0.3333</code> confirmed<br>
-  — <code>swappable: false</code>, <code>swapGroupId: 0</code>, <code>position: null</code> all confirmed<br>
-  — Source: blank-field DOM order in <code>body.prompt</code>, matched to <code>body.blanks[]</code> for weight
-</div>
+<p>One <code>Target</code> per hotspot defined in <code>body.hotspots[]</code> (or <code>body.blanks[]</code>, depending on legacy schema version). IDs are assigned incrementally (1, 2, 3…) in the order hotspots appear in the legacy array — the same incremental rule as standard DnD <code>targets[]</code>. The original AAT hotspot/blank id is used only as a lookup key to match weight and position data.</p>
 
-<div class="data-box">
-  <strong>Real data proof — weight normalization (question 000b5509):</strong><br>
-  AAT: body.blanks[0] = { "id": 790, "weight": 33.33 }<br>
-  QB:  targets[0] = { "id": 1, "weight": 0.3333, "swappable": false, "swapGroupId": 0, "position": null }
-</div>
-
-<div class="assume-box">
-  <span class="conf-assumed">~ ASSUMED</span> For image labelling:
-  <ul style="margin:6px 0 0 18px;">
-    <li>Targets come from hotspot/drop-zone definitions rather than <code>&lt;blank-field&gt;</code> tags — but the AAT source field name (<code>body.hotspots[]</code>?) is unknown.</li>
-    <li><code>targets[].position</code> is assumed to be <strong>required</strong> here (unlike BLANK_ON_QUESTION where it is <code>null</code>) to encode the pixel coordinates of each drop zone on the image.</li>
-    <li>The structure of <code>position</code> (x, y, width, height?) is completely unknown.</li>
-    <li>Weight normalization rule (÷100) assumed same.</li>
-  </ul>
+<div class="danger">
+  <strong>Coordinate system:</strong> Hotspot positions (<code>x</code>, <code>y</code>) are pixel offsets from the top-left corner of the background image. They must be within image bounds (0 ≤ x ≤ width, 0 ≤ y ≤ height). Values outside bounds should be clamped and flagged in the migration log.
 </div>
 
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
     <td><code>itemBody.targets</code></td><td>Array&lt;Target&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots[]</code> <em>(assumed)</em></td>
-    <td><span class="conf-known">✓ KNOWN (structure)</span> / <span class="conf-unknown">? UNKNOWN (source field name)</span></td>
-    <td>Target array structure confirmed from QB.json. AAT source field for image labelling is unknown — assumed <code>body.hotspots[]</code>.</td>
+    <td><code>body.hotspots</code> / <code>body.blanks</code></td>
+    <td>One target per hotspot, in array order. Count and order from <code>body.hotspots[]</code>; weight and position from matching entries.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td>Order in hotspot array</td>
-    <td><span class="conf-known">✓ KNOWN (rule)</span> / <span class="conf-assumed">~ ASSUMED (applies here)</span></td>
-    <td>Incremental rule confirmed from real data. Applied here by analogy.</td>
+    <td><code>body.hotspots</code> (order)</td>
+    <td>Incremental: first hotspot → <code>1</code>, second → <code>2</code>, etc. <strong>Not</strong> from the hotspot's own <code>id</code> attribute. The original hotspot <code>id</code> is only used to look up the matching <code>body.hotspots[]</code> entry for weight and position. Must match <code>correctAnswers[].targetId</code>.</td>
   </tr>
   <tr>
     <td><code>itemBody.targets[].weight</code></td><td>Float</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots[].weight</code> <em>(assumed)</em></td>
-    <td><span class="conf-known">✓ KNOWN (rule)</span> / <span class="conf-assumed">~ ASSUMED (applies here)</span></td>
-    <td>÷100 normalization confirmed from real data (33.33→0.3333). AAT source field name assumed.</td>
+    <td><code>body.hotspots[].weight</code></td>
+    <td>Normalize: divide by 100 (e.g. <code>100.0 → 1.0</code>, <code>50.0 → 0.5</code>). If absent, default to equal-weight distribution across all targets so they sum to <code>1.0</code>.</td>
   </tr>
   <tr>
-    <td><code>itemBody.targets[].position</code></td><td>ItemPosition</td><td class="required">YES (assumed)</td><td class="status-possible">Transform</td>
-    <td><code>body.hotspots[].x</code>, <code>body.hotspots[].y</code> <em>(guessed)</em></td>
-    <td><span class="conf-known">✓ KNOWN (null for DnD)</span> / <span class="conf-unknown">? UNKNOWN (structure for image labelling)</span></td>
-    <td>QB.json confirms <code>position: null</code> for BLANK_ON_QUESTION. For image labelling, position must carry coordinates — but the field structure is completely unknown.</td>
+    <td><code>itemBody.targets[].position</code></td><td>ItemPosition</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.hotspots[].x</code>, <code>body.hotspots[].y</code></td>
+    <td>Pixel coordinates of the drop zone on the background image. <strong>Required for Image Labelling DnD</strong> — unlike standard DnD where <code>position</code> is always <code>null</code>.</td>
   </tr>
   <tr>
-    <td><code>itemBody.targets[].swappable</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: always <code>false</code>.</td>
+    <td><code>itemBody.targets[].position.x</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>body.hotspots[].x</code></td>
+    <td>Horizontal pixel offset from image left edge.</td>
   </tr>
   <tr>
-    <td><code>itemBody.targets[].swapGroupId</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: always <code>0</code>.</td>
+    <td><code>itemBody.targets[].position.y</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>body.hotspots[].y</code></td>
+    <td>Vertical pixel offset from image top edge.</td>
   </tr>
+  <tr><td><code>itemBody.targets[].swappable</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>false</code>.</td></tr>
+  <tr><td><code>itemBody.targets[].swapGroupId</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>0</code>.</td></tr>
   </tbody>
 </table>
 
-
 <h3 id="sec3-options">3.6 <code>itemBody.options[]</code> <span class="schema-ref">— DnDOption</span></h3>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  Full options mapping confirmed end-to-end from real data. See §0.3 for the detailed proof.
-  Content type detection also confirmed: plain text → <code>{ "type": "text", "text": "..." }</code>.
-</div>
+<p>One <code>DnDOption</code> per entry in <code>body.choices.choiceItems[]</code>. Uses <code>.id</code> (incremental) and <code>.value</code> — same rules as standard DnD, different from MCQ.</p>
 
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
-  <tr>
-    <td><code>itemBody.options</code></td><td>Array&lt;DnDOption&gt;</td><td class="required">YES (min 1)</td><td class="status-direct">Direct</td>
-    <td><code>body.choices.choiceItems</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>AAT field name and structure confirmed from AAT.json.</td>
-  </tr>
+  <tr><td><code>itemBody.options</code></td><td>Array&lt;DnDOption&gt;</td><td class="required">YES (min 1)</td><td class="status-direct">Direct</td><td><code>body.choices.choiceItems</code></td><td>One option per choice item.</td></tr>
   <tr>
     <td><code>itemBody.options[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
     <td><code>body.choices.choiceItems</code> (order)</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>Incremental assignment confirmed from real data. AAT ids (220, 109, 221…) → QB ids (1, 2, 3…).</td>
+    <td>Incremental: first choiceItem → <code>1</code>, second → <code>2</code>, etc. The original AAT <code>choiceItems[].id</code> is only used as a lookup bridge when resolving <code>correctAnswers[].optionIds</code>. Must match <code>correctAnswers[].optionIds[]</code> values.</td>
   </tr>
   <tr>
-    <td><code>itemBody.options[].content</code></td><td>OptionsContentConfig</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>itemBody.options[].content</code></td>
+    <td>OptionsContentConfig</td><td class="required">YES</td><td class="status-possible">Transform</td>
     <td><code>body.choices.choiceItems[].value</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>Field is <code>.value</code> (not <code>.answer</code>). Content parsing confirmed: text → <code>{ type:"text", text:"..." }</code>. Confirmed from real data.</td>
+    <td>
+      Uses <code>.value</code>, <strong>not</strong> <code>.answer</code> (which MCQ uses).<br>
+      Parsed — media extracted, text cleaned.<br>
+      Text label → <code>{ type:"text", text:"..." }</code>, image label → <code>{ type:"image", image:{ url } }</code>.<br>
+      Options may be image URLs (e.g. draggable icon stickers) or plain-text labels.
+    </td>
   </tr>
   </tbody>
 </table>
@@ -670,19 +393,12 @@
 <hr>
 <h2 id="sec4">4. <code>responseDeclaration</code></h2>
 
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — QB.json</span>
-  QB.json confirms: <code>"responseDeclaration": { "maxAttempts": 1 }</code>. Only one field, value always 1.
-</div>
+<p>Image Labelling DnD has only <code>maxAttempts</code> — no <code>maxChoice</code>, <code>minChoice</code>, or <code>multipleAnswer</code> (those are MCQ-only). Identical to standard DnD.</p>
 
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
-  <tr>
-    <td><code>responseDeclaration.maxAttempts</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN (for DnD)</span> / <span class="conf-assumed">~ ASSUMED (for image labelling)</span></td>
-    <td>QB.json confirms <code>1</code> for BLANK_ON_QUESTION. Assumed same for image labelling.</td>
-  </tr>
+  <tr><td><code>responseDeclaration.maxAttempts</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1</code>.</td></tr>
   </tbody>
 </table>
 
@@ -691,89 +407,90 @@
 <hr>
 <h2 id="sec5">5. <code>outcomeDeclaration</code></h2>
 
-<h3>5.1 <code>scoringType</code> &amp; <code>scoring</code></h3>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  AAT: <code>"scoringType": "PARTIAL_MATCH"</code> → QB: <code>"scoringType": "PARTIAL_MATCH"</code>. Direct copy confirmed.<br>
-  QB also confirms hardcoded values: <code>normalizedMin: 0</code>, <code>normalizedMax: 1</code>, <code>defaultNormalizedValue: 0</code>.<br>
-  Multiple AAT records also confirm <code>EXACT_MATCH</code> (questions 001a40a1, 002928ed, 003fb5a7).
-</div>
-
+<h3 id="sec5-scoring">5.1 <code>scoringType</code> &amp; <code>scoring</code></h3>
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
-    <td><code>outcomeDeclaration.scoringType</code></td><td>String (enum)</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>outcomeDeclaration.scoringType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>EXACT_MATCH</div><div>PARTIAL_MATCH</div><div>MANUAL</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-direct">Direct</td>
     <td><code>validation.scoringType</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>Direct copy confirmed from real data. Defaults to <code>EXACT_MATCH</code> if absent.</td>
+    <td>Defaults to <code>"EXACT_MATCH"</code> if absent. <code>PARTIAL_MATCH</code> applies when individual hotspot weights differ.</td>
   </tr>
-  <tr><td><code>outcomeDeclaration.scoring.normalizedMin</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><span class="conf-known">✓ KNOWN</span></td><td>QB.json confirms: <code>0</code></td></tr>
-  <tr><td><code>outcomeDeclaration.scoring.normalizedMax</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><span class="conf-known">✓ KNOWN</span></td><td>QB.json confirms: <code>1</code></td></tr>
-  <tr><td><code>outcomeDeclaration.scoring.defaultNormalizedValue</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><span class="conf-known">✓ KNOWN</span></td><td>QB.json confirms: <code>0</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMin</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMax</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>1</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.defaultNormalizedValue</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
   </tbody>
 </table>
 
-<h3>5.2 <code>seeWhy</code></h3>
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN (absence confirmed)</span>
-  QB.json has no <code>seeWhy</code> field. AAT source has <code>"generalFeedback": ""</code> (empty string). Confirms: omitted when empty. See <a href="../migration_mapping.html#sec3">main doc §3.3</a>.
-</div>
+<h3 id="sec5-seewhy">5.2 <code>seeWhy</code> — shared</h3>
+<p>Identical to MCQ and DnD. Built from <code>body.generalFeedback</code>. See <a href="../migration_mapping.html#sec3">main doc §3.3</a>. Omitted if empty.</p>
 
-<h3>5.3 <code>feedback</code></h3>
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN (absence confirmed)</span>
-  QB.json has no <code>feedback</code> block at all. AAT source has all feedback fields as empty strings. Confirms: entire feedback object omitted when all sub-fields are empty.
-</div>
-<div class="assume-box">
-  <span class="conf-assumed">~ ASSUMED</span> Feedback source field names (<code>correctAnswerFeedback</code>, <code>wrongAnswerFeedback</code>, <code>partialAnswerFeedback</code>) confirmed in AAT.json. Assumed same fields exist in IMAGE_LABELLING_DRAG_DROP AAT records.
-</div>
+<h3 id="sec5-feedback">5.3 <code>feedback</code></h3>
 
-<h3>5.4 <code>validResponse</code></h3>
-
-<div class="known-box">
-  <span class="conf-known">✓ KNOWN — AAT.json + QB.json (question 000b5509)</span>
-  Full validResponse confirmed end-to-end from real data. See §0.4 for the detailed proof.<br>
-  Confirmed: <code>shouldAutoGraded: true</code>, <code>matchMode: "ALL"</code> for all correct answers, <code>optionIds</code> as array.
-</div>
-
-<div class="data-box">
-  <strong>Real data proof (question 000b5509):</strong><br>
-  AAT: answerMapping = [{ blankId: 790, choiceId: 220 }, { blankId: 483, choiceId: 109 }, { blankId: 726, choiceId: 221 }]<br>
-  QB:  correctAnswers = [{ targetId:1, optionIds:[1], matchMode:"ALL" }, { targetId:2, optionIds:[2], matchMode:"ALL" }, { targetId:3, optionIds:[3], matchMode:"ALL" }]
+<div class="info">
+  <strong>Image Labelling DnD feedback is optional</strong> — the entire <code>feedback</code> object is omitted when all sub-fields are absent. Same rule as standard DnD; differs from FIB where <code>feedback</code> is required.
 </div>
 
 <table>
-  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.feedback.general</code></td><td>FeedbackContent</td><td class="status-none">No Data</td><td>—</td><td>Never populated. <code>body.generalFeedback</code> goes to <code>seeWhy</code>.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.correct</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.correctAnswerFeedback</code></td><td>Omitted if null/empty. Same as MCQ and DnD.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.incorrect</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.wrongAnswerFeedback</code> + <code>body.hints[]</code></td><td>Via hint-mapper rules. See <a href="../migration_mapping.html#sec0-hintmapper">main doc §0.4</a>.</td></tr>
+  <tr>
+    <td><code>outcomeDeclaration.feedback.partial</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td>
+    <td><code>body.partialAnswerFeedback</code></td>
+    <td>Populated when <code>body.partialAnswerFeedback</code> is non-empty. Relevant for multi-hotspot questions with <code>PARTIAL_MATCH</code> scoring.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec5-valid">5.4 <code>outcomeDeclaration.validResponse</code> <span class="schema-ref">— DnDValidResponse</span></h3>
+
+<div class="info">
+  <strong>Image Labelling DnD <code>validResponse</code> is at the top level</strong> of <code>outcomeDeclaration</code>, same as standard DnD and MCQ. It is <strong>not</strong> nested inside a <code>validation</code> wrapper (that structure is FIB-only). The structure is identical to standard DnD — <code>shouldAutoGraded</code>, <code>correctAnswers[]</code>, and <code>matchMode</code> are all present.
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
   <tbody>
   <tr>
-    <td><code>validResponse.shouldAutoGraded</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: <code>true</code>. Always hardcoded.</td>
+    <td><code>outcomeDeclaration.validResponse.shouldAutoGraded</code></td>
+    <td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>true</code>. Shared with standard DnD — this field does not exist in MCQ or FIB.</td>
   </tr>
   <tr>
-    <td><code>validResponse.correctAnswers</code></td><td>Array&lt;DnDCorrectAnswer&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>outcomeDeclaration.validResponse.correctAnswers</code></td>
+    <td>Array&lt;DnDCorrectAnswer&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td>
     <td><code>validation.validResponse.answerMapping</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>AAT field name <code>answerMapping</code> confirmed. Structure confirmed from real data.</td>
+    <td>One <code>DnDCorrectAnswer</code> per entry in <code>answerMapping[]</code>. Each entry maps a hotspot (target) to the correct label (option).</td>
   </tr>
+  </tbody>
+</table>
+
+<h4>5.4.1 <code>DnDCorrectAnswer</code> structure</h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
   <tr>
     <td><code>correctAnswers[].targetId</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td><code>answerMapping[].blankId</code></td>
-    <td><span class="conf-known">✓ KNOWN (for DnD)</span> / <span class="conf-assumed">~ ASSUMED (field name for image labelling)</span></td>
-    <td>AAT field name <code>blankId</code> confirmed. For image labelling, the equivalent field may be <code>hotspotId</code> or similar — unknown.</td>
+    <td><code>validation.validResponse.answerMapping[].hotspotId</code> / <code>.blankId</code></td>
+    <td>The incremental QB id (1, 2, 3…) — not the AAT <code>hotspotId</code> value. Use the AAT <code>hotspotId</code> to find the hotspot's position in <code>body.hotspots[]</code>, then use that position's incremental id. Must match <code>itemBody.targets[].id</code>.</td>
   </tr>
   <tr>
     <td><code>correctAnswers[].optionIds</code></td><td>Array&lt;Integer&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td>
-    <td><code>answerMapping[].choiceId</code></td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>AAT field name <code>choiceId</code> confirmed. Incremental resolution logic confirmed from real data.</td>
+    <td><code>validation.validResponse.answerMapping[].choiceId</code></td>
+    <td>Use the AAT <code>choiceId</code> to find the position of that choice in <code>body.choices.choiceItems[]</code>, then use that position's incremental QB option id. Wrap in array: <code>[incrementalOptionId]</code>.</td>
   </tr>
   <tr>
-    <td><code>correctAnswers[].matchMode</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td>
-    <td><span class="conf-known">✓ KNOWN</span></td>
-    <td>QB.json confirms: always <code>"ALL"</code>.</td>
+    <td><code>correctAnswers[].matchMode</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>ALL</div><div>ANY</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>"ALL"</code>. Identical to standard DnD.</td>
   </tr>
   </tbody>
 </table>
@@ -781,34 +498,37 @@
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <hr>
-<h2 id="sec6">6. <code>modalFeedback</code></h2>
-<p>
-  <span class="conf-known">✓ KNOWN (absence)</span> QB.json has no <code>modalFeedback</code> key — AAT source has empty hints and null passage. Omission when empty confirmed.<br>
-  <span class="conf-assumed">~ ASSUMED</span> When hints are present, hint-mapper drives this field. Same rule assumed for image labelling. See <a href="../migration_mapping.html#sec5">main doc §5</a>.
-</p>
+<h2 id="sec6">6. <code>modalFeedback</code> — shared</h2>
+<p>Identical to MCQ and standard DnD. Driven by the hint-mapper. Omitted when no hints reach <code>needHelp</code> and no passage. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</p>
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <hr>
-<h2 id="sec7">7. Image Labelling DnD vs BLANK_ON_QUESTION — Key Differences</h2>
+<h2 id="sec7">7. Image Labelling DnD vs DnD (BLANK_ON_QUESTION) — Key Differences</h2>
 
 <table class="rule-table">
-  <thead><tr><th>Area</th><th>DnD (BLANK_ON_QUESTION)</th><th>Image Labelling DnD (IMAGE_ON_IMAGE)</th><th>Confidence</th></tr></thead>
+  <thead><tr><th>Area</th><th>DnD (BLANK_ON_QUESTION)</th><th>Image Labelling DnD (IMAGE_ON_IMAGE)</th></tr></thead>
   <tbody>
-  <tr><td><strong>Legacy type</strong></td><td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td><td class="result">IMAGE_LABELLING_DRAG_DROP</td><td><span class="conf-known">✓ KNOWN</span></td></tr>
-  <tr><td><strong>API type</strong></td><td class="cond">DND</td><td class="result">DND</td><td><span class="conf-known">✓ KNOWN — QB.json</span></td></tr>
-  <tr><td><strong>API subType</strong></td><td class="cond">BLANK_ON_QUESTION — <span class="conf-known">✓ KNOWN</span></td><td class="result">IMAGE_ON_IMAGE — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>sentence</strong></td><td class="cond">From body.prompt with @_@ markers — <span class="conf-known">✓ KNOWN</span></td><td class="result">null (assumed) — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>backgroundImage</strong></td><td class="cond">null — <span class="conf-known">✓ KNOWN — QB.json</span></td><td class="result">Required, URL from AAT — <span class="conf-unknown">? UNKNOWN (field name)</span></td><td></td></tr>
-  <tr><td><strong>Target source</strong></td><td class="cond">&lt;blank-field&gt; tags in body.prompt — <span class="conf-known">✓ KNOWN — AAT.json</span></td><td class="result">body.hotspots[]? — <span class="conf-unknown">? UNKNOWN</span></td><td></td></tr>
-  <tr><td><strong>targets[].position</strong></td><td class="cond">null — <span class="conf-known">✓ KNOWN — QB.json</span></td><td class="result">Required pixel coords — <span class="conf-unknown">? UNKNOWN (structure)</span></td><td></td></tr>
-  <tr><td><strong>targets[].weight normalization</strong></td><td class="cond">÷100 — <span class="conf-known">✓ KNOWN — real data</span></td><td class="result">÷100 assumed — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>options[].id</strong></td><td class="cond">Incremental — <span class="conf-known">✓ KNOWN — real data</span></td><td class="result">Incremental assumed — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>options[].content source</strong></td><td class="cond">choiceItems[].value — <span class="conf-known">✓ KNOWN — real data</span></td><td class="result">choiceItems[].value assumed — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>answerMapping source field</strong></td><td class="cond">answerMapping[].blankId — <span class="conf-known">✓ KNOWN — AAT.json</span></td><td class="result">answerMapping[].hotspotId? — <span class="conf-unknown">? UNKNOWN</span></td><td></td></tr>
-  <tr><td><strong>shouldAutoGraded</strong></td><td class="cond">true — <span class="conf-known">✓ KNOWN — QB.json</span></td><td class="result">true assumed — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>matchMode</strong></td><td class="cond">"ALL" — <span class="conf-known">✓ KNOWN — QB.json</span></td><td class="result">"ALL" assumed — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
-  <tr><td><strong>scoringType source</strong></td><td class="cond">validation.scoringType — <span class="conf-known">✓ KNOWN — AAT.json</span></td><td class="result">Same assumed — <span class="conf-assumed">~ ASSUMED</span></td><td></td></tr>
+  <tr><td><strong>Legacy type</strong></td><td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td><td class="result">IMAGE_LABELLING_DRAG_DROP</td></tr>
+  <tr><td><strong>type</strong></td><td class="cond">DND</td><td class="result">DND</td></tr>
+  <tr><td><strong>subType</strong></td><td class="cond">BLANK_ON_QUESTION (hardcoded)</td><td class="result">IMAGE_ON_IMAGE (hardcoded)</td></tr>
+  <tr><td><strong>itemBody schema</strong></td><td class="cond">DnDItemBodyResource</td><td class="result">ImageLabellingDnDItemBodyResource</td></tr>
+  <tr><td><strong>Question stem</strong></td><td class="cond"><code>sentence.text</code> — HTML with <code>@_@</code> blank markers</td><td class="result"><code>backgroundImage</code> — pixel image. No sentence. No statement.</td></tr>
+  <tr><td><strong>statement</strong></td><td class="cond">Always <code>null</code></td><td class="result">Always <code>null</code></td></tr>
+  <tr><td><strong>sentence</strong></td><td class="cond">From <code>body.prompt</code> with <code>@_@</code> markers</td><td class="result">Always <code>null</code></td></tr>
+  <tr><td><strong>backgroundImage</strong></td><td class="cond">Always <code>null</code> (images stay inline in sentence)</td><td class="result">Required — from <code>body.backgroundImage</code></td></tr>
+  <tr><td><strong>Target source</strong></td><td class="cond"><code>&lt;blank-field&gt;</code> tags in <code>body.prompt</code> HTML</td><td class="result"><code>body.hotspots[]</code> (or <code>body.blanks[]</code>)</td></tr>
+  <tr><td><strong>targets[].id source</strong></td><td class="cond">Incremental by blank-field DOM order</td><td class="result">Incremental by hotspot array order</td></tr>
+  <tr><td><strong>targets[].position</strong></td><td class="cond">Always <code>null</code></td><td class="result"><strong>Required</strong> — pixel (x, y) on background image</td></tr>
+  <tr><td><strong>targets[].weight source</strong></td><td class="cond"><code>body.blanks[].weight</code> (normalize ÷ 100)</td><td class="result"><code>body.hotspots[].weight</code> (normalize ÷ 100)</td></tr>
+  <tr><td><strong>options[].content source</strong></td><td class="cond"><code>choiceItems[].value</code></td><td class="result"><code>choiceItems[].value</code> (same)</td></tr>
+  <tr><td><strong>options[].id</strong></td><td class="cond">Incremental by choiceItems order</td><td class="result">Incremental by choiceItems order (same)</td></tr>
+  <tr><td><strong>correctAnswers[].targetId source</strong></td><td class="cond"><code>answerMapping[].blankId</code> → incremental blank position</td><td class="result"><code>answerMapping[].hotspotId</code> → incremental hotspot position</td></tr>
+  <tr><td><strong>correctAnswers[].optionIds</strong></td><td class="cond">Incremental by choiceItems order (wrapped in array)</td><td class="result">Incremental by choiceItems order (wrapped in array) (same)</td></tr>
+  <tr><td><strong>correctAnswers[].matchMode</strong></td><td class="cond"><code>"ALL"</code> (hardcoded)</td><td class="result"><code>"ALL"</code> (hardcoded, same)</td></tr>
+  <tr><td><strong>validResponse.shouldAutoGraded</strong></td><td class="cond"><code>true</code> (hardcoded)</td><td class="result"><code>true</code> (hardcoded, same)</td></tr>
+  <tr><td><strong>responseDeclaration</strong></td><td class="cond">maxAttempts only</td><td class="result">maxAttempts only (same)</td></tr>
+  <tr><td><strong>feedback</strong></td><td class="cond">Optional — omitted when all sub-fields empty</td><td class="result">Optional — omitted when all sub-fields empty (same)</td></tr>
   </tbody>
 </table>
 
@@ -818,39 +538,20 @@
 <h2 id="sec8">8. Unmapped / Ignored Legacy Fields</h2>
 
 <table>
-  <thead><tr><th>Legacy Field</th><th>Type</th><th>Confidence</th><th>Reason</th></tr></thead>
+  <thead><tr><th>Legacy Field</th><th>Type</th><th>Reason</th></tr></thead>
   <tbody>
-  <tr><td><code>validation.validResponse.type</code></td><td>String</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>AAT confirms value always echoes question type (e.g. <code>"FILL_IN_THE_BLANK_DRAG_DROP"</code>). Redundant with root type. No QB target.</td></tr>
-  <tr><td><code>toolkits</code>, <code>constraints</code>, <code>rubricId</code>, <code>scoring</code></td><td>Various</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>All confirmed <code>null</code> across all 5 AAT records. No QB target.</td></tr>
-  <tr><td><code>stage</code></td><td>String</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>Present in AAT (e.g. <code>"APPROVED"</code>, <code>"PENDING_REVIEW"</code>). No QB target field.</td></tr>
-  <tr><td><code>version</code></td><td>Integer</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>Present in AAT (e.g. 0, 1, 2, 3). No QB target.</td></tr>
-  <tr><td><code>adt</code></td><td>Boolean</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>Always <code>false</code> across all records. No QB target.</td></tr>
-  <tr><td><code>summative</code>, <code>maxScore</code></td><td>Various</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>Present in AAT. Redundant — covered by metadata fields in QB.</td></tr>
-  <tr><td><code>variants</code>, <code>variant</code></td><td>Various</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td><code>variants</code> always empty array; <code>variant</code> matches <code>language</code>. No QB target.</td></tr>
-  <tr><td><code>createdAt</code></td><td>ISO DateTime</td><td><span class="conf-known">✓ KNOWN — QB.json</span></td><td>QB annotation.tags confirms: preserved as <code>"migration:originalCreatedAt"</code>.</td></tr>
-  <tr><td><code>updatedAt</code></td><td>ISO DateTime</td><td><span class="conf-known">✓ KNOWN — QB.json (absent)</span></td><td>Not present in QB output. Dropped.</td></tr>
-  <tr><td><code>body.blanks[].feedback</code></td><td>String</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>Not present in AAT blanks[] (no feedback key in blanks array). Only choices have feedback (also always empty). No QB target.</td></tr>
-  <tr><td><code>choiceItems[].feedback</code></td><td>String</td><td><span class="conf-known">✓ KNOWN — AAT.json</span></td><td>Present in AAT, always <code>""</code> across all records. No QB target.</td></tr>
-  <tr><td><code>body.hotspots[].feedback</code> <em>(assumed)</em></td><td>String</td><td><span class="conf-assumed">~ ASSUMED</span></td><td>By analogy with blanks[].feedback above. Hotspot field name assumed.</td></tr>
+  <tr><td><code>validation.validResponse.type</code></td><td>String</td><td>Always echoes the question type. Redundant with root <code>type</code>.</td></tr>
+  <tr><td><code>toolkits</code>, <code>constraints</code>, <code>rubricId</code>, <code>scoring</code></td><td>Various</td><td>Always null/empty. No QB target.</td></tr>
+  <tr><td><code>stage</code>, <code>version</code>, <code>adt</code></td><td>Various</td><td>No QB target fields.</td></tr>
+  <tr><td><code>summative</code>, <code>variant</code>, <code>variants</code>, <code>maxScore</code></td><td>Various</td><td>Redundant or unused.</td></tr>
+  <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>ISO DateTime</td><td><code>createdAt</code> preserved in <code>annotation.tags["migration:originalCreatedAt"]</code>. <code>updatedAt</code> dropped.</td></tr>
+  <tr><td><code>body.hotspots[].feedback</code></td><td>String</td><td>Image Labelling DnD targets have no per-target feedback field in QB. Dropped.</td></tr>
+  <tr><td><code>body.hotspots[].type</code></td><td>String</td><td>No QB target field on Image Labelling DnD targets.</td></tr>
+  <tr><td><code>body.hotspots[].rules</code></td><td>Various</td><td>No QB target fields on Image Labelling DnD targets.</td></tr>
+  <tr><td><code>body.backgroundImageDimensions</code></td><td>Object</td><td>Width/height used if present; the wrapper object itself is not mapped — only the <code>width</code> and <code>height</code> scalars are extracted.</td></tr>
+  <tr><td><code>body.prompt</code> (after image extraction)</td><td>HTML String</td><td>The background image URL is extracted from the first <code>&lt;img&gt;</code> if <code>body.backgroundImage</code> is absent. Remaining prompt HTML is dropped — there is no <code>sentence.text</code> for this question type.</td></tr>
   </tbody>
 </table>
-
-<hr>
-<div class="verify-list">
-  <strong>📌 Remaining items that STILL need verification (after receiving AAT + QB data):</strong>
-  <ol>
-    <li>Confirm correct <strong>subType</strong> value for image labelling (<code>IMAGE_ON_IMAGE</code> vs <code>IMAGE_ON_SPACE</code> or other) — provide a migrated image labelling QB record.</li>
-    <li>Confirm the <strong>AAT field name</strong> for the background image URL (<code>body.backgroundImage</code>? or is it embedded in <code>body.prompt</code>?).</li>
-    <li>Confirm the <strong>QB field name</strong> for the background image (<code>backgroundImage</code>?).</li>
-    <li>Confirm the <strong>AAT field name</strong> for hotspot/drop-zone positions (<code>body.hotspots[]</code>? <code>body.blanks[]</code>?).</li>
-    <li>Confirm the <strong>structure of <code>targets[].position</code></strong> in QB — pixel x/y? percentage? width/height too?</li>
-    <li>Confirm the <strong>coordinate system</strong> — pixels from top-left? percentage of image size?</li>
-    <li>Confirm <code>answerMapping[].hotspotId</code> — is the AAT validation field named <code>blankId</code>, <code>hotspotId</code>, or something else?</li>
-    <li>Confirm whether <code>optionsPosition</code> remains <code>"bottom"</code> or uses a different value.</li>
-  </ol>
-  <br>
-  <strong>To resolve all of the above: provide one real <code>IMAGE_LABELLING_DRAG_DROP</code> AAT record + its migrated QB output.</strong>
-</div>
 
 </body>
 </html>
