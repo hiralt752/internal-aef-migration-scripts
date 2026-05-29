@@ -1,0 +1,191 @@
+{
+  "schemaVersion": {
+    "major": 1,                     // <Integer> [HARDCODED]
+    "minor": 0,                     // <Integer> [HARDCODED]
+    "patch": 0                      // <Integer> [HARDCODED]
+  },
+
+  "type": "MATCHING",               // <String> [HARDCODED]
+  "subType": "MATCHING_PAIRS",      // <String> [HARDCODED]
+  
+  "metadata": {
+    "general": {
+      "code": "<String>",           // e.g., "AR7_MLO_122_Q_4"
+      "externalId": "<UUID>",       // e.g., "52745043-7b30-48d8-bfc3-abb12eb16210"
+      "title": null,                // <Null> [HARDCODED]
+      "language": "<String>",       // e.g., "AR" or "EN_US"
+      "keywords": ["<String>"],     // Array of Strings
+      "parentReference": null,      // <Null> [HARDCODED]
+      "source": "<String>"          // Author name or email
+    },
+    "lifecycle": {
+      "status": "<String>"          // e.g., "DRAFT" or "PUBLISHED"
+    },
+    "technical": {
+      "penAndPaper": "<Boolean>"    // e.g., false
+    },
+    "educational": {
+      "resourceType": "<String>",   // e.g., "TEQ1"
+      "difficultyLevel": "<String>",// e.g., "DIFFICULT"
+      "cognitiveDimensions": ["<String>"], 
+      "knowledgeDimensions": ["<String>"], 
+      "summativeAssessment": "<Boolean>", 
+      "cefrLevel": "<String_or_Null>", 
+      "proficiency": "<String_or_Null>", 
+      "lexileLevel": "<String_or_Null>", 
+      "logitValue": "<Float_or_Null>"
+    },
+    "rights": {
+      "copyrights": ["<String>"],
+      "conditionsOfUse": ["<String>"]
+    },
+    "classification": {
+      "grade": "<String>",          // Extracted from outcomes
+      "subject": "<String>",        // Extracted from outcomes
+      "curriculum": "<String>",     // Extracted from outcomes
+      "curriculumOutcomes": [
+        {
+          "type": "<String>",
+          "id": "<String>",
+          "name": "<String>",
+          "description": "<String>",
+          "curriculum": "<String>",
+          "grade": "<String>",
+          "subject": "<String>"
+        }
+      ],
+      "subDomain": ["<String>"]
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",                  // <String> [HARDCODED]
+        "migration:originalCreatedAt": "<ISO_Date>",// e.g., "2019-09-04T18:52:07.664"
+        "migration:authoredDate": "<ISO_Date>"
+      }
+    }
+  },
+
+  "itemBody": {
+    "version": "1.0",               // <String> [HARDCODED]
+    "title": null,                  // <Null> [HARDCODED]
+    "subTitle": null,               // <Null> [HARDCODED]
+    "instruction": null,            // <Null> [HARDCODED]
+    "audio": null,                  // <Null> [HARDCODED]
+    "video": null,                  // <Null> [HARDCODED]
+    "backgroundLayout": null,       // <Null> [HARDCODED]
+    "timeSpentConfig": null,        // <Null> [HARDCODED]
+    "splitContent": null,           // <Null> [HARDCODED]
+    "sideImage": null,              // <Null> [HARDCODED]
+    "shuffled": "<Boolean>",        // e.g., true
+    
+    "statement": {
+      "content": [
+        {
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // Legacy prompt
+        }
+      ]
+    },
+    "sentence": null,               // <Null> [ADDED: Global TL Requirement]
+
+    "sourceItems": [
+      {
+        "id": "<Integer>",          // Legacy choiceId (e.g., 60)
+        "weight": "<Float>",        // e.g., 25.0
+        "content": {                // [UPDATED: Polymorphic wrapper]
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // Legacy choice value
+        },
+        "feedback": "<String_or_Null>" 
+      }
+    ],
+    "targetItems": [
+      {
+        "id": "<Integer>",          // Legacy answerId (e.g., 11)
+        "content": {                // [UPDATED: Polymorphic wrapper]
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // Legacy answer value
+        }
+      }
+    ]
+  },
+
+  "responseDeclaration": {
+    "type": "PAIR_MATCH",           // <String> [HARDCODED]
+    "cardinality": "MULTIPLE",      // <String> [HARDCODED]
+    "maxAttempts": 1                // <Integer> [HARDCODED]
+  },
+
+  "outcomeDeclaration": {
+    "scoringType": "<String>",      // e.g., "EXACT_MATCH"
+    "scoring": {
+      "normalizedMin": 0,           // <Integer> [HARDCODED]
+      "normalizedMax": 1,           // <Integer> [HARDCODED]
+      "defaultNormalizedValue": 0   // <Integer> [HARDCODED]
+    },
+    "maxScore": "<Integer_or_Float>", 
+    
+    "feedback": {                   // Optional Block
+      "correct": {
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy correctAnswerFeedback
+          }
+        ]
+      },
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy wrongAnswerFeedback
+          }
+        ]
+      },
+      "partial": {
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy partialAnswerFeedback
+          }
+        ]
+      }
+    },
+
+    "seeWhy": {                     // Optional Block
+      "layout": "TEXT",             // <String> [HARDCODED]
+      "content": [
+        {
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // legacy generalFeedback
+        }
+      ],
+      "audio": null                 // <Null> [HARDCODED]
+    },
+
+    "validResponse": {              // Optional Block
+      "shouldAutoGraded": true,     // <Boolean> [HARDCODED]
+      "correctAnswers": [
+        {
+          "sourceItemId": "<Integer>", // Points to sourceItems[].id
+          "targetItemId": "<Integer>"  // Points to targetItems[].id
+        }
+      ]
+    }
+  },
+
+  "modalFeedback": {                // Optional Block (Hints)
+    "needHelp": {
+      "content": {
+        "layout": "TEXT",           // <String> [HARDCODED]
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy hints
+          }
+        ]
+      }
+    },
+    "passageId": null               // <Null> [HARDCODED]
+  }
+}
