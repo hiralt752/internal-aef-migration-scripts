@@ -1,0 +1,9 @@
+[
+  {
+    "question_id": "68485cb4-9c61-4527-b0e3-4779cfbfc541",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.prompt"
+    ]
+  }
+]

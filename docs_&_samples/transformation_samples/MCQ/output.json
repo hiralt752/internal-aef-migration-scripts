@@ -1,0 +1,1022 @@
+[
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "MULTIPLE_CHOICE",
+    "subType": "TEXT",
+    "metadata": {
+      "general": {
+        "code": "PW_ER_03_LO061_Q_21",
+        "externalId": "00026684-7a88-4eb5-8e79-e4ab22744dbd",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "Jasmine",
+          "point of view",
+          "story"
+        ],
+        "parentReference": null,
+        "source": "Csa Ela5"
+      },
+      "lifecycle": {
+        "status": "DRAFT"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING",
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": true,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": "3",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ]
+      },
+      "classification": {
+        "grade": "3",
+        "subject": "ELA",
+        "curriculum": "English Reading",
+        "curriculumOutcomes": [
+          {
+            "type": "skill",
+            "id": "32183",
+            "name": "RL.3.6.c",
+            "description": "Explain the point of view of narrator or characters in a story",
+            "curriculum": "English Reading",
+            "grade": "3",
+            "subject": "ELA"
+          }
+        ],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2025-06-19T18:18:54.463",
+          "migration:authoredDate": "2025-06-19T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "statement": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>Read the text. Then, complete the sentence.</p>\n<p><br/><em>Jasmine rushed to her room and laid the paper on her desk. For the next two hours, Jasmine tried to figure out what the words and symbols meant. She developed a chart and tried to match each symbol to a letter, then tried to make the words and phrases match the code. But nothing worked. She finally gave up in frustration because this situation was ridiculous! She stuffed the paper in her backpack to look at tomorrow.</em></p>\n<p> </p>\n<p>How does Jasmine feel after working hard to solve the code? Choose two.</p>"
+          },
+          {
+            "type": "image",
+            "image": {
+              "url": "../alef-assessment-content/data/ccl/assessment/questions/2025/06/19/06/16/IMRBEQ9EW3.jpg",
+              "zoom": true
+            }
+          }
+        ]
+      },
+      "instruction": null,
+      "audio": null,
+      "stemVideo": null,
+      "stemImage": null,
+      "shuffled": true,
+      "columns": 2,
+      "listType": "NONE",
+      "allowTryAgain": false,
+      "hasActiveVideoBreakpoint": false,
+      "title": null,
+      "subTitle": null,
+      "video": null,
+      "backgroundLayout": null,
+      "splitContent": null,
+      "timeSpentConfig": null,
+      "options": [
+        {
+          "optionId": 0,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>tired</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>frustrated</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>delighted</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>confident</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 498,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>sad</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 619,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>scared</p>"
+            }
+          ],
+          "feedback": null
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "maxChoice": 2,
+      "minChoice": 2,
+      "multipleAnswer": true
+    },
+    "outcomeDeclaration": {
+      "scoringType": "PARTIAL_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "correctAnswers": [
+          {
+            "optionId": "0",
+            "weight": 1
+          },
+          {
+            "optionId": "1",
+            "weight": 1
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>Look for words in the text that show how Jasmine feels after trying to solve the mystery.</p>"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "MULTIPLE_CHOICE",
+    "subType": "TEXT",
+    "metadata": {
+      "general": {
+        "code": "MA8_L015_ExploreLearn_Q_2",
+        "externalId": "976ad445-acca-4d02-acb7-cc9f35be0b89",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "equation",
+          "multistep",
+          "expression",
+          "solve",
+          "skillId:b0fc5723-7c7e-4720-b12d-404d476704bd"
+        ],
+        "parentReference": null,
+        "source": "Lina Kreidieh"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ2",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "PROCEDURAL"
+        ],
+        "summativeAssessment": true,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": "8",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF"
+        ]
+      },
+      "classification": {
+        "grade": null,
+        "subject": null,
+        "curriculum": null,
+        "curriculumOutcomes": [],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2022-09-18T10:41:50.916",
+          "migration:authoredDate": "2022-09-18T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "statement": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct option.</span></p>\n<p>Tank A has 170 liters of water is emptied at a rate of \\(1 third\\) liters per second. Tank B has 100 liters of water and is filled at a rate of \\(1 fourth\\) liters per second.</p>\n<p>After how many seconds will the two tanks have the same amount of water? </p>"
+          }
+        ]
+      },
+      "instruction": null,
+      "audio": null,
+      "stemVideo": null,
+      "stemImage": null,
+      "shuffled": true,
+      "columns": 2,
+      "listType": "NONE",
+      "allowTryAgain": false,
+      "hasActiveVideoBreakpoint": false,
+      "title": null,
+      "subTitle": null,
+      "video": null,
+      "backgroundLayout": null,
+      "splitContent": null,
+      "timeSpentConfig": null,
+      "options": [
+        {
+          "optionId": 628,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>120</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 0,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>12</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 728,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>280</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 955,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>70</p>"
+            }
+          ],
+          "feedback": null
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "maxChoice": 1,
+      "minChoice": 1,
+      "multipleAnswer": false
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "correctAnswers": [
+          {
+            "optionId": "628",
+            "weight": 1
+          }
+        ]
+      },
+      "feedback": {}
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "MULTIPLE_CHOICE",
+    "subType": "IMAGE_TEXT",
+    "metadata": {
+      "general": {
+        "code": "MA5_MLO_301_Q4",
+        "externalId": "31a2a109-bd55-43bf-8420-99658a8555bd",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "Three-dimensional",
+          "two-dimensional",
+          "shape",
+          "skillId:20cf1d6e-24cf-4c84-8789-72ef5511abc2"
+        ],
+        "parentReference": null,
+        "source": "vq03_ma@test.com"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "REMEMBERING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": "5",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ]
+      },
+      "classification": {
+        "grade": null,
+        "subject": null,
+        "curriculum": null,
+        "curriculumOutcomes": [],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2022-05-30T04:55:30.221",
+          "migration:authoredDate": "2022-05-30T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "statement": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>Which shapes are two-dimensional?</p>\n<p> </p>\n<p> </p>"
+          }
+        ]
+      },
+      "instruction": null,
+      "audio": null,
+      "stemVideo": null,
+      "stemImage": null,
+      "shuffled": true,
+      "columns": 2,
+      "listType": "NONE",
+      "allowTryAgain": false,
+      "hasActiveVideoBreakpoint": false,
+      "title": null,
+      "subTitle": null,
+      "video": null,
+      "backgroundLayout": null,
+      "splitContent": null,
+      "timeSpentConfig": null,
+      "options": [
+        {
+          "optionId": 0,
+          "content": [
+            {
+              "type": "image",
+              "image": {
+                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/52/ygfIxw3giB.jpg",
+                "zoom": true
+              }
+            },
+            {
+              "type": "text",
+              "text": "<p> </p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 1,
+          "content": [
+            {
+              "type": "image",
+              "image": {
+                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/52/CTWewHW0A1.jpg",
+                "zoom": true
+              }
+            },
+            {
+              "type": "text",
+              "text": "<p> </p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 2,
+          "content": [
+            {
+              "type": "image",
+              "image": {
+                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/53/Aqz3fV8Wlb.jpg",
+                "zoom": true
+              }
+            },
+            {
+              "type": "text",
+              "text": "<p> </p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 3,
+          "content": [
+            {
+              "type": "image",
+              "image": {
+                "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/53/CU9iL1w6MS.jpg",
+                "zoom": true
+              }
+            },
+            {
+              "type": "text",
+              "text": "<p> </p>"
+            }
+          ],
+          "feedback": null
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "maxChoice": 2,
+      "minChoice": 2,
+      "multipleAnswer": true
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "correctAnswers": [
+          {
+            "optionId": "0",
+            "weight": 1
+          },
+          {
+            "optionId": "1",
+            "weight": 1
+          }
+        ]
+      },
+      "seeWhy": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>These two shapes are two-dimensional.</p>\n<p>                       </p>"
+          },
+          {
+            "type": "image",
+            "image": {
+              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/54/ZlCeyuEo6n.jpg",
+              "zoom": true
+            }
+          },
+          {
+            "type": "image",
+            "image": {
+              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/54/4dEReI3o1M.jpg",
+              "zoom": true
+            }
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>Three-dimensional shapes have volume.</p>"
+            }
+          ]
+        }
+      }
+    },
+    "modalFeedback": {
+      "needHelp": {
+        "content": {
+          "layout": "TEXT",
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>Two-dimensional shapes do not have volume.</p>"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "MULTIPLE_CHOICE",
+    "subType": "TEXT",
+    "metadata": {
+      "general": {
+        "code": "MA5_MLO_307_Q_3",
+        "externalId": "a43a3c92-1b4f-4182-a422-9efdc77644ba",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "place value",
+          "decimal",
+          "tenths",
+          "hundredths",
+          "skillId:b7d18f6c-45a5-4770-9ddc-aff2f2e7bfb4"
+        ],
+        "parentReference": null,
+        "source": "Doaa Hewait"
+      },
+      "lifecycle": {
+        "status": "DRAFT"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ2",
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "APPLYING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": "5",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF"
+        ]
+      },
+      "classification": {
+        "grade": null,
+        "subject": null,
+        "curriculum": null,
+        "curriculumOutcomes": [],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2022-05-20T02:05:55.032",
+          "migration:authoredDate": "2022-05-19T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "statement": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Select the correct answer</span></p>\n<p>Choose two different ways to describe the relationship between the digit 8 in the number 3.882  </p>"
+          },
+          {
+            "type": "image",
+            "image": {
+              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/28/12/05/1YqgQpQqTO.jpg",
+              "zoom": true
+            }
+          }
+        ]
+      },
+      "instruction": null,
+      "audio": null,
+      "stemVideo": null,
+      "stemImage": null,
+      "shuffled": true,
+      "columns": 1,
+      "listType": "NONE",
+      "allowTryAgain": false,
+      "hasActiveVideoBreakpoint": false,
+      "title": null,
+      "subTitle": null,
+      "video": null,
+      "backgroundLayout": null,
+      "splitContent": null,
+      "timeSpentConfig": null,
+      "options": [
+        {
+          "optionId": 0,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the tenths place is 100 times as much as 8 in the hundredths place.</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the hundredths  place is 10 times as much as 8 in the tenths place.</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the hundredths place is \\(1 over 10\\)of 8 in the tenths place.</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 96,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the hundredths place is \\(1 over 100\\)of 8 in the tenths place.</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 686,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the tenths place is \\(1 over 10\\)of 8 in the hundredths place.</p>"
+            }
+          ],
+          "feedback": null
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "maxChoice": 2,
+      "minChoice": 2,
+      "multipleAnswer": true
+    },
+    "outcomeDeclaration": {
+      "scoringType": "PARTIAL_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "correctAnswers": [
+          {
+            "optionId": "0",
+            "weight": 1
+          },
+          {
+            "optionId": "3",
+            "weight": 1
+          }
+        ]
+      },
+      "seeWhy": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>The value of each place is 10 times the value of the place to its right.  </p>\n<p>So, in number 3.882, the digit 8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>\n<p>The value of each place is \\(1 over 10\\) of the value of the place to its left.</p>\n<p>So, in number 3.882, 8 in the hundredths place is \\(1 over 10\\)of 8 in the tenths place.</p>"
+          },
+          {
+            "type": "image",
+            "image": {
+              "url": "../alef-assessment-content/data/ccl/assessment/questions/2022/05/28/12/05/1YqgQpQqTO.jpg",
+              "zoom": true
+            }
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>"
+            }
+          ]
+        }
+      }
+    },
+    "modalFeedback": {
+      "needHelp": {
+        "content": {
+          "layout": "TEXT",
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>The value of each place is 10 times the value of the place to its right.</p>\n<p>The value of each place is \\(1 over 10\\) of the value of the place to its left.</p>"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "MULTIPLE_CHOICE",
+    "subType": "TEXT",
+    "metadata": {
+      "general": {
+        "code": "IS11_MLO_009_Q1_ai_1",
+        "externalId": "936aa4ee-20c0-4c6a-97b2-5b66bfd4ac4c",
+        "title": null,
+        "language": "AR",
+        "keywords": [
+          "القُرآنُ",
+          "السُّنَّةُ.",
+          "التَّفسيرُ."
+        ],
+        "parentReference": null,
+        "source": "Ahmed AlHadi"
+      },
+      "lifecycle": {
+        "status": "DRAFT"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": null,
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": []
+      },
+      "classification": {
+        "grade": "11",
+        "subject": "Islamic Studies",
+        "curriculum": "UAE MOE",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "123",
+            "name": "2.1.3.4.G11",
+            "description": "يقارن بين مصادر الشريعة الإسلامية.",
+            "curriculum": "UAE MOE",
+            "grade": "11",
+            "subject": "Islamic Studies"
+          }
+        ],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "ai_generated": "true",
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2025-07-21T08:20:21.328",
+          "migration:authoredDate": "2025-07-21T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "statement": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>اخترِ الإجابَةَ الصَّحيحةَ: مَا هُمَا المَصْدَرَانِ الرَّئيسِيَّانِ للتَّشريعِ الإِسْلَامِيِّ؟<br/><br/><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct option.</span><br/></p>"
+          }
+        ]
+      },
+      "instruction": null,
+      "audio": null,
+      "stemVideo": null,
+      "stemImage": null,
+      "shuffled": true,
+      "columns": 1,
+      "listType": "NONE",
+      "allowTryAgain": false,
+      "hasActiveVideoBreakpoint": false,
+      "title": null,
+      "subTitle": null,
+      "video": null,
+      "backgroundLayout": null,
+      "splitContent": null,
+      "timeSpentConfig": null,
+      "options": [
+        {
+          "optionId": 27,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>القُرآنُ والسُّنَّةُ</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 0,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>القُرآنُ والتَّفسيرُ</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 510,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>السُّنَّةُ والتَّاريخُ</p>"
+            }
+          ],
+          "feedback": null
+        },
+        {
+          "optionId": 428,
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>القُرآنُ والفِقْهُ</p>"
+            }
+          ],
+          "feedback": null
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "maxChoice": 1,
+      "minChoice": 1,
+      "multipleAnswer": false
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "correctAnswers": [
+          {
+            "optionId": "27",
+            "weight": 1
+          }
+        ]
+      },
+      "seeWhy": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>المصدران الرئيسيان للتشريع الإسلامي هما القرآن والسنة.<br/>اجتهد علماء الأمة في حفظ كل ما صدر عن الرسول ﷺ من قول أو فعل أو تقرير أو صفة، وهذا يشمل السنة النبوية التي تعتبر المصدر الثاني بعد القرآن في التشريع الإسلامي.<br/>لذلك، الإجابة الصحيحة هي الخيار الأول: القرآن والسنة.</p>"
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>فكر في المصدرين الأساسيين للتشريع الإسلامي، وهما الكتاب والسنة.</p>"
+            }
+          ]
+        }
+      }
+    },
+    "modalFeedback": {
+      "needHelp": {
+        "content": {
+          "layout": "TEXT",
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>فكّر في المصادر التي جاءت عن الله تعالى ورسوله ﷺ.</p>"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

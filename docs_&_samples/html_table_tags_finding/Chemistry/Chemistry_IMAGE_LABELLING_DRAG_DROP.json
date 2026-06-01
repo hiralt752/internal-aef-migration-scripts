@@ -1,0 +1,107 @@
+[
+  {
+    "question_id": "4ba5cf18-8f1b-46ef-93d6-e7d0db021646",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "5517aa03-c833-409c-b5b7-1a576beb7d5c",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "8d43a5e6-3b3d-4c9e-a2bc-30de95e181ee",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "16b194d1-ae66-4dab-8dae-24d80c81f340",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "484f9180-b542-49f9-8687-609db67e4b9d",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "e19a1eb9-532e-4b29-a75b-f9485d90b940",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "b31cef06-d4be-4e4c-8087-1f14dd166528",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "9fd778ce-84cc-451d-965e-30cbdf1bf433",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.hints[1]"
+    ]
+  },
+  {
+    "question_id": "58b02f30-a8e2-423a-855f-393b71d818e2",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.hints[1]"
+    ]
+  },
+  {
+    "question_id": "82a904e0-9e27-4c77-a1c5-6ddebe1faa9b",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.prompt"
+    ]
+  },
+  {
+    "question_id": "6c8d2584-b1d5-4e20-a9ce-ef3dc3861da0",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.prompt"
+    ]
+  },
+  {
+    "question_id": "75745340-08c8-4a56-83bc-7972837dff3c",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.prompt"
+    ]
+  },
+  {
+    "question_id": "23aef35f-b5e1-4520-8922-c0aab08b013d",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.prompt"
+    ]
+  },
+  {
+    "question_id": "e662a79e-fd94-4a8c-90aa-098d88846bb1",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "4fce9c79-42a7-44ad-9140-316d5c2039f9",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  }
+]

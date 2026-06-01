@@ -1,0 +1,49 @@
+[
+  {
+    "question_id": "6c3f15ad-bb0c-4454-a8c8-360be0421789",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "4aad4668-8967-45f6-8e68-f5224565a9b7",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "7dee8d41-3846-41b0-8759-9b8e08e43c0c",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "c179f8e7-1458-4bb0-917b-32f6522195fe",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "603a9f7f-48ff-4f83-807a-27f0b6f731e2",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "d9cdea9b-3316-42c3-8cfc-1b68268095f0",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  }
+]

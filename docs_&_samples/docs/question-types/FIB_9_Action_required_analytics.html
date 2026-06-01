@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FIB Migration Analysis - Action Required</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222;
+            margin: 0;
+            padding: 30px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #1e3a5f;
+            border-bottom: 3px solid #1e3a5f;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #1e3a5f;
+            margin-top: 40px;
+        }
+
+        .summary-box {
+            background: #eef4ff;
+            border-left: 5px solid #1e3a5f;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #1e3a5f;
+            color: white;
+            padding: 14px;
+            text-align: left;
+            border: 1px solid #d8d8d8;
+        }
+
+        td {
+            border: 1px solid #d8d8d8;
+            padding: 14px;
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fbff;
+        }
+
+        .status {
+            font-weight: bold;
+            color: #c67a00;
+        }
+
+        .analysis {
+            background: #f8f9fc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 8px;
+        }
+
+        code {
+            background: #edf1f7;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        pre {
+            background: #2c3440;
+            color: #fff;
+            padding: 14px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .note {
+            color: #555;
+            font-style: italic;
+        }
+
+        .enum-box {
+            background: #eef8ef;
+            border-left: 4px solid #3c8c3c;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>9. Action Required - FIB Migration Analysis</h1>
+
+    <div class="summary-box">
+        <strong>Purpose:</strong><br><br>
+
+        This document contains analysis findings from the FIB dataset migration review.
+        The observations below are based on currently analyzed AAT FIB question data and sample payloads.
+
+        
+    </div>
+
+    <h2>9.1 Needs Human Decision</h2>
+
+    <table>
+        <tr>
+            <th>#</th>
+            <th>QB Field</th>
+            <th>AAT Source</th>
+            <th>Question / Concern</th>
+            <th>Current Assumption</th>
+            <th>Analysis</th>
+        </tr>
+
+        <tr>
+            <td>1</td>
+
+            <td>
+                <code>itemBody.items[].feedback</code>
+            </td>
+
+            <td>
+                <code>body.blanks[].feedback</code>
+            </td>
+
+            <td>
+                Per-blank feedback is currently available as HTML string content.
+                Should this HTML be stripped, sanitized, or copied directly?
+            </td>
+
+            <td>
+                Direct copy of HTML string
+            </td>
+
+            <td>
+                The current FIB request schema already contains HTML-based content in other fields
+                such as sentence/prompt rendering.
+
+                <div class="analysis">
+                    During dataset inspection, feedback values were observed in HTML format.
+                    Since the frontend/request schema already supports HTML rendering in other areas(body.prompt),
+                    it may be possible to pass feedback directly without additional processing.
+                </div>
+
+
+            </td>
+        </tr>
+    </table>
+
+    <h2>9.2 Needs Data Analysis</h2>
+
+    <table>
+
+        <tr>
+            <th>#</th>
+            <th>QB Field</th>
+            <th>AAT Source</th>
+            <th>Question / Concern</th>
+            <th>Current Assumption</th>
+            <th>Dataset Analysis</th>
+        </tr>
+
+        <!-- INPUT TYPE -->
+
+        <tr>
+            <td>1</td>
+
+            <td>
+                <code>itemBody.items[].inputType</code>
+            </td>
+
+            <td>
+                <code>body.blanks[].type</code>
+            </td>
+
+            <td>
+                What values appear in the FIB dataset?
+                Is it always <code>TEXT_BLANK</code>,
+                or are additional blank types present?
+            </td>
+
+            <td>
+                <code>TEXT_BLANK</code> passed through
+            </td>
+
+            <td>
+                Dataset analysis found multiple blank types.
+
+                <div class="enum-box">
+                    Observed values:
+                    <ul>
+                        <li><code>TEXT_BLANK</code></li>
+                        <li><code>MATH_BLANK</code></li>
+                    </ul>
+                </div>
+
+                This suggests the field may require enum-based handling instead of hardcoded assumptions.
+
+                
+            </td>
+        </tr>
+
+        <!-- ANSWER TYPE -->
+
+        <tr>
+            <td>2</td>
+
+            <td>
+                <code>itemBody.items[].answerType</code>
+            </td>
+
+            <td>
+                <code>&lt;blank-field&gt; content</code>
+            </td>
+
+            <td>
+                What answer content types exist inside blank-field tags?
+                Are answers always plain text?
+            </td>
+
+            <td>
+                <code>text</code> (plain word detection)
+            </td>
+
+            <td>
+
+                Dataset analysis found multiple answer content categories.
+
+                <div class="enum-box">
+                    Observed answer types:
+                    <ul>
+                        <li><code>text</code></li>
+                        <li><code>number</code></li>
+                        <li><code>formula</code></li>
+                    </ul>
+                </div>
+
+                Numeric and formula-based responses indicate that
+                answer type handling may require explicit enum mapping logic.
+
+            </td>
+        </tr>
+
+        <!-- WEIGHT -->
+
+        <tr>
+            <td>3</td>
+
+            <td>
+                <code>itemBody.items[].weight</code>
+            </td>
+
+            <td>
+                <code>body.blanks[].weight</code>
+            </td>
+
+            <td>
+                Are all weights equal?
+                Are weights normalized or unevenly distributed?
+            </td>
+
+            <td>
+                Normalize by dividing by 100
+            </td>
+
+            <td>
+
+                Multiple unique weight values were found in the dataset.
+
+                <div class="enum-box">
+                    Observed examples:
+                    <ul>
+                        <li><code>25.0</code></li>
+                        <li><code>33.33</code></li>
+                        <li><code>50.0</code></li>
+                        <li><code>100.0</code></li>
+                    </ul>
+                </div>
+
+                In observed multi-blank questions,
+                weights within the same question were generally equally distributed.
+
+                
+            </td>
+        </tr>
+
+        <!-- RULES -->
+
+        <tr>
+            <td>4</td>
+
+            <td>
+                <code>itemBody.items[].rules</code>
+            </td>
+
+            <td>
+                <code>body.blanks[].rules</code>
+            </td>
+
+            <td>
+                Are rules always empty arrays,
+                or are validation rules actively used?
+            </td>
+
+            <td>
+                Direct copy
+            </td>
+
+            <td>
+
+                Rules that are actively used.
+
+                <div class="enum-box">
+                    Observed rules:
+                    <ul>
+                        <li><code>IGNORE_KASHEEDA</code></li>
+                        <li><code>IGNORE_TASHKEEL</code></li>
+                        <li><code>IGNORE_SPACES</code></li>
+                        <li><code>NUMBERS_ONLY</code></li>
+                        <li><code>CASE_SENSITIVE</code></li>
+                        <li><code>[]</code> (empty)</li>
+                    </ul>
+                </div>
+
+                This strongly suggests that rules should likely be preserved as-is
+                and mapped through enum validation handling.
+
+            </td>
+        </tr>
+
+        <!-- DECIMAL -->
+
+        <tr>
+            <td>5</td>
+
+            <td>
+                <code>itemBody.items[].decimalNotation</code>
+            </td>
+
+            <td>
+                <code>body.blanks[].decimalNotation</code>
+            </td>
+
+            <td>
+                Are decimal notation configurations used?
+            </td>
+
+            <td>
+                <code>null</code>
+            </td>
+
+            <td>
+
+                Non-null values were found in the dataset.
+
+                <div class="enum-box">
+                    Observed values:
+                    <ul>
+                        <li><code>POINT</code></li>
+                        <li><code>COMMA</code></li>
+                    </ul>
+                </div>
+
+                Observed usage appears primarily within mathematics-related questions.
+
+            
+            </td>
+        </tr>
+
+        <!-- PERIOD -->
+
+        <tr>
+            <td>6</td>
+
+            <td>
+                <code>itemBody.items[].periodNotation</code>
+            </td>
+
+            <td>
+                <code>body.blanks[].periodNotation</code>
+            </td>
+
+            <td>
+                Are period notation configurations used in the dataset?
+            </td>
+
+            <td>
+                <code>null</code>
+            </td>
+
+            <td>
+
+                Non-null values were found.
+
+                <div class="enum-box">
+                    Observed values:
+                    <ul>
+                        <li><code>POINT</code></li>
+                        <li><code>COMMA</code></li>
+                    </ul>
+                </div>
+
+                Additional clarification may be required regarding:
+                <ul>
+                    <li>numeric parsing behavior</li>
+                    <li>international formatting expectations</li>
+                    <li>QB validation compatibility</li>
+                </ul>
+
+            </td>
+        </tr>
+
+        <!-- WIRIS XML -->
+
+        <tr>
+            <td>7</td>
+
+            <td>
+                <code>itemBody.items[].wirisXml</code>
+            </td>
+
+            <td>
+                <code>body.prompt</code> (Wiris math)</td>
+
+            <td>
+                Are there Wiris/math-enabled blanks in the dataset?
+            </td>
+
+            <td>
+                <code>null</code>
+            </td>
+
+            <td>
+
+                There is presence of Wiris XML content.
+
+                <div class="analysis">
+                    Questions containing MathML/Wiris structures were found.
+                </div>
+
+<pre>
+"wirisXml": "&lt;question&gt;
+  &lt;correctAnswers&gt;
+    &lt;correctAnswer type='mathml'&gt;...&lt;/correctAnswer&gt;
+  &lt;/correctAnswers&gt;
+&lt;/question&gt;"
+</pre>
+
+            
+
+            </td>
+        </tr>
+
+        <!-- WIRIS SVG -->
+
+        <tr>
+            <td>8</td>
+
+            <td>
+                <code>itemBody.items[].wirisSvg</code>
+            </td>
+
+            <td>
+                <code>body.prompt</code> (Wiris math)</td>
+
+            <td>
+                Are SVG-based math blanks present?
+            </td>
+
+            <td>
+                <code>null</code>
+            </td>
+
+            <td>
+
+                There is SVG-based Wiris rendering data.
+
+<pre>
+"wirisSvg": "data:image/svg+xml;charset=utf8,..."
+</pre>
+
+                SVG content appears to represent rendered visual equations
+                associated with Wiris math answers.
+
+                <div class="note">
+                    Frontend rendering expectations and QB storage requirements
+                    should be validated before implementation.
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- NUMBERED -->
+
+        <tr>
+            <td>9</td>
+
+            <td>
+                <code>itemBody.numberedSentence</code>
+            </td>
+
+            <td>
+                —
+            </td>
+
+            <td>
+                Are numbered blank layouts present in the dataset?
+            </td>
+
+            <td>
+                <code>false</code>
+            </td>
+
+            <td>
+
+                No numbered sentence layouts were found during dataset review.
+
+                <div class="analysis">
+                    No patterns such as:
+                    <ul>
+                        <li><code>1. ___</code></li>
+                        <li><code>(1) ___</code></li>
+                        <li>ordered blank lists</li>
+                    </ul>
+                    were observed.
+                </div>
+
+                Current findings suggest this flag may safely default to false,
+                although additional edge-case validation may still be recommended.
+
+            </td>
+        </tr>
+
+        <!-- CENTERED -->
+
+        <tr>
+            <td>10</td>
+
+            <td>
+                <code>itemBody.centered</code>
+            </td>
+
+            <td>
+                <code>body.prompt (CSS)</code>
+            </td>
+
+            <td>
+                Should text-align:center CSS drive this flag?
+            </td>
+
+            <td>
+                <code>false</code>
+            </td>
+
+            <td>
+
+                Dataset analysis found multiple occurrences of:
+
+<pre>
+text-align: center
+</pre>
+
+                However, these occurrences were primarily found in:
+                <ul>
+                    <li>table cells</li>
+                    <li>word bank layouts</li>
+                    <li>content formatting</li>
+                </ul>
+
+                No dedicated center-aligned sentence structure or explicit center-layout metadata was found.
+
+                <div class="note">
+                    It may be safer to avoid automatically deriving
+                    <code>centered=true</code>
+                    solely from generic CSS usage without additional UI validation.
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- WIDGET FORMAT -->
+
+        <tr>
+            <td>11</td>
+
+            <td>
+                <code>correctAnswers[].answerInWidgetFormat</code>
+            </td>
+
+            <td>
+                —
+            </td>
+
+            <td>
+                Is this field optional?
+                Does QB reject null values?
+            </td>
+
+            <td>
+                <code>null</code>
+            </td>
+
+            <td>
+
+                No widget-format answer structures were found in the analyzed AAT dataset.
+
+                <div class="analysis">
+                    Current answer mappings appear as plain values:
+                </div>
+
+<pre>
+"correctAnswer": "example"
+</pre>
+
+                and not structured widget objects such as:
+
+<pre>
+{
+  "value": "example"
+}
+</pre>
+
+                <div class="note">
+                    Additional QB API validation testing is recommended to confirm:
+                    <ul>
+                        <li>whether the field is optional</li>
+                        <li>whether null is accepted</li>
+                        <li>expected object structure (if required)</li>
+                    </ul>
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- MULTIPLE ANSWER -->
+
+        <tr>
+            <td>12</td>
+
+            <td>
+                <code>responseDeclaration.multipleAnswer</code>
+            </td>
+
+            <td>
+                <code>validation.scoringType / blank count</code>
+            </td>
+
+            <td>
+                Should multi-blank PARTIAL_MATCH questions enable multipleAnswer?
+            </td>
+
+            <td>
+                <code>false</code>
+            </td>
+
+            <td>
+
+                Dataset analysis found:
+                <ul>
+                    <li>multi-blank FIB questions</li>
+                    <li><code>PARTIAL_MATCH</code> & <code>EXACT_MATCH</code> scoring types</li>
+                </ul>
+
+                This suggests the response model supports multiple independent blank validations.
+
+                <div class="analysis">
+                    However, it remains unclear whether QB internally treats:
+                    <ul>
+                        <li>multi-blank FIB as composite single response</li>
+                        <li>or true multi-answer response handling</li>
+                    </ul>
+                </div>
+
+                <div class="note">
+                    API behavior should be validated with implementation testing before finalizing this field behavior.
+                </div>
+
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+[
+  {
+    "question_id": "068afebf-c65c-433c-83da-7d164596f23e",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.prompt"
+    ]
+  },
+  {
+    "question_id": "dbae6c2c-c588-4d9e-9f71-5eb5641b0bd9",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.choices.choiceItems[4].answer",
+      "response.body.choices.choiceItems[5].answer",
+      "response.body.choices.choiceItems[6].answer",
+      "response.body.hints[0]"
+    ]
+  }
+]

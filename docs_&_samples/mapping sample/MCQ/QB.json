@@ -1,0 +1,188 @@
+{
+  "schemaVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "type": "MULTIPLE_CHOICE",
+  "subType": "TEXT",
+  "metadata": {
+    "general": {
+      "code": "MA12_MLO_040_M2_Q_15",
+      "externalId": "e87cd03e-1b1e-4ca9-a53a-ece9179f4a2b",
+      "title": null,
+      "language": "EN_US",
+      "keywords": [
+        "compound inequality",
+        "absolute value inequality",
+        "limit",
+        "skillId:1c52d74c-9388-491d-9a7d-864ff4519477"
+      ],
+      "parentReference": null,
+      "source": "vq03_ma@test.com"
+    },
+    "lifecycle": {
+      "status": "PUBLISHED"
+    },
+    "technical": {
+      "penAndPaper": false
+    },
+    "educational": {
+      "resourceType": "TEQ2",
+      "difficultyLevel": "DIFFICULT",
+      "cognitiveDimensions": [
+        "APPLYING"
+      ],
+      "knowledgeDimensions": [
+        "PROCEDURAL"
+      ],
+      "summativeAssessment": false,
+      "cefrLevel": null,
+      "proficiency": null,
+      "lexileLevel": "12",
+      "logitValue": null
+    },
+    "rights": {
+      "copyrights": [
+        "ALEF"
+      ]
+    },
+    "classification": {
+      "grade": null,
+      "subject": null,
+      "curriculum": null,
+      "curriculumOutcomes": [],
+      "subDomain": []
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",
+        "migration:originalCreatedAt": "2021-07-12T19:42:54.082",
+        "migration:authoredDate": "2021-07-12T00:00:00.000"
+      }
+    }
+  },
+  "itemBody": {
+    "version": "1.0",
+    "title": null,
+    "subTitle": null,
+    "audio": null,
+    "video": null,
+    "backgroundLayout": null,
+    "timeSpentConfig": null,
+    "instruction": null,
+    "splitContent": null,
+    "stemImage": null,
+    "stemVideo": null,
+    "columns": 2,
+    "shuffled": true,
+    "allowTryAgain": false,
+    "listType": "NONE",
+    "options": [
+      {
+        "optionId": 315,
+        "content": [
+          {
+            "type": "text",
+            "text": "\\(\\sqrt{\\frac{8}{\\epsilon}} + 3\\)"
+          }
+        ],
+        "feedback": null
+      },
+      {
+        "optionId": 0,
+        "content": [
+          {
+            "type": "text",
+            "text": "\\(\\sqrt{\\frac{8}{\\epsilon}} - 3\\)"
+          }
+        ],
+        "feedback": null
+      },
+      {
+        "optionId": 445,
+        "content": [
+          {
+            "type": "text",
+            "text": "\\(\\sqrt{\\frac{3}{\\epsilon}} + 8\\)"
+          }
+        ],
+        "feedback": null
+      },
+      {
+        "optionId": 284,
+        "content": [
+          {
+            "type": "text",
+            "text": "\\(\\sqrt{\\frac{8}{\\epsilon}} + 3\\)"
+          }
+        ],
+        "feedback": null
+      }
+    ],
+    "hasActiveVideoBreakpoint": false,
+    "statement": {
+      "content": [
+        {
+          "type": "text",
+          "text": "<span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct statement.</span><br>Prove that \\(\\underset{x \\rightarrow - \\infty}{lim} \\frac{8}{\\left(x - 3\\right)^{2}} = 0\\).<br>What value of \\(N\\) guarantees that&nbsp;\\(\\frac{8}{\\left(x - 3\\right)^{2}}\\) is within \\(\\epsilon\\) of 0?"
+        }
+      ]
+    }
+  },
+  "responseDeclaration": {
+    "maxAttempts": 1,
+    "maxChoice": 1,
+    "minChoice": 1,
+    "multipleAnswer": false
+  },
+  "outcomeDeclaration": {
+    "validResponse": {
+      "correctAnswers": [
+        {
+          "optionId": 315,
+          "weight": 1
+        }
+      ]
+    },
+    "scoringType": "EXACT_MATCH",
+    "scoring": {
+      "normalizedMin": 0,
+      "normalizedMax": 1,
+      "defaultNormalizedValue": 0
+    },
+    "seeWhy": {
+      "layout": "TEXT",
+      "audio": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "Prove&nbsp;\\(\\underset{x \\rightarrow - \\infty}{lim} \\frac{8}{\\left(x - 3\\right)^{2}} = 0\\).<br>\\(\\begin{matrix} |\\frac{8}{\\left(x - 3\\right)^{2}} - 0|  0 \\\\ \\frac{8}{\\epsilon}  x - 3 \\text{Positive} square root because x approaches negative infinity \\\\ - \\sqrt{\\frac{8}{\\epsilon}} + 3 > x Add . \\end{matrix}\\)<br>&nbsp;<br>So if&nbsp;\\(N =\\) \\(- \\sqrt{\\frac{8}{\\epsilon}} + 3\\), then&nbsp;\\(\\frac{8}{\\left(x - 3\\right)^{2}}\\) is within&nbsp;\\(\\epsilon\\) of 0."
+        }
+      ]
+    },
+    "feedback": {
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Solve the inequality relating \\(x\\) and \\(\\epsilon\\) for \\(x\\)."
+          }
+        ]
+      }
+    }
+  },
+  "modalFeedback": {
+    "needHelp": {
+      "content": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "Begin by replacing&nbsp;\\(f \\left(x\\right)\\) with&nbsp; \\(\\frac{8}{\\left(x - 3\\right)^{2}}\\) and \\(L\\) with 0 for \\(|f ( x ) - L|"
+          }
+        ]
+      }
+    }
+  }
+}

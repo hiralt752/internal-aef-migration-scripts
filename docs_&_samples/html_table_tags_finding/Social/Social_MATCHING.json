@@ -1,0 +1,18 @@
+[
+  {
+    "question_id": "3f2fafa2-81f8-40b1-ae05-f595c948b009",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "d3a93dcb-168e-4fea-bb33-7e904029493b",
+    "question_type": "MATCHING",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  }
+]

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MCQ — AAT to Question API Mapping</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; font-size: 0.9em; }
+  th, td { border: 1px solid #dddddd; text-align: left; padding: 10px; vertical-align: top; }
+  th { background-color: #f8f9fa; color: #333; }
+  code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; color: #d63384; }
+  h1, h2, h3, h4 { color: #2c3e50; }
+  h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+  h3 { color: #34495e; margin-top: 25px; }
+  .status-direct { font-weight: bold; color: #198754; }
+  .status-possible { font-weight: bold; color: #fd7e14; }
+  .status-none { font-weight: bold; color: #dc3545; }
+  .status-hardcode { font-weight: bold; color: #6f42c1; }
+  .schema-ref { font-size: 0.85em; color: #6c757d; font-style: italic; }
+  .required { color: #dc3545; font-weight: bold; font-size: 0.8em; }
+  .toc { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+  .toc a { color: #0d6efd; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+  .note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+  .info { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
+  .danger { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
+  .enum-badge { position: relative; cursor: help; border-bottom: 2px dotted #0d6efd; padding: 2px 0; }
+  .tooltip { display: none; position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 12px; border-radius: 6px; white-space: nowrap; z-index: 1000; font-size: 11px; border: 1px solid #0d6efd; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #1a1a1a; }
+  .enum-badge:hover .tooltip { display: block; }
+  .enum-values { font-family: monospace; font-size: 10px; display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid #444; }
+  .enum-values div { padding: 2px 0; }
+  .rule-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.88em; }
+  .rule-table th { background: #e8eaf6; }
+  .rule-table td.cond { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
+  .rule-table td.result { background: #e8f5e9; font-family: monospace; font-size: 0.85em; }
+  .flow-step { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 14px; margin: 6px 0; font-size: 0.92em; }
+  .flow-step strong { color: #e65100; }
+</style>
+</head>
+<body>
+
+<div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 18px; margin-bottom:20px; font-size:0.9em;">
+  <strong>Part of:</strong> <a href="../migration_mapping.html">migration_mapping.html</a> (general mapping doc) —
+  This sub-doc covers <strong>MCQ (Multiple Choice / Multiple Selection)</strong> specific fields only.
+  Shared sections (Metadata, Hints, ModalFeedback, SeeWhy, Prompt extraction) are defined in the main doc.
+</div>
+
+<h1>MCQ — AAT → Question API Mapping (<code>application/json</code>)</h1>
+<p>Maps legacy AAT <code>MULTIPLE_CHOICE</code> and <code>MULTIPLE_SELECTION</code> questions to
+<code>MCQQuestionResource</code> for <code>POST /api/v1/questions</code>.</p>
+
+<div class="info">
+  <strong>Status Legend:</strong>
+  <ul style="margin:8px 0 0 18px; padding:0;">
+    <li><span class="status-direct">Direct</span> — direct copy from legacy field</li>
+    <li><span class="status-possible">Transform</span> — requires processing/logic</li>
+    <li><span class="status-hardcode">Hardcode</span> — fixed value, no legacy source</li>
+    <li><span class="status-none">No Data</span> — not present in legacy system</li>
+  </ul>
+</div>
+
+<div class="toc">
+  <strong>Table of Contents</strong>
+  <ol>
+    <li><a href="#sec0">MCQ Key Transformation Rules</a>
+      <ul>
+        <li><a href="#sec0-type">Type Mapping</a></li>
+        <li><a href="#sec0-subtype">SubType Detection</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec1">Base Structure — shared (see main doc)</a></li>
+    <li><a href="#sec2">Metadata — shared (see main doc)</a></li>
+    <li><a href="#sec3">MCQ-Specific: itemBody (MCQItemBodyResource)</a>
+      <ul>
+        <li><a href="#sec3-top">Top-level fields</a></li>
+        <li><a href="#sec3-options">options[] (MCQOption)</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec4">responseDeclaration extras (MCQResponseDeclarationResource)</a></li>
+    <li><a href="#sec5">outcomeDeclaration.validResponse (MCQValidResponse)</a></li>
+    <li><a href="#sec6">Shared sections — see main doc</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec0">0. MCQ Key Transformation Rules</h2>
+
+<h3 id="sec0-type">0.1 Type Mapping</h3>
+
+<table class="rule-table">
+  <thead><tr><th>Legacy <code>type</code></th><th>→ API <code>type</code></th><th>→ API <code>subType</code></th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td class="cond">MULTIPLE_CHOICE</td>
+    <td class="result">MULTIPLE_CHOICE</td>
+    <td class="result">TEXT (auto-detected, see §0.2)</td>
+    <td>Standard single-answer MCQ.</td>
+  </tr>
+  <tr>
+    <td class="cond">MULTIPLE_SELECTION</td>
+    <td class="result">MULTIPLE_CHOICE</td>
+    <td class="result">TEXT (auto-detected, see §0.2)</td>
+    <td>Multi-answer MCQ. Sets <code>responseDeclaration.multipleAnswer = true</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec0-subtype">0.2 SubType Detection</h3>
+<p>Computed by inspecting <strong>all options</strong> (<code>body.choices.choiceItems[].answer</code>) after extracting media from their HTML. Builds three boolean flags, then applies a decision table.</p>
+
+<div class="flow-step"><strong>Step 1 — Guard:</strong> If <code>body.choices.choiceItems</code> is empty or missing → return <code>"TEXT"</code> immediately.</div>
+<div class="flow-step"><strong>Step 2 — Per option loop:</strong> Parse each option's <code>answer</code> HTML to extract media and clean text.<br>
+  &nbsp;&nbsp;• <code>textContent</code> = non-empty text remains after cleaning.<br>
+  &nbsp;&nbsp;• <code>imageContent</code> = a non-math <code>&lt;img&gt;</code> was present in the option.
+</div>
+<div class="flow-step"><strong>Step 3 — Accumulate flags across all options:</strong><br>
+  &nbsp;&nbsp;• <code>hasAnyImage</code> = <code>true</code> if <em>at least one</em> option has an image.<br>
+  &nbsp;&nbsp;• <code>hasAnyText</code> = <code>true</code> if <em>at least one</em> option has non-empty text.<br>
+  &nbsp;&nbsp;• <code>allArePureImages</code> = <code>true</code> only if <em>every</em> option has an image <strong>AND</strong> no text.
+</div>
+<div class="flow-step"><strong>Step 4 — Apply decision table:</strong></div>
+
+<table class="rule-table">
+  <thead>
+    <tr><th>hasAnyImage</th><th>allArePureImages</th><th>hasAnyText</th><th>→ <code>subType</code></th><th>Example scenario</th></tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td class="cond">true</td><td class="cond">true</td><td class="cond"><em>false</em> (implied)</td>
+    <td class="result">IMAGE</td>
+    <td>All options are <code>&lt;img&gt;</code> tags only — no text label on any.</td>
+  </tr>
+  <tr>
+    <td class="cond">true</td><td class="cond">false</td><td class="cond">true</td>
+    <td class="result">IMAGE_TEXT</td>
+    <td>Mixed: some options have image + text, or some are image-only while others are text-only.</td>
+  </tr>
+  <tr>
+    <td class="cond">false</td><td class="cond">false</td><td class="cond"><em>any</em></td>
+    <td class="result">TEXT</td>
+    <td>No option contains any image — all are plain text (fallthrough / default).</td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>allArePureImages edge case:</strong> An option that has an image but also has leftover text (even whitespace that survives HTML cleaning) breaks <code>allArePureImages</code> and pushes the result toward <code>IMAGE_TEXT</code> instead of <code>IMAGE</code>.
+</div>
+
+<div class="note">
+  <strong>Available MCQ subType values:</strong> <code>TEXT</code>, <code>IMAGE</code>, <code>IMAGE_TEXT</code>, <code>SPLIT_SCREEN</code>, <code>SPLIT_IMAGE</code>, <code>SPLIT_VIDEO</code>, <code>SPLIT_TEXT</code>. The SPLIT variants are never auto-assigned during migration.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec1">1. Base Structure — shared</h2>
+<p>Root fields identical to all other question types. See <a href="../migration_mapping.html#sec1">main doc §1</a>.</p>
+
+<pre><code>{
+  "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },
+  "type": "MULTIPLE_CHOICE",
+  "subType": "TEXT",          ← auto-detected
+  "metadata": { ... },
+  "itemBody": { ... },
+  "responseDeclaration": { ... },
+  "outcomeDeclaration": { ... },
+  "modalFeedback": { ... }    ← omitted when no hints/passage
+}</code></pre>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec2">2. Metadata — shared</h2>
+<p>All <code>metadata.*</code> sub-objects identical across all question types. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec3">3. MCQ-Specific: <code>itemBody</code> <span class="schema-ref">— MCQItemBodyResource</span></h2>
+
+<h3 id="sec3-top">3.1 Top-level <code>itemBody</code> fields</h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.version</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"1.0"</code>.</td></tr>
+  <tr>
+    <td><code>itemBody.statement</code></td>
+    <td>MCQStatement</td><td></td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td>Built from <code>body.prompt</code> — media extracted, text cleaned. See <a href="../migration_mapping.html#sec0-prompt">main doc §0.3</a>. Structure: <code>{ content: ContentItem[] }</code>. <code>null</code> if prompt is empty.</td>
+  </tr>
+  <tr><td><code>itemBody.instruction</code></td><td>Html</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. Prompt content goes to <code>statement</code>.</td></tr>
+  <tr><td><code>itemBody.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;audio src="..."&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.stemVideo</code></td><td>VideoProps</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;video src="..."&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.stemImage</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. Prompt images go into <code>statement.content[]</code> instead.</td></tr>
+  <tr><td><code>itemBody.shuffled</code></td><td>Boolean</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>body.choices.shuffle</code></td><td>Defaults to <code>true</code> if absent.</td></tr>
+  <tr><td><code>itemBody.columns</code></td><td>Integer</td><td></td><td class="status-direct">Direct</td><td><code>body.choices.layoutColumns</code></td><td>Defaults to <code>2</code> if absent.</td></tr>
+  <tr><td><code>itemBody.listType</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>NONE</div><div>DISC</div><div>DECIMAL</div><div>UPPER_LATIN</div><div>LOWER_LATIN</div><div>LOWER_ROMAN</div></div></div></span></td><td></td><td class="status-direct">Direct</td><td><code>body.choices.listType</code></td><td>Defaults to <code>"NONE"</code> if absent.</td></tr>
+  <tr><td><code>itemBody.allowTryAgain</code></td><td>Boolean</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>false</code>.</td></tr>
+  <tr><td><code>itemBody.hasActiveVideoBreakpoint</code></td><td>Boolean</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>false</code>.</td></tr>
+  <tr><td><code>itemBody.title</code></td><td>StringTitle / TooltipTitle</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.subTitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.video</code></td><td>Video</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.backgroundLayout</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.splitContent</code></td><td>SplitContent</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.timeSpentConfig</code></td><td>TimeSpentConfig</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-options">3.2 <code>itemBody.options[]</code> <span class="schema-ref">— MCQOption</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.options</code></td><td>Array&lt;MCQOption&gt;</td><td class="required">YES (min 2)</td><td class="status-direct">Direct</td><td><code>body.choices.choiceItems</code></td><td>One MCQOption per choice item.</td></tr>
+  <tr><td><code>itemBody.options[].optionId</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>body.choices.choiceItems[].choiceId</code></td><td>Direct copy.</td></tr>
+  <tr>
+    <td><code>itemBody.options[].content</code></td>
+    <td>Array&lt;ContentItem&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.choices.choiceItems[].answer</code></td>
+    <td>
+      Parsed — media extracted, text cleaned. Image item placed <em>before</em> text item when present.<br>
+      • Result: <code>[{ type:"image", image:{url} }, { type:"text", text:"..." }]</code> or just one item.
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.options[].feedback</code></td>
+    <td>Feedback</td><td></td><td class="status-possible">Transform</td>
+    <td><code>body.choices.choiceItems[].feedback</code></td>
+    <td>Per-option feedback. If non-empty: <code>{ general: { content: [{ type:"text", text:"..." }] } }</code>. <code>null</code> if empty/absent.</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec4">4. <code>responseDeclaration</code> extras <span class="schema-ref">— MCQResponseDeclarationResource</span></h2>
+<p>In addition to the common <code>maxAttempts: 1</code> (see <a href="../migration_mapping.html#sec4">main doc §4</a>):</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>responseDeclaration.maxChoice</code></td><td>Integer</td><td></td><td class="status-direct">Direct</td><td><code>body.choices.maxChoice</code></td><td>Defaults to <code>1</code> if absent.</td></tr>
+  <tr><td><code>responseDeclaration.minChoice</code></td><td>Integer</td><td></td><td class="status-direct">Direct</td><td><code>body.choices.minChoice</code></td><td>Defaults to <code>1</code> if absent.</td></tr>
+  <tr>
+    <td><code>responseDeclaration.multipleAnswer</code></td>
+    <td>Boolean</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>type</code> / <code>body.choices.maxChoice</code></td>
+    <td><code>true</code> if legacy <code>type === "MULTIPLE_SELECTION"</code> OR if <code>body.choices.maxChoice &gt; 1</code>. Otherwise <code>false</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec5">5. <code>outcomeDeclaration.validResponse</code> <span class="schema-ref">— MCQValidResponse</span></h2>
+
+<div class="info">
+  MCQ <code>validResponse</code> is at the top level of <code>outcomeDeclaration</code> — not nested in a wrapper. Contrast with FIB which uses <code>outcomeDeclaration.validation.validResponse</code>.
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>outcomeDeclaration.validResponse.correctAnswers</code></td>
+    <td>Array&lt;MCQCorrectAnswer&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.choiceIds</code></td>
+    <td>Map each <code>choiceId</code> to one <code>MCQCorrectAnswer</code> object.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h4>5.1 <code>MCQCorrectAnswer</code> structure</h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>correctAnswers[].optionId</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>validation.validResponse.choiceIds[]</code></td>
+    <td>One entry per correct choice ID. Direct copy of the <code>choiceId</code> value — MCQ does <strong>not</strong> reassign incremental IDs (unlike FIB/DnD/Dropdown).</td>
+  </tr>
+  <tr>
+    <td><code>correctAnswers[].weight</code></td><td>Float</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>1.0</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec6">6. Shared Sections — see main doc</h2>
+<p>The following are identical across all question types and documented in <a href="../migration_mapping.html">migration_mapping.html</a>:</p>
+<ul>
+  <li><a href="../migration_mapping.html#sec0-prompt">§0.3 Prompt / Media Extraction</a> — how <code>body.prompt</code> is parsed into statement, audio, video</li>
+  <li><a href="../migration_mapping.html#sec0-hintmapper">§0.4 Hint-Mapper Logic</a> — how hints and wrongAnswerFeedback route to <code>feedback.incorrect</code> and <code>needHelp</code></li>
+  <li><a href="../migration_mapping.html#sec2">§2 Metadata</a> — all <code>metadata.*</code> sub-objects</li>
+  <li><a href="../migration_mapping.html#sec3">§3 outcomeDeclaration</a> — scoringType, scoring, seeWhy, feedback (correct/incorrect/partial)</li>
+  <li><a href="../migration_mapping.html#sec4">§4 responseDeclaration</a> — <code>maxAttempts: 1</code></li>
+  <li><a href="../migration_mapping.html#sec5">§5 modalFeedback</a> — needHelp, passageId</li>
+</ul>
+
+</body>
+</html>

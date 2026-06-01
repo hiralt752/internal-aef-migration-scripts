@@ -1,0 +1,656 @@
+[
+  {
+    "question_id": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "enjoyment",
+          "audience",
+          "players"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": true,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Layla Itani",
+        "authoredDate": "2026-01-08T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "6224",
+            "name": "ENG.07.RV.CS.2.1",
+            "description": "Read and identify specific information in extended written or multimodal texts on familiar and unfamiliar concrete topics that are clearly structured and may use some nonstandard language or expressions.",
+            "curriculum": "UAE MOE",
+            "grade": "11",
+            "subject": "English"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MOE_EN_11_LO053_Q5",
+      "createdByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>Read. Then, complete the sentence.</strong></p>\n<p>&nbsp;</p>\n<p><strong>Virtual Sports: A New Kind of Arena</strong><span style=\"font-weight: 400;\">&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports have grown from a small hobby into an activity many people enjoy. These competitions, called E-sports, take place in digital games where players compete through screens instead of on a field. The excitement still feels strong for players and spectators.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">A key part of virtual sports is multi-player games. People join teams with friends or players from other places. They talk through headsets, plan their steps, and move quickly. Because of this, strategy is very important. Teams choose when to move forward, stay back, or use certain skills.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Large E-sports tournaments bring in many fans, especially when events happen in big rooms with huge screens, or when they are streamed online. Many tournaments last several days. Gaming also helps students build communication and fast-thinking skills. Some schools support strong players by helping them join clubs or teams.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports continue to grow and show that competition can happen anywhere—on a field, in a gym, or in a digital game world. People enjoy watching good moves, smart plays, and close games.</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports can be enjoyed by both players and &nbsp;<blank-field id=\"779\" class=\"mceNonEditable\"></blank-field>&nbsp;.</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 779,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 851,
+                  "value": "<span style=\"font-weight: 400;\">spectators</span>",
+                  "feedback": ""
+                },
+                {
+                  "id": 336,
+                  "value": "<p><span style=\"font-weight: 400;\">teachers</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 776,
+                  "value": "<p><span style=\"font-weight: 400;\">coaches</span></p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [
+          "<p><span style=\"font-weight: 400;\">Think about who watches the games.</span></p>"
+        ],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2026-01-08T07:54:29.413",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 779,
+              "choiceId": 851
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2026-01-08T07:54:29.413",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "layla.itani@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "layla.itani@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": true
+    }
+  },
+  {
+    "question_id": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "enjoyment",
+          "audience",
+          "players"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": true,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Layla Itani",
+        "authoredDate": "2026-01-08T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "6224",
+            "name": "ENG.07.RV.CS.2.1",
+            "description": "Read and identify specific information in extended written or multimodal texts on familiar and unfamiliar concrete topics that are clearly structured and may use some nonstandard language or expressions.",
+            "curriculum": "UAE MOE",
+            "grade": "11",
+            "subject": "English"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MOE_EN_11_LO053_Q5",
+      "createdByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>Read. Then, complete the sentence.</strong></p>\n<p>&nbsp;</p>\n<p><strong>Virtual Sports: A New Kind of Arena</strong><span style=\"font-weight: 400;\">&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports have grown from a small hobby into an activity many people enjoy. These competitions, called E-sports, take place in digital games where players compete through screens instead of on a field. The excitement still feels strong for players and spectators.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">A key part of virtual sports is multi-player games. People join teams with friends or players from other places. They talk through headsets, plan their steps, and move quickly. Because of this, strategy is very important. Teams choose when to move forward, stay back, or use certain skills.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Large E-sports tournaments bring in many fans, especially when events happen in big rooms with huge screens, or when they are streamed online. Many tournaments last several days. Gaming also helps students build communication and fast-thinking skills. Some schools support strong players by helping them join clubs or teams.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports continue to grow and show that competition can happen anywhere—on a field, in a gym, or in a digital game world. People enjoy watching good moves, smart plays, and close games.</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports can be enjoyed by both players and &nbsp;<blank-field id=\"779\" class=\"mceNonEditable\"></blank-field>&nbsp;.</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 779,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 851,
+                  "value": "<span style=\"font-weight: 400;\">spectators</span>",
+                  "feedback": ""
+                },
+                {
+                  "id": 336,
+                  "value": "<p><span style=\"font-weight: 400;\">teachers</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 776,
+                  "value": "<p><span style=\"font-weight: 400;\">coaches</span></p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [
+          "<p><span style=\"font-weight: 400;\">Think about who watches the games.</span></p>"
+        ],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2026-01-08T07:54:29.413",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 779,
+              "choiceId": 851
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2026-01-08T07:54:29.413",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "layla.itani@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "layla.itani@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": true
+    }
+  },
+  {
+    "question_id": "0010e730-066f-4da5-a0a4-473344be411a",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "cause",
+          "connection",
+          "global systems"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Layla Itani",
+        "authoredDate": "2026-01-09T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "6255",
+            "name": "ENG.08.RV.CS.3.1",
+            "description": "Interpret and analyse explicit and implicit connections between ideas, perspectives or themes and own experience, background knowledge, other texts or the wider world to support conclusions when reading extended written or multimodal texts on concrete and some abstract topics that may use some nonstandard language.",
+            "curriculum": "UAE MOE",
+            "grade": "12",
+            "subject": "English"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MOE_EN_12_LO055_Q7",
+      "createdByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>Read. Then, complete the sentence.</strong></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">What in the World?&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Thanks to globalisation, supermarkets in nearly every country offer foods from all over the world. While this allows consumers to enjoy a greater variety, it also contributes to a shift in eating habits. The benefit of this change is that more people can experience different cuisines and nutrients.&nbsp;</span></p>\n<p><span style=\"font-weight: 400;\">However, it has also led to the extinction or endangerment of traditional plants and animals, as livestock and crops are grown mostly to serve global demand.&nbsp;</span></p>\n<p><span style=\"font-weight: 400;\">For example, processed foods have become common in many countries, sometimes replacing fresh, local dishes. This shift can create new obstacles, such as health issues related to nutrition, and raises questions about how global trade affects local cultures.</span></p>\n<p><strong><br /></strong><span style=\"font-weight: 400;\"> The decline of traditional plants and animals is connected to &nbsp;<blank-field id=\"649\" class=\"mceNonEditable\"></blank-field>&nbsp;.</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 649,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 904,
+                  "value": "<span style=\"font-weight: 400;\">global demand for specific crops and livestock</span>",
+                  "feedback": ""
+                },
+                {
+                  "id": 960,
+                  "value": "<p><span style=\"font-weight: 400;\">climate change alone</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 880,
+                  "value": "<p><span style=\"font-weight: 400;\">personal food preferences</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 825,
+                  "value": "<p><span style=\"font-weight: 400;\">farming technology</span></p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2026-01-09T10:16:08.963",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "0010e730-066f-4da5-a0a4-473344be411a",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 649,
+              "choiceId": 904
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2026-01-09T10:16:08.963",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "layla.itani@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "layla.itani@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "0010e730-066f-4da5-a0a4-473344be411a",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "cause",
+          "connection",
+          "global systems"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Layla Itani",
+        "authoredDate": "2026-01-09T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "6255",
+            "name": "ENG.08.RV.CS.3.1",
+            "description": "Interpret and analyse explicit and implicit connections between ideas, perspectives or themes and own experience, background knowledge, other texts or the wider world to support conclusions when reading extended written or multimodal texts on concrete and some abstract topics that may use some nonstandard language.",
+            "curriculum": "UAE MOE",
+            "grade": "12",
+            "subject": "English"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MOE_EN_12_LO055_Q7",
+      "createdByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>Read. Then, complete the sentence.</strong></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">What in the World?&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Thanks to globalisation, supermarkets in nearly every country offer foods from all over the world. While this allows consumers to enjoy a greater variety, it also contributes to a shift in eating habits. The benefit of this change is that more people can experience different cuisines and nutrients.&nbsp;</span></p>\n<p><span style=\"font-weight: 400;\">However, it has also led to the extinction or endangerment of traditional plants and animals, as livestock and crops are grown mostly to serve global demand.&nbsp;</span></p>\n<p><span style=\"font-weight: 400;\">For example, processed foods have become common in many countries, sometimes replacing fresh, local dishes. This shift can create new obstacles, such as health issues related to nutrition, and raises questions about how global trade affects local cultures.</span></p>\n<p><strong><br /></strong><span style=\"font-weight: 400;\"> The decline of traditional plants and animals is connected to &nbsp;<blank-field id=\"649\" class=\"mceNonEditable\"></blank-field>&nbsp;.</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 649,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 904,
+                  "value": "<span style=\"font-weight: 400;\">global demand for specific crops and livestock</span>",
+                  "feedback": ""
+                },
+                {
+                  "id": 960,
+                  "value": "<p><span style=\"font-weight: 400;\">climate change alone</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 880,
+                  "value": "<p><span style=\"font-weight: 400;\">personal food preferences</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 825,
+                  "value": "<p><span style=\"font-weight: 400;\">farming technology</span></p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2026-01-09T10:16:08.963",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "0010e730-066f-4da5-a0a4-473344be411a",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 649,
+              "choiceId": 904
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2026-01-09T10:16:08.963",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "layla.itani@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "layla.itani@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "0010e730-066f-4da5-a0a4-473344be411a",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "cause",
+          "connection",
+          "global systems"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Layla Itani",
+        "authoredDate": "2026-01-09T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "6255",
+            "name": "ENG.08.RV.CS.3.1",
+            "description": "Interpret and analyse explicit and implicit connections between ideas, perspectives or themes and own experience, background knowledge, other texts or the wider world to support conclusions when reading extended written or multimodal texts on concrete and some abstract topics that may use some nonstandard language.",
+            "curriculum": "UAE MOE",
+            "grade": "12",
+            "subject": "English"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MOE_EN_12_LO055_Q7",
+      "createdByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>Read. Then, complete the sentence.</strong></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">What in the World?&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Thanks to globalisation, supermarkets in nearly every country offer foods from all over the world. While this allows consumers to enjoy a greater variety, it also contributes to a shift in eating habits. The benefit of this change is that more people can experience different cuisines and nutrients.&nbsp;</span></p>\n<p><span style=\"font-weight: 400;\">However, it has also led to the extinction or endangerment of traditional plants and animals, as livestock and crops are grown mostly to serve global demand.&nbsp;</span></p>\n<p><span style=\"font-weight: 400;\">For example, processed foods have become common in many countries, sometimes replacing fresh, local dishes. This shift can create new obstacles, such as health issues related to nutrition, and raises questions about how global trade affects local cultures.</span></p>\n<p><strong><br /></strong><span style=\"font-weight: 400;\"> The decline of traditional plants and animals is connected to &nbsp;<blank-field id=\"649\" class=\"mceNonEditable\"></blank-field>&nbsp;.</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 649,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 904,
+                  "value": "<span style=\"font-weight: 400;\">global demand for specific crops and livestock</span>",
+                  "feedback": ""
+                },
+                {
+                  "id": 960,
+                  "value": "<p><span style=\"font-weight: 400;\">climate change alone</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 880,
+                  "value": "<p><span style=\"font-weight: 400;\">personal food preferences</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 825,
+                  "value": "<p><span style=\"font-weight: 400;\">farming technology</span></p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2026-01-09T10:16:08.963",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "0010e730-066f-4da5-a0a4-473344be411a",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 649,
+              "choiceId": 904
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2026-01-09T10:16:08.963",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "layla.itani@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "layla.itani@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  }
+]

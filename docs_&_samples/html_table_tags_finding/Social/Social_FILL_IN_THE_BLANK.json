@@ -1,0 +1,9 @@
+[
+  {
+    "question_id": "0b25a1df-cd03-4926-9e18-b1ab3eb778c7",
+    "question_type": "FILL_IN_THE_BLANK",
+    "keys": [
+      "response.body.prompt"
+    ]
+  }
+]

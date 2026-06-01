@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AAT to Question API Mappings (application/json)</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; font-size: 0.9em; }
+  th, td { border: 1px solid #dddddd; text-align: left; padding: 10px; vertical-align: top; }
+  th { background-color: #f8f9fa; color: #333; }
+  code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; color: #d63384; }
+  h1, h2, h3, h4 { color: #2c3e50; }
+  h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+  h3 { color: #34495e; margin-top: 25px; }
+  .status-direct { font-weight: bold; color: #198754; }
+  .status-possible { font-weight: bold; color: #fd7e14; }
+  .status-none { font-weight: bold; color: #dc3545; }
+  .status-hardcode { font-weight: bold; color: #6f42c1; }
+  .status-note { font-weight: bold; color: #20c997; }
+  .note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+  .highlight-field { background-color: #fffacd !important; box-shadow: inset 0 0 5px rgba(255, 215, 0, 0.5); cursor: pointer; }
+  .api-field, .aat-field { cursor: pointer; position: relative; }
+  .api-field:hover, .aat-field:hover { text-decoration: underline; }
+  .info { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
+  .danger { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
+  .success { background-color: #d1e7dd; border-left: 4px solid #198754; padding: 10px; margin: 15px 0; }
+  .schema-ref { font-size: 0.85em; color: #6c757d; font-style: italic; }
+  .required { color: #dc3545; font-weight: bold; font-size: 0.8em; }
+  .toc { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+  .toc a { color: #0d6efd; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+  .enum-badge {
+    position: relative;
+    cursor: help;
+    border-bottom: 2px dotted #0d6efd;
+    padding: 2px 0;
+  }
+  .tooltip {
+    display: none;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 1000;
+    font-size: 11px;
+    border: 1px solid #0d6efd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: #1a1a1a;
+  }
+  .enum-badge:hover .tooltip {
+    display: block;
+  }
+  .enum-values {
+    font-family: monospace;
+    font-size: 10px;
+    display: block;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #444;
+  }
+  .enum-values div {
+    padding: 2px 0;
+  }
+  /* Decision / rule tables */
+  .rule-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.88em; }
+  .rule-table th { background: #e8eaf6; }
+  .rule-table td.cond { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
+  .rule-table td.result { background: #e8f5e9; font-family: monospace; font-size: 0.85em; }
+  .flow-step { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 14px; margin: 6px 0; font-size: 0.92em; }
+  .flow-step strong { color: #e65100; }
+  .tag-pill { display: inline-block; background: #e3f2fd; border: 1px solid #90caf9; border-radius: 12px; padding: 2px 10px; font-size: 0.8em; font-family: monospace; margin: 2px; }
+</style>
+</head>
+<body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const tables = document.querySelectorAll('table');
+  tables.forEach(table => {
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length < 2) return;
+      let apiField = null;
+      let aatField = null;
+      cells.forEach((cell, index) => {
+        const code = cell.querySelector('code');
+        if (code && !apiField && index === 0) apiField = code;
+        if (code && index > 2) {
+          const text = cell.textContent.trim();
+          if (text && !text.includes('Array') && !text.includes('String') && !text.includes('Integer') && !text.includes('Boolean')) {
+            aatField = code;
+          }
+        }
+      });
+      if (apiField) {
+        apiField.classList.add('api-field');
+        apiField.addEventListener('click', function(e) {
+          e.stopPropagation();
+          clearHighlights();
+          highlightField(apiField.textContent.trim(), 'both');
+        });
+      }
+      if (aatField) {
+        aatField.classList.add('aat-field');
+        aatField.addEventListener('click', function(e) {
+          e.stopPropagation();
+          clearHighlights();
+          highlightField(aatField.textContent.trim(), 'both');
+        });
+      }
+    });
+  });
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('code')) clearHighlights();
+  });
+});
+
+function highlightField(fieldName, direction) {
+  document.querySelectorAll('code').forEach(code => {
+    if (code.textContent.trim() === fieldName) {
+      const cell = code.closest('td');
+      if (cell) cell.classList.add('highlight-field');
+    }
+  });
+}
+function clearHighlights() {
+  document.querySelectorAll('.highlight-field').forEach(el => el.classList.remove('highlight-field'));
+}
+</script>
+
+<h1>AAT → Question API Mappings (<code>application/json</code>)</h1>
+<p>Maps legacy AAT question JSON to the <code>application/json</code> request body for
+<code>POST /api/v1/questions</code>. Target schemas: <code>MCQQuestionResource</code> &amp; <code>DnDQuestionResource</code>,
+both extending <code>QuestionResource</code>.</p>
+
+<div class="note">
+  <strong>Note:</strong> This uses <code>Content-Type: application/json</code>, NOT <code>application/vnd.weavr.widget+json</code>.
+</div>
+
+<div class="info">
+  <strong>Interactive Feature:</strong> Click any <strong>API Field</strong> or <strong>Legacy AAT Field</strong> to highlight all matching fields across the document. Click elsewhere to clear.
+</div>
+
+<div class="toc">
+  <strong>Table of Contents</strong>
+  <ol>
+    <li><a href="#sec0">Key Transformation Rules (Decision Logic)</a>
+      <ul>
+        <li><a href="#sec0-type">Type Mapping</a></li>
+        <li><a href="question-types/MCQ_mapping.html">SubType Detection (MCQ-only → MCQ doc)</a></li>
+        <li><a href="#sec0-prompt">Prompt / TIN — Media Extraction</a></li>
+        <li><a href="#sec0-hintmapper">Hint-Mapper Logic (Hints &amp; Feedback.Incorrect)</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec1">Base Structure (QuestionResource)</a></li>
+    <li><a href="#sec2">Common: Metadata (MetadataResource)</a></li>
+    <li><a href="#sec3">Common: outcomeDeclaration</a></li>
+    <li><a href="#sec4">Common: responseDeclaration</a></li>
+    <li><a href="#sec5">Common: modalFeedback</a></li>
+    <li><a href="question-types/MCQ_mapping.html">MCQ-Specific → question-types/MCQ_mapping.html</a></li>
+    <li><a href="#sec7">DnD-Specific: itemBody &amp; Extras</a></li>
+    <li><a href="#sec8">Unmapped / Ignored Legacy Fields</a></li>
+    <li><a href="#sec-type-docs">Question-Type Specific Docs</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec-type-docs">Question-Type Specific Mapping Docs</h2>
+<p>This document covers <strong>shared/general logic only</strong> — base structure, metadata, prompt processing, hint-mapper, outcomeDeclaration common fields, and modalFeedback. Every question type has its own sub-doc in <code>UIMapper/question-types/</code> for type-specific itemBody, responseDeclaration, and validResponse mappings.</p>
+
+<table>
+  <thead><tr><th>Question Type</th><th>Legacy AAT <code>type</code></th><th>QB API <code>type</code></th><th>Mapping Doc</th><th>Sample Files</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><strong>MCQ / Multi-Select</strong></td>
+    <td><code>MULTIPLE_CHOICE</code>, <code>MULTIPLE_SELECTION</code></td>
+    <td><code>MULTIPLE_CHOICE</code></td>
+    <td><a href="question-types/MCQ_mapping.html">question-types/MCQ_mapping.html</a></td>
+    <td><a href="../mapping sample/MCQ/AAT.json">AAT.json</a> · <a href="../mapping sample/MCQ/QB.json">QB.json</a></td>
+  </tr>
+  <tr>
+    <td><strong>DnD (Drag &amp; Drop FIB)</strong></td>
+    <td><code>FILL_IN_THE_BLANK_DRAG_DROP</code></td>
+    <td><code>DND</code></td>
+    <td><a href="question-types/DND_mapping.html">question-types/DND_mapping.html</a></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td><strong>FIB (Fill in the Blank — typed)</strong></td>
+    <td><code>FILL_IN_THE_BLANK</code></td>
+    <td><code>FILL_IN_THE_BLANK</code></td>
+    <td><a href="question-types/FIB_mapping.html">question-types/FIB_mapping.html</a></td>
+    <td><a href="../mapping sample/FIB/AAT.json">AAT.json</a> · <a href="../mapping sample/FIB/QB.json">QB.json</a></td>
+  </tr>
+  <tr>
+    <td><strong>Dropdown (Select-a-Blank)</strong></td>
+    <td><code>SELECT_A_BLANK</code></td>
+    <td><code>DROPDOWN</code></td>
+    <td><a href="question-types/Dropdown_mapping.html">question-types/Dropdown_mapping.html</a></td>
+    <td><a href="../mapping sample/Dropdown/AAT.json">AAT.json</a> · <a href="../mapping sample/Dropdown/QB.json">QB.json</a></td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="info">
+  <strong>Shared sections in this doc</strong> (applicable to all question types above): §0 Transformation Rules, §1 Base Structure, §2 Metadata, §3 outcomeDeclaration (common parts — seeWhy, feedback, hint-mapper), §4 responseDeclaration (maxAttempts), §5 modalFeedback.
+</div>
+
+<div class="info" style="margin-top: 20px;">
+  <strong>Status Legend:</strong>
+  <ul style="margin: 10px 0; padding-left: 20px;">
+    <li><span class="status-direct">Direct</span> — Direct mapping from legacy field (clickable)</li>
+    <li><span class="status-possible">Transform</span> — Requires transformation/processing</li>
+    <li><span class="status-hardcode">Hardcode</span> — Fixed value set during migration</li>
+    <li><span class="status-note">Note</span> — Important note or contextual information</li>
+    <li><span class="status-none">No Data</span> — No data available in legacy system</li>
+  </ul>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec0">0. Key Transformation Rules (Decision Logic)</h2>
+<p>These are the non-trivial transformation rules that drive how legacy data is interpreted and placed into the new schema.</p>
+
+<!-- ──────────────────── TYPE MAPPING ──────────────────── -->
+<h3 id="sec0-type">0.1 Type Mapping</h3>
+
+<table class="rule-table">
+  <thead><tr><th>Legacy <code>type</code></th><th>→ API <code>type</code></th><th>→ API default <code>subType</code></th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td class="cond">MULTIPLE_CHOICE</td><td class="result">MULTIPLE_CHOICE</td><td class="result">TEXT (auto-detected, see §0.2)</td><td>Standard single-answer MCQ.</td></tr>
+  <tr><td class="cond">MULTIPLE_SELECTION</td><td class="result">MULTIPLE_CHOICE</td><td class="result">TEXT (auto-detected, see §0.2)</td><td>Multi-answer MCQ. Sets <code>responseDeclaration.multipleAnswer = true</code>.</td></tr>
+  <tr><td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td><td class="result">DND</td><td class="result">BLANK_ON_QUESTION (hardcoded)</td><td>Drag-and-drop fill-in-the-blank.</td></tr>
+  </tbody>
+</table>
+
+<!-- ──────────────────── SUBTYPE DETECTION ──────────────────── -->
+<h3 id="sec0-subtype">0.2 SubType Detection (MCQ-specific)</h3>
+<div class="info">
+  MCQ subType auto-detection is documented in the MCQ sub-doc.<br>
+  → <a href="question-types/MCQ_mapping.html#sec0-subtype"><strong>MCQ_mapping.html §0.2 — SubType Detection</strong></a>
+</div>
+
+<!-- ──────────────────── PROMPT / TIN ──────────────────── -->
+<h3 id="sec0-prompt">0.3 Prompt / TIN — Media Extraction from <code>body.prompt</code></h3>
+<p>The legacy <code>body.prompt</code> is an HTML string that may contain embedded <code>&lt;img&gt;</code>, <code>&lt;audio&gt;</code>, and <code>&lt;video&gt;</code> tags. These tags are stripped from the HTML and returned as structured objects. The remaining cleaned text is kept separately.</p>
+
+<div class="flow-step"><strong>Step 1 — MathML detection:</strong> If an <code>&lt;img&gt;</code> has a <code>src</code> starting with <code>data:image/svg+xml</code> and containing <code>MathML</code>, it is a <strong>Wiris math formula</strong>. It is converted to inline LaTeX (<code>\(latex\)</code>) and stays embedded in the text string. It is <strong>NOT</strong> extracted as an image.</div>
+<div class="flow-step"><strong>Step 2 — Image extraction:</strong> The first non-math <code>&lt;img src="..."&gt;</code> is extracted → <code>{ url: "..." }</code>. The <code>&lt;img&gt;</code> tag is removed from the HTML string.</div>
+<div class="flow-step"><strong>Step 3 — Audio extraction:</strong> The first <code>&lt;audio src="..."&gt;</code> is extracted → <code>{ url: "..." }</code>. Removed from HTML.</div>
+<div class="flow-step"><strong>Step 4 — Video extraction:</strong> The first <code>&lt;video src="..."&gt;</code> is extracted → <code>{ url: "..." }</code>. Removed from HTML.</div>
+<div class="flow-step"><strong>Step 5 — Text cleanup:</strong> Newlines are converted to <code>&lt;br&gt;</code>. All remaining HTML tags are stripped <em>except</em> <code>&lt;span&gt;</code> and <code>&lt;br&gt;</code>. The result is the clean text.</div>
+
+<p>The extracted parts are then assembled into the <code>itemBody.statement.content[]</code> array (and separately into top-level <code>audio</code> / <code>stemVideo</code> fields):</p>
+
+<table class="rule-table">
+  <thead><tr><th>Extracted from <code>body.prompt</code></th><th>MCQ destination</th><th>DnD destination</th></tr></thead>
+  <tbody>
+  <tr><td class="cond">Plain text (after stripping media tags)</td><td class="result">itemBody.statement.content[] → { type:"text", text:"..." }<br><em>also</em> itemBody.sentence.text (same value)</td><td class="result">itemBody.statement.content[] → { type:"text", text:"..." }<br><em>also</em> itemBody.sentence.text</td></tr>
+  <tr><td class="cond">&lt;img src="url"&gt; (non-math)</td><td class="result">itemBody.statement.content[] → { type:"image", image:{ url, zoom:true } }<br><em>Note: itemBody.stemImage is always null</em></td><td class="result">itemBody.statement.content[] → { type:"image", image:{ url, zoom:true } }<br><em>Note: itemBody.image is always null</em></td></tr>
+  <tr><td class="cond">&lt;audio src="url"&gt;</td><td class="result">itemBody.audio = { url }<br>itemBody.statement.content[] → { type:"audio", audio:{ url } }</td><td class="result">itemBody.audio = { url }<br>itemBody.statement.content[] → { type:"audio", audio:{ url } }</td></tr>
+  <tr><td class="cond">&lt;video src="url"&gt;</td><td class="result">itemBody.stemVideo = { url }<br>itemBody.statement.content[] → { type:"video", video:{ url } }</td><td class="result">itemBody.video = { url }<br>itemBody.statement.content[] → { type:"video", video:{ url } }</td></tr>
+  <tr><td class="cond">MathML SVG &lt;img&gt;</td><td class="result" colspan="2">Converted to \(LaTeX\) — stays in text. Not extracted.</td></tr>
+  <tr><td class="cond">Nothing in prompt (null/empty)</td><td class="result" colspan="2">itemBody.statement = null, itemBody.sentence = null</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>itemBody.instruction is always <code>null</code></strong> in both MCQ and DnD. The prompt content is placed in <code>itemBody.statement</code> (and <code>itemBody.sentence</code> for DnD). The old mapping of <code>body.prompt → itemBody.instruction</code> is <em>not</em> used.
+</div>
+
+<!-- ──────────────────── HINT MAPPER ──────────────────── -->
+<h3 id="sec0-hintmapper">0.4 Hint-Mapper Logic</h3>
+<p>Legacy hints (<code>body.hints[]</code>) and incorrect feedback (<code>body.wrongAnswerFeedback</code>) are processed together. The result is split between <code>outcomeDeclaration.feedback.incorrect</code> and <code>modalFeedback.needHelp</code>.</p>
+
+<div class="info">
+  <strong>Key concept:</strong> <code>feedback.incorrect</code> is shown <em>inline</em> after a wrong answer. <code>modalFeedback.needHelp</code> is shown in a separate "Need Help" modal. The mapper decides which content goes where based on the rules below.
+</div>
+
+<table class="rule-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Condition</th>
+      <th>→ <code>feedback.incorrect</code></th>
+      <th>→ <code>needHelp</code></th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><strong>R1</strong></td>
+    <td class="cond">body.wrongAnswerFeedback has text</td>
+    <td class="result">wrongAnswerFeedback content (text + any media)</td>
+    <td class="result">ALL hints (every hint goes to needHelp)</td>
+  </tr>
+  <tr>
+    <td><strong>R2</strong></td>
+    <td class="cond">0 hints AND no wrongAnswerFeedback</td>
+    <td class="result"><em>null / absent</em></td>
+    <td class="result"><em>empty / absent</em></td>
+  </tr>
+  <tr>
+    <td><strong>R3</strong></td>
+    <td class="cond">1 hint, hint has NO media (image/audio/video), no wrongAnswerFeedback</td>
+    <td class="result">The single hint (text only)</td>
+    <td class="result"><em>empty / absent</em></td>
+  </tr>
+  <tr>
+    <td><strong>R4</strong></td>
+    <td class="cond">1 hint, hint HAS media (image/audio/video), no wrongAnswerFeedback</td>
+    <td class="result"><em>null / absent</em></td>
+    <td class="result">The single hint (text + media)</td>
+  </tr>
+  <tr>
+    <td><strong>R5</strong></td>
+    <td class="cond">2+ hints, no wrongAnswerFeedback</td>
+    <td class="result">Last hint <strong>text only</strong></td>
+    <td class="result">First N−1 hints (all content) <strong>+</strong> last hint's media (if any, text-stripped)</td>
+  </tr>
+  </tbody>
+</table>
+
+<p><strong>R5 detail:</strong> When there are multiple hints and no existing <code>wrongAnswerFeedback</code>, the last hint acts as the "summary" shown inline after a wrong answer (text portion only). All earlier hints, plus any media from the last hint, are surfaced in the NeedHelp modal. This ensures media-heavy hints aren't lost.</p>
+
+<div class="note">
+  <strong>Content format:</strong> Each item in <code>needHelp.content.content[]</code> is a separate <code>ContentItem</code> object: <code>{ type: "text", text: "..." }</code>, <code>{ type: "image", image: { url } }</code>, <code>{ type: "audio", audio: { url } }</code>, or <code>{ type: "video", video: { url } }</code>. Text and media are split into separate array entries.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec1">1. Base Structure: <code>QuestionResource</code></h2>
+<p>Every question type extends <code>QuestionResource</code>. These root-level fields are shared.</p>
+
+<pre><code>{
+  "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },
+  "type": "MULTIPLE_CHOICE",
+  "subType": "TEXT",
+  "metadata": { ... },
+  "itemBody": { ... },
+  "responseDeclaration": { ... },
+  "outcomeDeclaration": { ... },
+  "modalFeedback": { ... }     ← omitted when no hints/passage
+}</code></pre>
+
+<table>
+  <thead>
+  <tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+  <tr><td><code>schemaVersion</code></td><td>SemanticVersion</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>{ "major": 1, "minor": 0, "patch": 0 }</code>.</td></tr>
+  <tr><td><code>schemaVersion.major</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>1</code></td></tr>
+  <tr><td><code>schemaVersion.minor</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  <tr><td><code>schemaVersion.patch</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  <tr>
+    <td><code>type</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">API values:<div class="enum-values"><div>MULTIPLE_CHOICE</div><div>DND</div></div></div></span></td>
+    <td class="required">YES</td>
+    <td class="status-possible">Transform</td>
+    <td><code>type</code></td>
+    <td>See §0.1. <code>MULTIPLE_CHOICE</code>→<code>MULTIPLE_CHOICE</code>, <code>MULTIPLE_SELECTION</code>→<code>MULTIPLE_CHOICE</code>, <code>FILL_IN_THE_BLANK_DRAG_DROP</code>→<code>DND</code>.</td>
+  </tr>
+  <tr>
+    <td><code>subType</code></td>
+    <td>String (enum)</td>
+    <td class="required">YES</td>
+    <td class="status-possible">Transform</td>
+    <td>—</td>
+    <td>MCQ: auto-detected <code>TEXT</code>/<code>IMAGE</code>/<code>IMAGE_TEXT</code> (see §0.2). DnD: hardcoded <code>"BLANK_ON_QUESTION"</code>.</td>
+  </tr>
+  <tr><td><code>metadata</code></td><td>MetadataResource</td><td class="required">YES</td><td class="status-possible">Transform</td><td>(Section 2)</td><td>Full mapping in section 2.</td></tr>
+  <tr><td><code>modalFeedback</code></td><td>ModalFeedback</td><td></td><td class="status-possible">Transform</td><td><code>body.hints</code> / <code>body.passage</code></td><td>Omitted entirely if no hints end up in needHelp and no passage. See §5.</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec2">2. Common: Metadata (<code>MetadataResource</code>)</h2>
+<p>Shared across all question types. Contains 7 sub-objects.</p>
+
+<h3>2.1 <code>metadata.general</code> <span class="schema-ref">— GeneralMetadataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.general.code</code></td><td>String</td><td class="status-direct">Direct</td><td><code>code</code></td><td>Unique question code.</td></tr>
+  <tr><td><code>metadata.general.externalId</code></td><td>String</td><td class="status-direct">Direct</td><td><code>id</code></td><td>Legacy UUID — stored for traceability.</td></tr>
+  <tr><td><code>metadata.general.title</code></td><td>String</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. Not present in legacy.</td></tr>
+  <tr><td><code>metadata.general.language</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>EN_US</div><div>AR</div></div></div></span></td><td class="status-direct">Direct</td><td><code>language</code></td><td><code>"EN_US"</code> or <code>"AR"</code>.</td></tr>
+  <tr><td><code>metadata.general.keywords</code></td><td>Array&lt;String&gt;</td><td class="status-possible">Transform</td><td><code>metadata.keywords</code></td><td>Start with <code>metadata.keywords[]</code>, then append <code>"skillId:{value}"</code> if <code>metadata.skillId</code> exists, then append <code>"subSkill:{value}"</code> if <code>metadata.subSkill</code> exists.</td></tr>
+  <tr><td><code>metadata.general.parentReference</code></td><td>String</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>metadata.general.source</code></td><td>String</td><td class="status-possible">Transform</td><td><code>metadata.author</code></td><td>Use <code>metadata.author</code> first. Fallback: <code>createdByUser.email</code>.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.2 <code>metadata.lifecycle</code> <span class="schema-ref">— LifecycleMetadataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.lifecycle.status</code></td><td>String</td><td class="status-direct">Direct</td><td><code>status</code></td><td>Passed through from legacy root <code>status</code> field (e.g. <code>"PUBLISHED"</code>). Defaults to <code>null</code> if absent.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.3 <code>metadata.technical</code> <span class="schema-ref">— TechnicalMetadataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.technical.penAndPaper</code></td><td>Boolean</td><td class="status-direct">Direct</td><td><code>metadata.penAndPaper</code></td><td>Defaults to <code>false</code> if absent.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.4 <code>metadata.educational</code> <span class="schema-ref">— EducationalMetadataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.educational.resourceType</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>TEQ1</div><div>TEQ2</div><div>TEQ4</div></div></div></span></td><td class="status-direct">Direct</td><td><code>metadata.resourceType</code></td><td><code>"TEQ1"</code>, <code>"TEQ2"</code>, <code>"TEQ4"</code>. <code>null</code> if absent.</td></tr>
+  <tr><td><code>metadata.educational.difficultyLevel</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>EASY</div><div>MEDIUM</div><div>DIFFICULT</div></div></div></span></td><td class="status-direct">Direct</td><td><code>metadata.difficultyLevel</code></td><td><code>"EASY"</code>, <code>"MEDIUM"</code>, <code>"DIFFICULT"</code>.</td></tr>
+  <tr><td><code>metadata.educational.cognitiveDimensions</code></td><td>Array&lt;String&gt;</td><td class="status-direct">Direct</td><td><code>metadata.cognitiveDimensions</code></td><td>Empty array if absent.</td></tr>
+  <tr><td><code>metadata.educational.knowledgeDimensions</code></td><td>Array&lt;String&gt;</td><td class="status-direct">Direct</td><td><code>metadata.knowledgeDimensions</code></td><td>Empty array if absent.</td></tr>
+  <tr><td><code>metadata.educational.summativeAssessment</code></td><td>Boolean</td><td class="status-direct">Direct</td><td><code>metadata.summativeAssessment</code></td><td>Defaults to <code>false</code> if absent.</td></tr>
+  <tr><td><code>metadata.educational.cefrLevel</code></td><td>String</td><td class="status-direct">Direct</td><td><code>metadata.cefrLevel</code></td><td></td></tr>
+  <tr><td><code>metadata.educational.proficiency</code></td><td>String</td><td class="status-direct">Direct</td><td><code>metadata.proficiency</code></td><td>Observed as <code>null</code> in all samples.</td></tr>
+  <tr><td><code>metadata.educational.lexileLevel</code></td><td>String</td><td class="status-direct">Direct</td><td><code>metadata.lexileLevel</code></td><td></td></tr>
+  <tr><td><code>metadata.educational.logitValue</code></td><td>String</td><td class="status-direct">Direct</td><td><code>metadata.logitValue</code></td><td>Observed as <code>null</code> in all samples.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.5 <code>metadata.rights</code> <span class="schema-ref">— RightsMetadataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.rights.copyrights</code></td><td>Array&lt;String&gt;</td><td class="status-direct">Direct</td><td><code>metadata.copyrights</code></td><td>Empty array if absent.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.6 <code>metadata.classification</code> <span class="schema-ref">— ClassificationMetadataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.classification.grade</code></td><td>String</td><td class="status-possible">Transform</td><td><code>metadata.curriculumOutcomes[0].grade</code></td><td>Extract from first outcome only. <code>null</code> if no outcomes.</td></tr>
+  <tr><td><code>metadata.classification.subject</code></td><td>String</td><td class="status-possible">Transform</td><td><code>metadata.curriculumOutcomes[0].subject</code></td><td>Extract from first outcome only.</td></tr>
+  <tr><td><code>metadata.classification.curriculum</code></td><td>String</td><td class="status-possible">Transform</td><td><code>metadata.curriculumOutcomes[0].curriculum</code></td><td>Extract from first outcome only.</td></tr>
+  <tr><td><code>metadata.classification.curriculumOutcomes</code></td><td>Array&lt;CurriculumOutcome&gt;</td><td class="status-direct">Direct</td><td><code>metadata.curriculumOutcomes</code></td><td>Full array passed through. Empty array if absent.</td></tr>
+  <tr><td><code>metadata.classification.subDomain</code></td><td>Array&lt;String&gt;</td><td class="status-possible">Transform</td><td><code>metadata.domains</code> + <code>metadata.subSkill</code></td><td>Merge: spread <code>metadata.domains[]</code> first, then push <code>metadata.subSkill</code> (as single string) if present. Empty array if neither exist.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.7 <code>metadata.annotation</code> <span class="schema-ref">— AnnotationMetaDataResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>metadata.annotation.tags</code></td>
+    <td>Object (key→value)</td>
+    <td class="status-possible">Transform</td>
+    <td><code>tags</code>, <code>createdAt</code>, <code>metadata.authoredDate</code></td>
+    <td>
+      Built by merging three sources:
+      <ol style="margin: 6px 0 0 18px; padding: 0;">
+        <li>Copy all entries from legacy root <code>tags</code> (if any).</li>
+        <li>Always add <span class="tag-pill">migration:source = "AAT"</span></li>
+        <li>If <code>createdAt</code> exists: add <span class="tag-pill">migration:originalCreatedAt = &lt;ISO timestamp&gt;</span></li>
+        <li>If <code>metadata.authoredDate</code> exists: add <span class="tag-pill">migration:authoredDate = &lt;ISO timestamp&gt;</span></li>
+      </ol>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec3">3. Common: <code>outcomeDeclaration</code></h2>
+<p>Shared structure for all question types. Differences are in <code>validResponse</code> internals (covered in type-specific sub-docs).</p>
+
+<div class="info">
+  <strong>Schema note:</strong> MCQ <em>requires</em> <code>feedback</code> (always present, at minimum an empty <code>{}</code>). DnD does not require <code>feedback</code> (omitted when empty).
+</div>
+
+<h3>3.1 <code>outcomeDeclaration.scoringType</code></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.scoringType</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>EXACT_MATCH</div><div>PARTIAL_MATCH</div><div>MANUAL</div></div></div></span></td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>validation.scoringType</code></td><td>Defaults to <code>"EXACT_MATCH"</code> if absent.</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 <code>outcomeDeclaration.scoring</code> <span class="schema-ref">— ScoringResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMin</code></td><td>Number (double)</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMax</code></td><td>Number (double)</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>1</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.defaultNormalizedValue</code></td><td>Number (double)</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  </tbody>
+</table>
+
+<h3>3.3 <code>outcomeDeclaration.seeWhy</code> <span class="schema-ref">— SeeWhy</span></h3>
+<p>Built from <code>body.generalFeedback</code> (media extracted, text cleaned). <strong>Omitted entirely</strong> (returns <code>null</code>) if <code>generalFeedback</code> has no text and no image.</p>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.seeWhy.layout</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>TEXT</div><div>TEXT_WITH_IMAGE</div><div>TEXT_WITH_EQUATION</div></div></div></span></td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"TEXT"</code>.</td></tr>
+  <tr><td><code>outcomeDeclaration.seeWhy.content</code></td><td>Array&lt;ContentItem&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td><td><code>body.generalFeedback</code></td><td>Parsed from HTML — media extracted, text cleaned. Each entry: <code>{ type:"text", text:"..." }</code> or <code>{ type:"image", image:{url} }</code>.</td></tr>
+  <tr><td><code>outcomeDeclaration.seeWhy.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.generalFeedback</code></td><td>Extracted <code>&lt;audio&gt;</code> from generalFeedback HTML, if present.</td></tr>
+  </tbody>
+</table>
+
+<div class="danger">
+  <strong>generalFeedback goes to seeWhy ONLY.</strong> It does NOT populate <code>outcomeDeclaration.feedback.general</code>. That field is never set.
+</div>
+
+<h3>3.4 <code>outcomeDeclaration.feedback</code> <span class="schema-ref">— Feedback</span></h3>
+<p>Has 4 possible children. Each is a <code>FeedbackContent</code> with <code>content: Array&lt;ContentItem&gt;</code>. The <code>incorrect</code> child is determined by the hint-mapper decision rules — it is <strong>not</strong> a direct copy of <code>body.wrongAnswerFeedback</code>.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>outcomeDeclaration.feedback.general</code></td>
+    <td>FeedbackContent</td>
+    <td class="status-none">No Data</td>
+    <td>—</td>
+    <td><strong>Never populated.</strong> <code>body.generalFeedback</code> goes to <code>seeWhy</code> (§3.3), not here.</td>
+  </tr>
+  <tr>
+    <td><code>outcomeDeclaration.feedback.correct</code></td>
+    <td>FeedbackContent</td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.correctAnswerFeedback</code></td>
+    <td>Omitted if <code>correctAnswerFeedback</code> is null/empty. Content: <code>[{ type:"text", text:"&lt;HTML&gt;" }]</code>.</td>
+  </tr>
+  <tr>
+    <td><code>outcomeDeclaration.feedback.incorrect</code></td>
+    <td>FeedbackContent</td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.wrongAnswerFeedback</code> + <code>body.hints[]</code></td>
+    <td>Determined by the hint-mapper. See decision table below.</td>
+  </tr>
+  <tr>
+    <td><code>outcomeDeclaration.feedback.partial</code></td>
+    <td>FeedbackContent</td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.partialAnswerFeedback</code></td>
+    <td>Only populated for <code>MULTIPLE_SELECTION</code> and <code>DnD</code> types. Omitted if null/empty.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h4>3.4.1 Hint-Mapper Decision Rules for <code>feedback.incorrect</code> and <code>modalFeedback.needHelp</code></h4>
+<p>Both <code>feedback.incorrect</code> and <code>needHelp</code> share the same computed result.</p>
+
+<div class="info">
+  <strong>Key distinction:</strong> <code>feedback.incorrect</code> is the <em>inline</em> message shown after a wrong answer. <code>modalFeedback.needHelp</code> is the content in the separate "Need Help" modal the student can open.
+</div>
+
+<p><strong>Inputs:</strong> <code>hints</code> = <code>body.hints[]</code> (array of HTML strings) · <code>incorrectFeedback</code> = <code>body.wrongAnswerFeedback</code> (HTML string or null)</p>
+<p><strong>Pre-processing:</strong> Each hint is parsed to split it into text, image, audio, and video parts. The <code>wrongAnswerFeedback</code> is also parsed; it is only considered "existing" if the extracted text is non-empty.</p>
+
+<table class="rule-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Condition (<code>wrongAnswerFeedback</code> / hints)</th>
+      <th>→ <code>feedback.incorrect</code> content</th>
+      <th>→ <code>needHelp.content.content[]</code></th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><strong>R1</strong></td>
+    <td class="cond">
+      <code>wrongAnswerFeedback</code> has text<br>
+      <em>(regardless of how many hints exist)</em>
+    </td>
+    <td class="result">
+      <code>wrongAnswerFeedback</code> text + any media from it.<br>
+      Shown inline as the incorrect feedback.
+    </td>
+    <td class="result">
+      ALL hints moved here (every hint goes to needHelp).<br>
+      Shown only if student opens "Need Help".
+    </td>
+  </tr>
+  <tr>
+    <td><strong>R2</strong></td>
+    <td class="cond">
+      0 hints <strong>AND</strong> no <code>wrongAnswerFeedback</code>
+    </td>
+    <td class="result"><em>null — field omitted</em></td>
+    <td class="result"><em>empty — needHelp omitted</em></td>
+  </tr>
+  <tr>
+    <td><strong>R3</strong></td>
+    <td class="cond">
+      Exactly 1 hint<br>
+      Hint has <strong>no media</strong> (no image, audio, or video)<br>
+      No <code>wrongAnswerFeedback</code>
+    </td>
+    <td class="result">
+      The single hint's text.<br>
+      <em>(Text-only hint acts as the inline incorrect message.)</em>
+    </td>
+    <td class="result"><em>empty — needHelp omitted</em></td>
+  </tr>
+  <tr>
+    <td><strong>R4</strong></td>
+    <td class="cond">
+      Exactly 1 hint<br>
+      Hint <strong>has media</strong> (image, audio, or video)<br>
+      No <code>wrongAnswerFeedback</code>
+    </td>
+    <td class="result"><em>null — field omitted</em></td>
+    <td class="result">
+      The single hint (text + media).<br>
+      <em>(Media-rich hint goes to needHelp to preserve the media.)</em>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>R5</strong></td>
+    <td class="cond">
+      2 or more hints<br>
+      No <code>wrongAnswerFeedback</code>
+    </td>
+    <td class="result">
+      Last hint — <strong>text only</strong> (media stripped out).<br>
+      <em>(The final hint is the inline summary.)</em>
+    </td>
+    <td class="result">
+      First N−1 hints (all content, text + media)<br>
+      <strong>+</strong> last hint's media (if any), as a text-stripped item.<br>
+      <em>(Earlier hints + any media from the last hint surface in the modal.)</em>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>R5 example:</strong> 3 hints — hint 1 (text + image), hint 2 (text only), hint 3 (text + audio).<br>
+  → <code>needHelp</code>: [hint1 text item, hint1 image item, hint2 text item, <strong>hint3 audio item</strong>]<br>
+  → <code>feedback.incorrect</code>: hint3 text only.
+</div>
+<div class="note">
+  <strong>Content format in needHelp:</strong> Each hint is flattened into separate typed objects per media: <code>{ type:"text", text:"..." }</code>, <code>{ type:"image", image:{url} }</code>, <code>{ type:"audio", audio:{url} }</code>, <code>{ type:"video", video:{url} }</code>. One hint may produce multiple array entries.
+</div>
+
+<h3>3.5 <code>outcomeDeclaration.validResponse</code> — type-specific</h3>
+<p>See <a href="question-types/MCQ_mapping.html#sec5">MCQ validResponse (MCQ doc §5)</a> and <a href="question-types/DND_mapping.html#sec5-valid">DnD validResponse (DnD doc §5.4)</a>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec4">4. Common: <code>responseDeclaration</code></h2>
+<p><code>maxAttempts</code> is shared across all question types. Type-specific extras are documented in each type's sub-doc.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>responseDeclaration.maxAttempts</code></td><td>Integer (≥1)</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1</code>. Not present in legacy data.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec5">5. Common: <code>modalFeedback</code></h2>
+<p>Contains needHelp content and optional passage reference. Uses the hint-mapper result (§0.4). <strong>The entire <code>modalFeedback</code> object is omitted</strong> from the payload when there are no needHelp items and no passage.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>modalFeedback.needHelp</code></td>
+    <td>NeedHelp</td>
+    <td></td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.hints[]</code> + <code>body.wrongAnswerFeedback</code></td>
+    <td>Populated only when the hint-mapper produces <code>needHelpItems</code> (see §0.4 rules R1, R4, R5). Omitted when <code>needHelpItems</code> is empty.</td>
+  </tr>
+  <tr>
+    <td><code>modalFeedback.needHelp.content.layout</code></td>
+    <td>String</td>
+    <td class="required">YES (if needHelp present)</td>
+    <td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>"TEXT"</code>.</td>
+  </tr>
+  <tr>
+    <td><code>modalFeedback.needHelp.content.content</code></td>
+    <td>Array&lt;ContentItem&gt;</td>
+    <td class="required">YES (if needHelp present)</td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.hints[]</code></td>
+    <td>Each hint is parsed and flattened into separate content items: text items and media items as individual entries in the array.</td>
+  </tr>
+  <tr>
+    <td><code>modalFeedback.passageId</code></td>
+    <td>String (UUID)</td>
+    <td></td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.passage.id</code></td>
+    <td>Only set if <code>body.passage</code> exists and has an <code>id</code>. Observed as <code>null</code> in all samples — passage creation is a prerequisite step.</td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>No <code>hints[]</code> array on the API:</strong> The legacy <code>body.hints[]</code> raw strings are not passed through directly. Instead, they are processed by the hint-mapper and distributed between <code>feedback.incorrect</code> and <code>needHelp.content.content[]</code>.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec6">6. MCQ-Specific Mapping</h2>
+<div class="info">
+  MCQ-specific fields (subType detection, itemBody, options, responseDeclaration extras, validResponse) are now documented in the MCQ sub-doc.<br>
+  → <a href="question-types/MCQ_mapping.html"><strong>question-types/MCQ_mapping.html</strong></a>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec7">7. DnD-Specific: <code>DnDQuestionResource</code></h2>
+<p>For legacy type <code>FILL_IN_THE_BLANK_DRAG_DROP</code>. API type: <code>"DND"</code>.</p>
+
+<h3>7.1 <code>subType</code> — Hardcoded</h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>subType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">All DnD subType values:<div class="enum-values"><div>BLANK_ON_QUESTION</div><div>TEXT_ON_IMAGE</div><div>BLANK_ON_SENTENCE</div><div>IMAGE_ON_IMAGE</div><div>IMAGE_ON_SPACE</div><div>IMAGE_TO_FIXED_1</div><div>IMAGE_TO_FIXED_2</div><div>SEQUENCE_IMAGE</div><div>SEQUENCE_TEXT</div><div>SPLIT_SCREEN</div></div></div></span></td>
+    <td class="required">YES</td>
+    <td class="status-hardcode">Hardcode</td>
+    <td>Always <code>"BLANK_ON_QUESTION"</code>. Not auto-detected. All DnD questions from AAT map to this single subtype during migration.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3>7.2 <code>itemBody</code> <span class="schema-ref">— DnDItemBodyResource</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.version</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"1.0"</code>.</td></tr>
+  <tr>
+    <td><code>itemBody.statement</code></td>
+    <td>DnDStatement</td>
+    <td></td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td>Built from <code>body.prompt</code> via media extraction (§0.3). <code>{ content: ContentItem[] }</code>. <code>null</code> if prompt empty.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sentence</code></td>
+    <td>Sentence</td>
+    <td></td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td>Text-only form of the prompt: <code>{ text: "&lt;cleaned prompt text&gt;" }</code>. Used for BLANK_ON_SENTENCE rendering. <code>null</code> if no text.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.instruction</code></td>
+    <td>Html</td>
+    <td></td>
+    <td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>null</code>. Prompt content goes to <code>statement</code>/<code>sentence</code>.</td>
+  </tr>
+  <tr><td><code>itemBody.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;audio&gt;</code> from prompt → <code>{ "url": "..." }</code>. <code>null</code> if absent.</td></tr>
+  <tr><td><code>itemBody.video</code></td><td>Video</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;video&gt;</code> from prompt → <code>{ "url": "..." }</code>. <code>null</code> if absent.</td></tr>
+  <tr><td><code>itemBody.image</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>. Prompt images go into <code>statement.content[]</code> instead.</td></tr>
+  <tr><td><code>itemBody.showDragHandle</code></td><td>Boolean</td><td></td><td class="status-direct">Direct</td><td><code>body.choices.showDragHandle</code></td><td>Defaults to <code>true</code> if absent.</td></tr>
+  <tr><td><code>itemBody.shuffled</code></td><td>Boolean</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>body.choices.shuffle</code></td><td>Defaults to <code>true</code> if absent.</td></tr>
+  <tr><td><code>itemBody.optionsStyle</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"option-style-1"</code>.</td></tr>
+  <tr><td><code>itemBody.dropLimit</code></td><td>Integer (≥1)</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1</code>.</td></tr>
+  <tr><td><code>itemBody.optionsPosition</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"bottom"</code>.</td></tr>
+  <tr><td><code>itemBody.sideImage</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.title</code></td><td>StringTitle</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.subTitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.backgroundLayout</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.splitContent</code></td><td>SplitContent</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.timeSpentConfig</code></td><td>TimeSpentConfig</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  </tbody>
+</table>
+
+<h4>7.2.1 <code>itemBody.targets[]</code> <span class="schema-ref">— Target</span></h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.targets</code></td><td>Array&lt;Target&gt;</td><td class="required">YES (min 1)</td><td class="status-direct">Direct</td><td><code>body.blanks</code></td><td>One target per blank.</td></tr>
+  <tr><td><code>itemBody.targets[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>body.blanks[].id</code></td><td>Direct copy.</td></tr>
+  <tr><td><code>itemBody.targets[].weight</code></td><td>Float</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>1.0</code>.</td></tr>
+  <tr><td><code>itemBody.targets[].swappable</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>false</code>.</td></tr>
+  <tr><td><code>itemBody.targets[].swapGroupId</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>0</code>.</td></tr>
+  <tr><td><code>itemBody.targets[].position</code></td><td>ItemPosition</td><td></td><td class="status-none">No Data</td><td>—</td><td>Not present in legacy.</td></tr>
+  </tbody>
+</table>
+
+<h4>7.2.2 <code>itemBody.options[]</code> <span class="schema-ref">— DnDOption</span></h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.options</code></td><td>Array&lt;DnDOption&gt;</td><td class="required">YES (min 1)</td><td class="status-direct">Direct</td><td><code>body.choices.choiceItems</code></td><td>One DnDOption per choice item.</td></tr>
+  <tr><td><code>itemBody.options[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>body.choices.choiceItems[].id</code></td><td>Uses <code>id</code>, not <code>choiceId</code> (unlike MCQ).</td></tr>
+  <tr>
+    <td><code>itemBody.options[].content</code></td>
+    <td>OptionsContentConfig</td>
+    <td class="required">YES</td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.choices.choiceItems[].value</code></td>
+    <td>
+      Parsed — media extracted, text cleaned. Note: DnD uses <code>value</code> field, not <code>answer</code> (unlike MCQ).<br>
+      Text → <code>{ type:"text", text:"..." }</code>, image → <code>{ type:"image", image:{url} }</code>.
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec7-valid">7.3 <code>outcomeDeclaration.validResponse</code> <span class="schema-ref">— DnDValidResponse</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.validResponse.shouldAutoGraded</code></td><td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>true</code>. This field does <strong>NOT</strong> exist in MCQ.</td></tr>
+  <tr><td><code>outcomeDeclaration.validResponse.correctAnswers</code></td><td>Array&lt;DnDCorrectAnswer&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td><td><code>validation.validResponse.answerMapping</code></td><td>One DnDCorrectAnswer per answerMapping entry.</td></tr>
+  </tbody>
+</table>
+
+<h4>7.3.1 <code>DnDCorrectAnswer</code> structure</h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>correctAnswers[].targetId</code></td><td>Integer</td><td class="required">YES</td><td class="status-direct">Direct</td><td><code>validation.validResponse.answerMapping[].blankId</code></td><td>References a <code>targets[].id</code>.</td></tr>
+  <tr><td><code>correctAnswers[].optionIds</code></td><td>Array&lt;Integer&gt;</td><td class="required">YES</td><td class="status-possible">Transform</td><td><code>validation.validResponse.answerMapping[].choiceId</code></td><td>Wrap single <code>choiceId</code> in array: <code>[choiceId]</code>.</td></tr>
+  <tr><td><code>correctAnswers[].matchMode</code></td><td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>ALL</div><div>ANY</div></div></div></span></td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"ALL"</code>.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec8">8. Unmapped / Ignored Legacy Fields</h2>
+<p>These AAT fields have no destination in the <code>application/json</code> request body and are dropped during transformation.</p>
+
+<div class="info">
+  <strong>Note:</strong> Fields <code>organisation</code> and <code>state</code> (if present) are <strong>not</strong> part of the request body. They should be extracted and used to populate the <code>X-Tenant-ID</code> header (or equivalent) in the HTTP request.
+</div>
+
+<h3>8.1 Root-Level — To Drop</h3>
+<table>
+  <thead><tr><th>Legacy Field</th><th>Type</th><th>Observed Values</th><th>Reason</th></tr></thead>
+  <tbody>
+  <tr><td><code>toolkits</code></td><td>Array / null</td><td><code>[]</code> / <code>null</code></td><td>Always empty. No target field.</td></tr>
+  <tr><td><code>constraints</code></td><td>Object / null</td><td><code>null</code></td><td>Always null.</td></tr>
+  <tr><td><code>stage</code></td><td>String</td><td><code>"PUBLISHED"</code></td><td>No target field.</td></tr>
+  <tr><td><code>version</code></td><td>Integer</td><td><code>1</code>–<code>7</code></td><td>Legacy versioning. Not needed.</td></tr>
+  <tr><td><code>adt</code></td><td>Boolean</td><td><code>false</code></td><td>No target field.</td></tr>
+  <tr><td><code>rubricId</code></td><td>null</td><td><code>null</code></td><td>No target field.</td></tr>
+  <tr><td><code>scoring</code></td><td>null</td><td><code>null</code></td><td>Root-level scoring unused. Use <code>outcomeDeclaration.scoring</code> instead.</td></tr>
+  <tr><td><code>validation.validResponse.type</code></td><td>String</td><td>Echoes question type</td><td>Redundant with root <code>type</code>.</td></tr>
+  <tr><td><code>summative</code></td><td>Boolean</td><td><code>true</code> / <code>false</code></td><td>Redundant with <code>metadata.summativeAssessment</code>.</td></tr>
+  <tr><td><code>variant</code></td><td>String</td><td><code>"EN_US"</code>, <code>"AR"</code></td><td>Often identical to <code>language</code>.</td></tr>
+  <tr><td><code>variants</code></td><td>Array</td><td><code>[]</code> or translation links</td><td>Needed only if maintaining cross-language associations.</td></tr>
+  <tr><td><code>maxScore</code></td><td>Integer</td><td><code>1</code>, <code>100</code></td><td>Consider for informing <code>outcomeDeclaration.scoring</code> normalization.</td></tr>
+  </tbody>
+</table>
+
+<h3>8.2 Root-Level — Decision Required</h3>
+<table>
+  <thead><tr><th>Legacy Field</th><th>Type</th><th>Observed Values</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>ISO DateTime</td><td>Timestamps</td><td><code>createdAt</code> is preserved in <code>annotation.tags["migration:originalCreatedAt"]</code>.</td></tr>
+  <tr><td><code>createdBy</code> / <code>updatedBy</code></td><td>String (email)</td><td>Emails</td><td>System-managed. <code>createdByUser.email</code> used as fallback for <code>metadata.general.source</code>.</td></tr>
+  <tr><td><code>createdByUser</code> / <code>updatedByUser</code></td><td>Object</td><td><code>{ uuid, name, email }</code></td><td>Email used as fallback source. Rest dropped.</td></tr>
+  </tbody>
+</table>
+
+<h3>8.3 Metadata — To Drop</h3>
+<table>
+  <thead><tr><th>Legacy Field</th><th>Type</th><th>Reason</th></tr></thead>
+  <tbody>
+  <tr><td><code>metadata.conditionsOfUse</code></td><td>Array</td><td>Always empty. No target field.</td></tr>
+  <tr><td><code>metadata.formatType</code></td><td>String</td><td>Always <code>"QUESTION"</code>. No target field.</td></tr>
+  <tr><td><code>metadata.authoredDate</code></td><td>ISO DateTime</td><td>Preserved in <code>annotation.tags["migration:authoredDate"]</code>, otherwise dropped.</td></tr>
+  <tr><td><code>metadata.skillId</code></td><td>String</td><td>Appended to <code>metadata.general.keywords</code> as <code>"skillId:{value}"</code>. Not a standalone field.</td></tr>
+  <tr><td><code>metadata.subSkill</code></td><td>String</td><td>Appended to <code>keywords</code> as <code>"subSkill:{value}"</code> AND included in <code>classification.subDomain[]</code>.</td></tr>
+  <tr><td><code>metadata.domains</code></td><td>Array</td><td>Merged into <code>classification.subDomain[]</code>. Not a standalone field.</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>

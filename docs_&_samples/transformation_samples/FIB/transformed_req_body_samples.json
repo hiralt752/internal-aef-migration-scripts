@@ -1,0 +1,656 @@
+[
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "FILL_IN_THE_BLANK",
+    "subType": "BLANK_ON_TEXT",
+    "metadata": {
+      "general": {
+        "code": "EN8_MLO_295_Q_3",
+        "externalId": "21d0ca69-b321-4070-bd00-8da3683730d6",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "Present Perfect",
+          "Continuous",
+          "Culture"
+        ],
+        "parentReference": null,
+        "source": "Va11"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ2",
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": "A2",
+        "proficiency": "READING",
+        "lexileLevel": "8",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF"
+        ]
+      },
+      "classification": {
+        "grade": "8",
+        "subject": "English MOE",
+        "curriculum": "UAE MOE",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "575630",
+            "name": "En8.5.R.RS.1",
+            "description": "Recognise key features of text organisation.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "889924",
+            "name": "En8.5.R.CS.3",
+            "description": "Read and understand details in simple, extended texts on familiar and concrete topics.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "657862",
+            "name": "En8.5.R.CS.5",
+            "description": "Infer the meaning of unknown words when reading simple texts on familiar and concrete topics.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "439040",
+            "name": "En8.5.W.WS.1",
+            "description": "Apply spelling rules and conventions with consistency when writing.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "833256",
+            "name": "En8.5.W.WP.3",
+            "description": "Write simple, structured paragraphs that contain a topic sentence and supporting details.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          }
+        ],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2020-08-25T15:24:05.483",
+          "migration:authoredDate": "2020-08-25T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "fibImage": null,
+      "optionsStyle": "option-style-1",
+      "wordBankLayout": "none",
+      "wordBankDistractor": [],
+      "columns": 1,
+      "numberedSentence": false,
+      "centered": false,
+      "statement": {
+        "content": {
+          "type": "text",
+          "text": ""
+        }
+      },
+      "sentence": {
+        "text": "<p>Fill in the blank to make the sentence present perfect continuous.</p>\n<p> </p>\n<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">\n<tbody>\n<tr>\n<td colspan=\"4\" style=\"width: 25%; text-align: center;\">Word Bank</td>\n</tr>\n<tr>\n<td style=\"width: 25%; text-align: center;\">has been</td>\n<td style=\"width: 25%; text-align: center;\">have been</td>\n<td style=\"width: 25%; text-align: center;\">had been</td>\n<td style=\"width: 25%; text-align: center;\">been</td>\n</tr>\n</tbody>\n</table>\n<p>My sister  @_@  making traditional casual clothing since she was sixteen years old.</p>"
+      },
+      "items": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "feedback": null,
+          "rules": [],
+          "decimalNotation": null,
+          "periodNotation": null,
+          "answerType": "text",
+          "inputType": "TEXT_BLANK",
+          "swappable": false,
+          "swapGroupId": 0,
+          "withBlankPicker": false,
+          "allowEquivalentNumber": false,
+          "simplestFormFraction": false,
+          "decimals": null,
+          "itemId": null,
+          "position": null,
+          "wirisXml": null,
+          "wirisSvg": null
+        }
+      ],
+      "variables": []
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "multipleAnswer": false
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validation": {
+        "scoringType": "EXACT_MATCH",
+        "validResponse": {
+          "correctAnswers": [
+            {
+              "blankId": 1,
+              "correctAnswer": "has been",
+              "alternateAnswers": [],
+              "answerInWidgetFormat": null
+            }
+          ]
+        }
+      },
+      "seeWhy": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>Present perfect continuous tells how long you have been doing an action.</p>"
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>We use present perfect continuous to talk about things you are doing at that moment.</p>"
+            }
+          ]
+        }
+      }
+    },
+    "modalFeedback": {
+      "needHelp": {
+        "content": {
+          "layout": "TEXT",
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>There is only one sister.</p>"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "FILL_IN_THE_BLANK",
+    "subType": "BLANK_ON_TEXT",
+    "metadata": {
+      "general": {
+        "code": "EN8_MLO_295_Q_6",
+        "externalId": "ed9483a4-4971-4c2a-8d5f-b2ec9a2ffb8f",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "Present Perfect",
+          "Continuous",
+          "Culture"
+        ],
+        "parentReference": null,
+        "source": "Va11"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ2",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": "A2",
+        "proficiency": "READING",
+        "lexileLevel": "8",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF"
+        ]
+      },
+      "classification": {
+        "grade": "8",
+        "subject": "English MOE",
+        "curriculum": "UAE MOE",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "575630",
+            "name": "En8.5.R.RS.1",
+            "description": "Recognise key features of text organisation.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "889924",
+            "name": "En8.5.R.CS.3",
+            "description": "Read and understand details in simple, extended texts on familiar and concrete topics.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "657862",
+            "name": "En8.5.R.CS.5",
+            "description": "Infer the meaning of unknown words when reading simple texts on familiar and concrete topics.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "439040",
+            "name": "En8.5.W.WS.1",
+            "description": "Apply spelling rules and conventions with consistency when writing.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "833256",
+            "name": "En8.5.W.WP.3",
+            "description": "Write simple, structured paragraphs that contain a topic sentence and supporting details.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          }
+        ],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2020-08-27T16:53:14.682",
+          "migration:authoredDate": "2020-08-27T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "fibImage": null,
+      "optionsStyle": "option-style-1",
+      "wordBankLayout": "none",
+      "wordBankDistractor": [],
+      "columns": 1,
+      "numberedSentence": false,
+      "centered": false,
+      "statement": {
+        "content": {
+          "type": "text",
+          "text": ""
+        }
+      },
+      "sentence": {
+        "text": "<p>Fill in the blank to complete the present perfect continuous.</p>\n<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">\n<tbody>\n<tr>\n<td colspan=\"4\" style=\"width: 25%; text-align: center;\">Word Bank</td>\n</tr>\n<tr>\n<td style=\"width: 25%; text-align: center;\">since</td>\n<td style=\"width: 25%; text-align: center;\">has</td>\n<td style=\"width: 25%; text-align: center;\">had</td>\n<td style=\"width: 25%; text-align: center;\">have</td>\n</tr>\n</tbody>\n</table>\n<p>She  @_@  been writing a novel about the values of the people.</p>"
+      },
+      "items": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "feedback": null,
+          "rules": [],
+          "decimalNotation": null,
+          "periodNotation": null,
+          "answerType": "text",
+          "inputType": "TEXT_BLANK",
+          "swappable": false,
+          "swapGroupId": 0,
+          "withBlankPicker": false,
+          "allowEquivalentNumber": false,
+          "simplestFormFraction": false,
+          "decimals": null,
+          "itemId": null,
+          "position": null,
+          "wirisXml": null,
+          "wirisSvg": null
+        }
+      ],
+      "variables": []
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "multipleAnswer": false
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validation": {
+        "scoringType": "EXACT_MATCH",
+        "validResponse": {
+          "correctAnswers": [
+            {
+              "blankId": 1,
+              "correctAnswer": "has",
+              "alternateAnswers": [],
+              "answerInWidgetFormat": null
+            }
+          ]
+        }
+      },
+      "seeWhy": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>You can use the present perfect continuous to talk about an action that started in the past and is continuing until now.</p>"
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>This is taking place in the present.</p>"
+            }
+          ]
+        }
+      }
+    },
+    "modalFeedback": {
+      "needHelp": {
+        "content": {
+          "layout": "TEXT",
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>There is only one <em>she</em>.</p>"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "FILL_IN_THE_BLANK",
+    "subType": "BLANK_ON_TEXT",
+    "metadata": {
+      "general": {
+        "code": "EN8_MLO_295_Q_11",
+        "externalId": "37cf14ab-50da-4c65-99e7-9e33ea33fbec",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "Present perfect",
+          "Continuous",
+          "Culture"
+        ],
+        "parentReference": null,
+        "source": "Va11"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ2",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": "A2",
+        "proficiency": "READING",
+        "lexileLevel": "8",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF"
+        ]
+      },
+      "classification": {
+        "grade": "8",
+        "subject": "English MOE",
+        "curriculum": "UAE MOE",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "575630",
+            "name": "En8.5.R.RS.1",
+            "description": "Recognise key features of text organisation.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "889924",
+            "name": "En8.5.R.CS.3",
+            "description": "Read and understand details in simple, extended texts on familiar and concrete topics.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "657862",
+            "name": "En8.5.R.CS.5",
+            "description": "Infer the meaning of unknown words when reading simple texts on familiar and concrete topics.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "439040",
+            "name": "En8.5.W.WS.1",
+            "description": "Apply spelling rules and conventions with consistency when writing.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          },
+          {
+            "type": "sub_standard",
+            "id": "833256",
+            "name": "En8.5.W.WP.3",
+            "description": "Write simple, structured paragraphs that contain a topic sentence and supporting details.",
+            "curriculum": "UAE MOE",
+            "grade": "8",
+            "subject": "English MOE"
+          }
+        ],
+        "subDomain": null
+      },
+      "annotation": {
+        "tags": {
+          "migration:source": "AAT",
+          "migration:originalCreatedAt": "2020-08-27T17:52:12.159",
+          "migration:authoredDate": "2020-08-27T00:00:00.000"
+        }
+      }
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "fibImage": null,
+      "optionsStyle": "option-style-1",
+      "wordBankLayout": "none",
+      "wordBankDistractor": [],
+      "columns": 1,
+      "numberedSentence": false,
+      "centered": false,
+      "statement": {
+        "content": {
+          "type": "text",
+          "text": ""
+        }
+      },
+      "sentence": {
+        "text": "<p>Fill in the blank to make the sentence present perfect continuous.</p>\n<p> </p>\n<table border=\"1\" style=\"border-collapse: collapse; width: 100%; height: 56px;\">\n<tbody>\n<tr style=\"height: 28px;\">\n<td colspan=\"4\" style=\"width: 25%; text-align: center; height: 28px;\">Word Bank</td>\n</tr>\n<tr style=\"height: 28px;\">\n<td style=\"width: 25%; height: 28px; text-align: center;\">has</td>\n<td style=\"width: 25%; height: 28px; text-align: center;\">have</td>\n<td style=\"width: 25%; height: 28px; text-align: center;\">had</td>\n<td style=\"width: 25%; height: 28px; text-align: center;\">since</td>\n</tr>\n</tbody>\n</table>\n<p>I  @_@  been exploring Donggung Palace.</p>"
+      },
+      "items": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "feedback": null,
+          "rules": [],
+          "decimalNotation": null,
+          "periodNotation": null,
+          "answerType": "text",
+          "inputType": "TEXT_BLANK",
+          "swappable": false,
+          "swapGroupId": 0,
+          "withBlankPicker": false,
+          "allowEquivalentNumber": false,
+          "simplestFormFraction": false,
+          "decimals": null,
+          "itemId": null,
+          "position": null,
+          "wirisXml": null,
+          "wirisSvg": null
+        }
+      ],
+      "variables": []
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1,
+      "multipleAnswer": false
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validation": {
+        "scoringType": "EXACT_MATCH",
+        "validResponse": {
+          "correctAnswers": [
+            {
+              "blankId": 1,
+              "correctAnswer": "have",
+              "alternateAnswers": [],
+              "answerInWidgetFormat": null
+            }
+          ]
+        }
+      },
+      "seeWhy": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p>You can use the present perfect continuous to talk about an action that started in the past and is continuing until now.</p>"
+          }
+        ]
+      },
+      "feedback": {
+        "incorrect": {
+          "content": [
+            {
+              "type": "text",
+              "text": "<p>This is happening in the present.</p>"
+            }
+          ]
+        }
+      }
+    },
+    "modalFeedback": {
+      "needHelp": {
+        "content": {
+          "layout": "TEXT",
+          "content": [
+            {
+              "type": "text",
+              "text": "<p><em>I</em> uses the same verb form as when you have more than one subject.</p>"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

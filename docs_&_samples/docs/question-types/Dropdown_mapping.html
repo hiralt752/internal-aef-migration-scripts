@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Dropdown — AAT to Question API Mapping</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; font-size: 0.9em; }
+  th, td { border: 1px solid #dddddd; text-align: left; padding: 10px; vertical-align: top; }
+  th { background-color: #f8f9fa; color: #333; }
+  code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; color: #d63384; }
+  h1, h2, h3, h4 { color: #2c3e50; }
+  h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+  h3 { color: #34495e; margin-top: 25px; }
+  .status-direct { font-weight: bold; color: #198754; }
+  .status-possible { font-weight: bold; color: #fd7e14; }
+  .status-none { font-weight: bold; color: #dc3545; }
+  .status-hardcode { font-weight: bold; color: #6f42c1; }
+  .status-manual { font-weight: bold; color: #e83e8c; }
+  .note { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+  .info { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
+  .danger { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
+  .manual { background-color: #fce4ec; border-left: 4px solid #e83e8c; padding: 10px; margin: 15px 0; }
+  .schema-ref { font-size: 0.85em; color: #6c757d; font-style: italic; }
+  .required { color: #dc3545; font-weight: bold; font-size: 0.8em; }
+  .toc { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+  .toc a { color: #0d6efd; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+  .enum-badge { position: relative; cursor: help; border-bottom: 2px dotted #0d6efd; padding: 2px 0; }
+  .tooltip { display: none; position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 12px; border-radius: 6px; white-space: nowrap; z-index: 1000; font-size: 11px; border: 1px solid #0d6efd; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #1a1a1a; }
+  .enum-badge:hover .tooltip { display: block; }
+  .enum-values { font-family: monospace; font-size: 10px; display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid #444; }
+  .enum-values div { padding: 2px 0; }
+  .rule-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.88em; }
+  .rule-table th { background: #e8eaf6; }
+  .rule-table td.cond { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
+  .rule-table td.result { background: #e8f5e9; font-family: monospace; font-size: 0.85em; }
+  .flow-step { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 14px; margin: 6px 0; font-size: 0.92em; }
+  .flow-step strong { color: #e65100; }
+</style>
+</head>
+<body>
+
+<div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 18px; margin-bottom:20px; font-size:0.9em;">
+  <strong>Part of:</strong> <a href="../migration_mapping.html">migration_mapping.html</a> (general mapping doc) —
+  This sub-doc covers <strong>Dropdown (Select-a-Blank)</strong> specific fields only.
+  Shared sections (Metadata, Hints, ModalFeedback, SeeWhy) are defined in the main doc.
+</div>
+
+<h1>Dropdown — AAT → Question API Mapping (<code>application/json</code>)</h1>
+<p>Maps legacy AAT <code>SELECT_A_BLANK</code> questions to <code>DropdownQuestionResource</code> for
+<code>POST /api/v1/questions</code>.</p>
+
+<div class="info">
+  <strong>Status Legend:</strong>
+  <ul style="margin:8px 0 0 18px; padding:0;">
+    <li><span class="status-direct">Direct</span> — direct copy from legacy field</li>
+    <li><span class="status-possible">Transform</span> — requires processing/logic</li>
+    <li><span class="status-hardcode">Hardcode</span> — fixed value, no legacy source</li>
+    <li><span class="status-manual">Manual</span> — needs human decision or QB-team confirmation</li>
+    <li><span class="status-none">No Data</span> — not present in legacy system</li>
+  </ul>
+</div>
+
+<div class="toc">
+  <strong>Table of Contents</strong>
+  <ol>
+    <li><a href="#sec0">Key Transformation Rules</a>
+      <ul>
+        <li><a href="#sec0-type">Type &amp; SubType</a></li>
+        <li><a href="#sec0-blanks">body.blanks structure — different from FIB/DnD</a></li>
+        <li><a href="#sec0-prompt">Prompt Processing — sentence &amp; @_@ replacement</a></li>
+        <li><a href="#sec0-ids">ID Re-mapping (incremental)</a></li>
+        <li><a href="#sec0-weight">Weight Normalization</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec1">Base Structure — shared</a></li>
+    <li><a href="#sec2">Metadata — shared</a></li>
+    <li><a href="#sec3">Dropdown-Specific: itemBody (DropdownItemBodyResource)</a>
+      <ul>
+        <li><a href="#sec3-top">Top-level fields</a></li>
+        <li><a href="#sec3-statement">statement — always null</a></li>
+        <li><a href="#sec3-sentence">sentence — full prompt with @_@ blanks</a></li>
+        <li><a href="#sec3-items">items[] (DropdownItemResource — one per blank)</a></li>
+        <li><a href="#sec3-options">items[].options[] (DropdownOptionResource — per-blank choices)</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec4">responseDeclaration</a></li>
+    <li><a href="#sec5">outcomeDeclaration</a>
+      <ul>
+        <li><a href="#sec5-scoring">scoringType &amp; scoring</a></li>
+        <li><a href="#sec5-seewhy">seeWhy — shared</a></li>
+        <li><a href="#sec5-feedback">feedback</a></li>
+        <li><a href="#sec5-valid">validResponse</a></li>
+      </ul>
+    </li>
+    <li><a href="#sec6">modalFeedback — shared</a></li>
+    <li><a href="#sec7">Dropdown vs FIB vs DnD — structural comparison</a></li>
+    <li><a href="#sec8">Unmapped / Ignored Legacy Fields</a></li>
+    <li><a href="#sec-manual">Fields Needing Clarification</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec0">0. Key Transformation Rules</h2>
+
+<h3 id="sec0-type">0.1 Type &amp; SubType</h3>
+
+<table class="rule-table">
+  <thead><tr><th>Legacy <code>type</code></th><th>→ API <code>type</code></th><th>→ API <code>subType</code></th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td class="cond">SELECT_A_BLANK</td>
+    <td class="result">DROPDOWN</td>
+    <td class="result">DROPDOWN_SENTENCE (hardcoded)</td>
+    <td>Type is remapped. SubType always hardcoded to <code>DROPDOWN_SENTENCE</code> for migration. Other available values: <code>SPLIT_SCREEN</code>, <code>CARDS</code> — never assigned.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec0-blanks">0.2 <code>body.blanks</code> Structure — key difference from FIB and DnD</h3>
+
+<div class="danger">
+  <strong>Dropdown <code>body.blanks</code> is an object, not an array.</strong> FIB and DnD have <code>body.blanks</code> as a flat array of blank definitions. Dropdown wraps it differently — each blank carries its own choices inline.
+</div>
+
+<table class="rule-table">
+  <thead><tr><th>Field</th><th>FIB/DnD source</th><th>Dropdown source</th></tr></thead>
+  <tbody>
+  <tr><td class="cond">Shuffle flag</td><td class="result"><code>body.choices.shuffle</code></td><td class="result"><code>body.blanks.shuffle</code></td></tr>
+  <tr><td class="cond">Blank definitions</td><td class="result"><code>body.blanks[]</code> (flat array)</td><td class="result"><code>body.blanks.blankItems[]</code></td></tr>
+  <tr><td class="cond">Per-blank choices</td><td class="result"><code>body.choices.choiceItems[]</code> (global pool)</td><td class="result"><code>body.blanks.blankItems[].choices[]</code> (per-blank)</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Per-blank choices:</strong> Unlike DnD where all options are a global pool shared across all blanks, Dropdown gives each blank its own independent set of choices. Each QB <code>DropdownItemResource</code> (blank) contains its own <code>options[]</code> array sourced from that blank's <code>choices[]</code>.
+</div>
+
+<h3 id="sec0-prompt">0.3 Prompt Processing — sentence &amp; <code>@_@</code> replacement</h3>
+
+<p>Same approach as FIB and DnD — the full <code>body.prompt</code> HTML goes into <code>sentence.text</code> with each <code>&lt;blank-field&gt;</code> replaced by <code>@_@</code>. <code>statement</code> is always <code>null</code>.</p>
+
+<div class="flow-step"><strong>Step 1 — Find all blank-field tags:</strong> Scan <code>body.prompt</code> for all <code>&lt;blank-field id="N" ...&gt;&lt;/blank-field&gt;</code> in DOM order.</div>
+<div class="flow-step"><strong>Step 2 — Replace each with <code>@_@</code>:</strong> Strip the entire tag, insert <code>@_@</code> in its place.</div>
+<div class="flow-step"><strong>Step 3 — Audio/Video extraction:</strong> <code>&lt;audio&gt;</code> → <code>itemBody.audio</code>, <code>&lt;video&gt;</code> → <code>itemBody.video</code>. Tags removed from HTML.</div>
+<div class="flow-step"><strong>Step 4 — Result → <code>itemBody.sentence.text</code>.</strong> <code>itemBody.statement</code> = <code>null</code>.</div>
+
+<h3 id="sec0-ids">0.4 ID Re-mapping (incremental)</h3>
+
+<p>Same rule as FIB and DnD — all IDs are reassigned as sequential integers starting at 1. AAT IDs are used only as lookup keys.</p>
+
+<table class="rule-table">
+  <thead><tr><th>QB Field</th><th>Assigned value</th><th>AAT lookup source</th></tr></thead>
+  <tbody>
+  <tr>
+    <td class="cond">items[].id</td>
+    <td class="result">1, 2, 3… by blank-field order in prompt</td>
+    <td class="result">AAT blank-field <code>id</code> attr used to find matching <code>body.blanks.blankItems[]</code> entry</td>
+  </tr>
+  <tr>
+    <td class="cond">items[].options[].id</td>
+    <td class="result">1, 2, 3… by order within each blank's <code>choices[]</code></td>
+    <td class="result">AAT choice <code>id</code> used to resolve <code>correctAnswers[].optionId</code></td>
+  </tr>
+  <tr>
+    <td class="cond">correctAnswers[].dropDownId</td>
+    <td class="result">Incremental item id (matches items[].id)</td>
+    <td class="result">AAT <code>validBlankChoices[].blankId</code> → find blank-field position</td>
+  </tr>
+  <tr>
+    <td class="cond">correctAnswers[].optionId</td>
+    <td class="result">Incremental option id (matches items[].options[].id)</td>
+    <td class="result">AAT <code>validBlankChoices[].choiceId</code> → find choice position within that blank</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec0-weight">0.5 Weight Normalization</h3>
+<p>Same rule as FIB/DnD — divide by 100. <code>100.0 → 1.0</code>, <code>50.0 → 0.5</code>. Source: <code>body.blanks.blankItems[].weight</code>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec1">1. Base Structure — shared</h2>
+
+<pre><code>{
+  "schemaVersion": { "major": 1, "minor": 0, "patch": 0 },
+  "type": "DROPDOWN",
+  "subType": "DROPDOWN_SENTENCE",
+  "metadata": { ... },
+  "itemBody": { ... },
+  "responseDeclaration": { ... },
+  "outcomeDeclaration": { ... },
+  "modalFeedback": { ... }
+}</code></pre>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>schemaVersion</code></td><td>SemanticVersion</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>{ "major": 1, "minor": 0, "patch": 0 }</code>.</td></tr>
+  <tr>
+    <td><code>type</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">API value:<div class="enum-values"><div>DROPDOWN</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>type</code></td>
+    <td>Legacy <code>SELECT_A_BLANK</code> → <code>DROPDOWN</code>.</td>
+  </tr>
+  <tr>
+    <td><code>subType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">Dropdown subType values:<div class="enum-values"><div>DROPDOWN_SENTENCE</div><div>SPLIT_SCREEN</div><div>CARDS</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>"DROPDOWN_SENTENCE"</code>.</td>
+  </tr>
+  <tr><td><code>metadata</code></td><td>MetadataResource</td><td class="required">YES</td><td class="status-possible">Transform</td><td>(Section 2)</td><td>Identical to MCQ/FIB/DnD. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</td></tr>
+  <tr><td><code>modalFeedback</code></td><td>ModalFeedback</td><td></td><td class="status-possible">Transform</td><td><code>body.hints</code> / <code>body.passage</code></td><td>Identical to MCQ. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec2">2. Metadata — shared</h2>
+<p>All <code>metadata.*</code> sub-objects identical to MCQ. See <a href="../migration_mapping.html#sec2">main doc §2</a>.</p>
+<div class="note">
+  <strong>source field:</strong> <code>metadata.general.source</code> uses <code>metadata.author</code> first, then falls back to <code>createdByUser.email</code>. The Dropdown AAT sample includes a <code>createdByUser</code> object — use its <code>email</code> as the fallback source.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec3">3. Dropdown-Specific: <code>itemBody</code> <span class="schema-ref">— DropdownItemBodyResource</span></h2>
+
+<h3 id="sec3-top">3.1 Top-level <code>itemBody</code> fields</h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.version</code></td><td>String</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>"1.0"</code>.</td></tr>
+  <tr><td><code>itemBody.title</code></td><td>StringTitle/TooltipTitle</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.subTitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.instruction</code></td><td>Html</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.audio</code></td><td>Audio</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;audio&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.video</code></td><td>Video</td><td></td><td class="status-possible">Transform</td><td><code>body.prompt</code></td><td>Extracted <code>&lt;video&gt;</code> → <code>{ "url": "..." }</code>. <code>null</code> if none.</td></tr>
+  <tr><td><code>itemBody.backgroundLayout</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.timeSpentConfig</code></td><td>TimeSpentConfig</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.splitContent</code></td><td>SplitContent</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.sideImage</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr>
+    <td><code>itemBody.shuffled</code></td><td>Boolean</td><td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>body.blanks.shuffle</code></td>
+    <td>Note the different source vs FIB/DnD — Dropdown shuffle comes from <code>body.blanks.shuffle</code>, not <code>body.choices.shuffle</code>. Defaults to <code>true</code> if absent.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-statement">3.2 <code>itemBody.statement</code></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>itemBody.statement</code></td>
+    <td>DropdownStatement</td><td></td><td class="status-hardcode">Hardcode</td>
+    <td>Always <code>null</code>. Full prompt goes into <code>sentence.text</code>.</td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>DropdownStatement.content</strong> is a single <code>ContentItem</code> (not an array), same structure as FIBStatement. When <code>null</code> is not accepted, use <code>{ "content": { "type": "text", "text": "" } }</code>.
+</div>
+
+<h3 id="sec3-sentence">3.3 <code>itemBody.sentence</code> <span class="schema-ref">— DropdownSentence</span></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>itemBody.sentence.text</code></td>
+    <td>String</td><td></td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code></td>
+    <td>Full prompt HTML with every <code>&lt;blank-field id="N"...&gt;&lt;/blank-field&gt;</code> replaced by <code>@_@</code>. All other HTML preserved as-is. <code>null</code> if prompt empty.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-items">3.4 <code>itemBody.items[]</code> <span class="schema-ref">— DropdownItemResource</span></h3>
+<p>One <code>DropdownItemResource</code> per <code>&lt;blank-field&gt;</code> tag found in the prompt, in DOM order. Each item represents one dropdown in the sentence and carries its own options array.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>itemBody.items</code></td><td>Array&lt;DropdownItemResource&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td><td><code>body.prompt</code> + <code>body.blanks.blankItems</code></td><td>One item per blank-field tag, in prompt DOM order.</td></tr>
+  <tr>
+    <td><code>itemBody.items[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.prompt</code> (blank-field order)</td>
+    <td>Incremental: first blank-field → <code>1</code>, second → <code>2</code>, etc. AAT blank-field <code>id</code> attr is lookup key only.</td>
+  </tr>
+  <tr>
+    <td><code>itemBody.items[].weight</code></td><td>Float</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.blanks.blankItems[].weight</code></td>
+    <td>Matched via blank-field <code>id</code> → <code>blankItems[].id</code>. Normalize: divide by 100.</td>
+  </tr>
+  <tr><td><code>itemBody.items[].title</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.items[].subtitle</code></td><td>String</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  <tr><td><code>itemBody.items[].image</code></td><td>Image</td><td></td><td class="status-hardcode">Hardcode</td><td>—</td><td>Always <code>null</code>.</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec3-options">3.5 <code>itemBody.items[].options[]</code> <span class="schema-ref">— DropdownOptionResource</span></h3>
+<p>Per-blank options — sourced from <code>body.blanks.blankItems[N].choices[]</code> for the matching blank. Each blank has its own independent option set.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>items[].options</code></td><td>Array&lt;DropdownOptionResource&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td><td><code>body.blanks.blankItems[N].choices</code></td><td>Matched via blank-field id → blankItems[].id, then map that blank's choices array.</td></tr>
+  <tr>
+    <td><code>items[].options[].id</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.blanks.blankItems[N].choices[].id</code></td>
+    <td>Incremental <strong>within each blank</strong>: first choice of blank N → <code>1</code>, second → <code>2</code>, etc. Resets to 1 for each new blank. AAT choice <code>id</code> is lookup key only.</td>
+  </tr>
+  <tr>
+    <td><code>items[].options[].content</code></td><td>ContentItem</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>body.blanks.blankItems[N].choices[].value</code></td>
+    <td>
+      Parsed — media extracted, text cleaned. <strong>Single ContentItem</strong> (not array — schema is <code>$ref: ContentItem</code>).<br>
+      Text → <code>{ "type": "text", "text": "..." }</code><br>
+      Image → <code>{ "type": "image", "image": { "url": "..." } }</code>
+    </td>
+  </tr>
+  <tr>
+    <td><code>items[].options[].feedback</code></td><td>String</td><td></td><td class="status-direct">Direct</td>
+    <td><code>body.blanks.blankItems[N].choices[].feedback</code></td>
+    <td>Direct copy. Empty string if absent.</td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="danger">
+  <strong>options[].content is a single ContentItem, not an array.</strong> This differs from DnD <code>options[].content</code> which is <code>ContentItem[]</code>. Dropdown uses a single object: <code>"content": { "type": "text", "text": "..." }</code>.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec4">4. <code>responseDeclaration</code></h2>
+<p>Dropdown has only <code>maxAttempts</code> — same as DnD, simpler than MCQ.</p>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>responseDeclaration.maxAttempts</code></td><td>Integer</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>Always <code>1</code>.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec5">5. <code>outcomeDeclaration</code> <span class="schema-ref">— DropdownOutcomeDeclarationResource</span></h2>
+
+<h3 id="sec5-scoring">5.1 <code>scoringType</code> &amp; <code>scoring</code></h3>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>outcomeDeclaration.scoringType</code></td>
+    <td>String <span class="enum-badge">(enum)<div class="tooltip">Values:<div class="enum-values"><div>EXACT_MATCH</div><div>PARTIAL_MATCH</div><div>MANUAL</div></div></div></span></td>
+    <td class="required">YES</td><td class="status-direct">Direct</td>
+    <td><code>validation.scoringType</code></td>
+    <td>Defaults to <code>"EXACT_MATCH"</code> if absent.</td>
+  </tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMin</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.normalizedMax</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>1</code></td></tr>
+  <tr><td><code>outcomeDeclaration.scoring.defaultNormalizedValue</code></td><td>Number</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td><td>—</td><td><code>0</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec5-seewhy">5.2 <code>seeWhy</code> — shared</h3>
+<p>Identical to MCQ. Built from <code>body.generalFeedback</code>. See <a href="../migration_mapping.html#sec3">main doc §3.3</a>. Omitted if empty.</p>
+
+<h3 id="sec5-feedback">5.3 <code>feedback</code></h3>
+<div class="info">
+  <strong>feedback is optional</strong> — omitted entirely when all sub-fields are absent (same as DnD).
+</div>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr><td><code>outcomeDeclaration.feedback.general</code></td><td>FeedbackContent</td><td class="status-none">No Data</td><td>—</td><td>Never populated.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.correct</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.correctAnswerFeedback</code></td><td>Omitted if null/empty.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.incorrect</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.wrongAnswerFeedback</code> + <code>body.hints[]</code></td><td>Via hint-mapper rules. See <a href="../migration_mapping.html#sec0-hintmapper">main doc §0.4</a>.</td></tr>
+  <tr><td><code>outcomeDeclaration.feedback.partial</code></td><td>FeedbackContent</td><td class="status-possible">Transform</td><td><code>body.partialAnswerFeedback</code></td><td>Omitted if null/empty.</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec5-valid">5.4 <code>outcomeDeclaration.validResponse</code> <span class="schema-ref">— DropdownValidResponseResource</span></h3>
+
+<div class="info">
+  <strong>Top-level <code>validResponse</code></strong> — same position as MCQ/DnD. Not nested in a <code>validation</code> wrapper (that is FIB-only). Includes <code>shouldAutoGraded: true</code> like DnD.
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>outcomeDeclaration.validResponse.shouldAutoGraded</code></td>
+    <td>Boolean</td><td class="required">YES</td><td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td>Always <code>true</code>.</td>
+  </tr>
+  <tr>
+    <td><code>outcomeDeclaration.validResponse.correctAnswers</code></td>
+    <td>Array&lt;DropdownCorrectAnswerResource&gt;</td><td class="required">YES (min 1)</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.validBlankChoices</code></td>
+    <td>One entry per blank. Uses incremental QB ids — not AAT <code>blankId</code>/<code>choiceId</code> values.</td>
+  </tr>
+  </tbody>
+</table>
+
+<h4>5.4.1 <code>DropdownCorrectAnswerResource</code> structure</h4>
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Required</th><th>Status</th><th>Legacy AAT Field</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>correctAnswers[].dropDownId</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.validBlankChoices[].blankId</code></td>
+    <td>The incremental QB item id. Use AAT <code>blankId</code> to find the blank-field position in the prompt, then use that position number.</td>
+  </tr>
+  <tr>
+    <td><code>correctAnswers[].optionId</code></td><td>Integer</td><td class="required">YES</td><td class="status-possible">Transform</td>
+    <td><code>validation.validResponse.validBlankChoices[].choiceId</code></td>
+    <td>The incremental QB option id within that blank's options. Use AAT <code>choiceId</code> to find the choice position within <code>blankItems[N].choices[]</code>, then use that position number.</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec6">6. <code>modalFeedback</code> — shared</h2>
+<p>Identical to MCQ. See <a href="../migration_mapping.html#sec5">main doc §5</a>.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec7">7. Dropdown vs FIB vs DnD — Structural Comparison</h2>
+
+<table class="rule-table">
+  <thead><tr><th>Area</th><th>FIB</th><th>DnD</th><th>Dropdown</th></tr></thead>
+  <tbody>
+  <tr><td><strong>AAT type</strong></td><td class="cond">FILL_IN_THE_BLANK</td><td class="cond">FILL_IN_THE_BLANK_DRAG_DROP</td><td class="result">SELECT_A_BLANK</td></tr>
+  <tr><td><strong>QB type</strong></td><td class="cond">FILL_IN_THE_BLANK</td><td class="cond">DND</td><td class="result">DROPDOWN</td></tr>
+  <tr><td><strong>QB subType</strong></td><td class="cond">BLANK_ON_TEXT</td><td class="cond">BLANK_ON_QUESTION</td><td class="result">DROPDOWN_SENTENCE</td></tr>
+  <tr><td><strong>sentence.text</strong></td><td class="cond">Full HTML + @_@</td><td class="cond">Full HTML + @_@</td><td class="result">Full HTML + @_@</td></tr>
+  <tr><td><strong>statement</strong></td><td class="cond">null</td><td class="cond">null</td><td class="result">null</td></tr>
+  <tr><td><strong>Blank source</strong></td><td class="cond">body.blanks[] (flat array)</td><td class="cond">body.blanks[] (flat array)</td><td class="result">body.blanks.blankItems[] (nested in object)</td></tr>
+  <tr><td><strong>Choice source</strong></td><td class="cond">N/A (typed input)</td><td class="cond">body.choices.choiceItems[] (global pool)</td><td class="result">body.blanks.blankItems[N].choices[] (per-blank)</td></tr>
+  <tr><td><strong>Shuffle source</strong></td><td class="cond">N/A</td><td class="cond">body.choices.shuffle</td><td class="result">body.blanks.shuffle</td></tr>
+  <tr><td><strong>QB blank unit</strong></td><td class="cond">items[] (FIBItem)</td><td class="cond">targets[] (Target)</td><td class="result">items[] (DropdownItemResource)</td></tr>
+  <tr><td><strong>QB choice unit</strong></td><td class="cond">N/A</td><td class="cond">options[] flat (DnDOption)</td><td class="result">items[N].options[] nested (DropdownOptionResource)</td></tr>
+  <tr><td><strong>options[].content type</strong></td><td class="cond">N/A</td><td class="cond">ContentItem[] (array)</td><td class="result">ContentItem (single object)</td></tr>
+  <tr><td><strong>validResponse location</strong></td><td class="cond">outcomeDeclaration.validation.validResponse (nested)</td><td class="cond">outcomeDeclaration.validResponse (top level)</td><td class="result">outcomeDeclaration.validResponse (top level)</td></tr>
+  <tr><td><strong>shouldAutoGraded</strong></td><td class="cond">— (absent)</td><td class="cond">true</td><td class="result">true</td></tr>
+  <tr><td><strong>correctAnswer fields</strong></td><td class="cond">blankId + correctAnswer + alternateAnswers</td><td class="cond">targetId + optionIds[] + matchMode</td><td class="result">dropDownId + optionId</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec8">8. Unmapped / Ignored Legacy Fields</h2>
+<table>
+  <thead><tr><th>Legacy Field</th><th>Type</th><th>Reason</th></tr></thead>
+  <tbody>
+  <tr><td><code>validation.validResponse.type</code></td><td>String</td><td>Always echoes <code>SELECT_A_BLANK</code>. Redundant with root <code>type</code>.</td></tr>
+  <tr><td><code>toolkits</code>, <code>constraints</code>, <code>rubricId</code>, <code>scoring</code></td><td>Various</td><td>Always null/empty. No QB target.</td></tr>
+  <tr><td><code>stage</code>, <code>version</code>, <code>adt</code>, <code>summative</code>, <code>variant</code>, <code>variants</code>, <code>maxScore</code></td><td>Various</td><td>No QB target or redundant.</td></tr>
+  <tr><td><code>createdAt</code> / <code>updatedAt</code></td><td>ISO DateTime</td><td><code>createdAt</code> → <code>annotation.tags["migration:originalCreatedAt"]</code>. <code>updatedAt</code> dropped.</td></tr>
+  <tr><td><code>body.blanks.blankItems[].id</code></td><td>Integer</td><td>Lookup bridge only — used to match blank-field tags to blankItems data. Not emitted in QB output.</td></tr>
+  <tr><td><code>body.blanks.blankItems[].choices[].id</code></td><td>Integer</td><td>Lookup bridge only — used to resolve <code>correctAnswers[].optionId</code>. Not emitted.</td></tr>
+  <tr><td><code>validation.validResponse.validBlankChoices[].blankId</code></td><td>Integer</td><td>Lookup bridge — maps to incremental QB <code>dropDownId</code>.</td></tr>
+  <tr><td><code>validation.validResponse.validBlankChoices[].choiceId</code></td><td>Integer</td><td>Lookup bridge — maps to incremental QB <code>optionId</code>.</td></tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec-manual">9. Fields Needing Clarification</h2>
+<table>
+  <thead><tr><th>#</th><th>QB Field</th><th>Question</th><th>Current Assumption</th></tr></thead>
+  <tbody>
+  <tr>
+    <td>1</td>
+    <td><code>itemBody.statement</code></td>
+    <td>Can <code>statement</code> be <code>null</code>, or must it be <code>{ "content": { "type": "text", "text": "" } }</code>?</td>
+    <td><code>null</code></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><code>outcomeDeclaration.validResponse.shouldAutoGraded</code></td>
+    <td><code>DropdownValidResponseResource</code> schema does not mark <code>shouldAutoGraded</code> as required (unlike the non-Resource variant). Confirm if it must be sent.</td>
+    <td><code>true</code> (hardcoded)</td>
+  </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

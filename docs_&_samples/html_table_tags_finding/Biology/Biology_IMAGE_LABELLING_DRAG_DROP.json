@@ -1,0 +1,16 @@
+[
+  {
+    "question_id": "b49ae67f-cef9-419e-bfe6-76c1e2045779",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "54dbc43a-c8ce-4389-a392-ec5b5ff1e237",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  }
+]

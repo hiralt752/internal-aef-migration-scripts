@@ -1,0 +1,640 @@
+[
+    {
+      "metadata": {
+        "keywords": [
+          "Jasmine",
+          "point of view",
+          "story"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": true,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING",
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "3",
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ],
+        "conditionsOfUse": [
+          "https://www.shutterstock.com/image-photo/blue-pen-marking-on-checklist-sheet-2398228961"
+        ],
+        "formatType": "QUESTION",
+        "author": "Csa Ela5",
+        "authoredDate": "2025-06-19T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "skill",
+            "id": "32183",
+            "name": "RL.3.6.c",
+            "description": "Explain the point of view of narrator or characters in a story",
+            "curriculum": "English Reading",
+            "grade": "3",
+            "subject": "ELA"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "PW_ER_03_LO061_Q_21",
+      "createdByUser": {
+        "uuid": "e1ef123c-47aa-46c0-8981-75c606c31cce",
+        "name": "Csa Ela5",
+        "email": "csaela5@alefedu.net"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "MULTIPLE_SELECTION",
+      "body": {
+        "hints": [
+          "<p>Look for words in the text that show how Jasmine feels after trying to solve the mystery.</p>"
+        ],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "prompt": "<p>Read the text. Then, complete the sentence.</p>\n<p><br /><em>Jasmine rushed to her room and laid the paper on her desk. For the next two hours, Jasmine tried to figure out what the words and symbols meant. She developed a chart and tried to match each symbol to a letter, then tried to make the words and phrases match the code. But nothing worked. She finally gave up in frustration because this situation was ridiculous! She stuffed the paper in her backpack to look at tomorrow.</em></p>\n<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2025/06/19/06/16/IMRBEQ9EW3.jpg\" width=\"400\" height=\"267\" />&nbsp;</p>\n<p>How does Jasmine feel after working hard to solve the code? Choose two.</p>",
+        "choices": {
+          "minChoice": 2,
+          "maxChoice": 2,
+          "layoutColumns": 2,
+          "shuffle": true,
+          "listType": "NONE",
+          "choiceItems": [
+            {
+              "feedback": "",
+              "choiceId": 0,
+              "weight": 50.0,
+              "answer": "<p>tired</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 1,
+              "weight": 50.0,
+              "answer": "<p>frustrated</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 2,
+              "weight": 0.0,
+              "answer": "<p>delighted</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 3,
+              "weight": 0.0,
+              "answer": "<p>confident</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 498,
+              "weight": 0.0,
+              "answer": "<p>sad</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 619,
+              "weight": 0.0,
+              "answer": "<p>scared</p>"
+            }
+          ]
+        },
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2025-06-19T18:18:54.463",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "00026684-7a88-4eb5-8e79-e4ab22744dbd",
+      "validation": {
+        "validResponse": {
+          "type": "MULTIPLE_SELECTION",
+          "choiceIds": [
+            0,
+            1
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2025-06-19T18:18:54.463",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "e1ef123c-47aa-46c0-8981-75c606c31cce",
+        "name": "Csa Ela5",
+        "email": "csaela5@alefedu.net"
+      },
+      "scoring": null,
+      "updatedBy": "csaela5@alefedu.net",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "IN_PROGRESS",
+      "createdBy": "csaela5@alefedu.net",
+      "status": "DRAFT",
+      "summative": true
+    },
+    {
+      "metadata": {
+        "keywords": [
+          "equation",
+          "multistep",
+          "expression",
+          "solve"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": true,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "PROCEDURAL"
+        ],
+        "lexileLevel": "8",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Lina Kreidieh",
+        "authoredDate": "2022-09-18T00:00:00.000",
+        "curriculumOutcomes": [],
+        "skillId": "b0fc5723-7c7e-4720-b12d-404d476704bd",
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MA8_L015_ExploreLearn_Q_2",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "MULTIPLE_CHOICE",
+      "body": {
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "prompt": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct option.</span></p>\n<p>Tank A has 170 liters of water is emptied at a rate of <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2225%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E3%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2220.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2252%22%3E3%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 third\" width=\"25\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»3«/mn»«/mfrac»«/math»\" /> liters per second. Tank B has 100 liters of water and is filled at a rate of <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2225%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E4%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2220.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2212.5%22%20y%3D%2252%22%3E4%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 fourth\" width=\"25\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»4«/mn»«/mfrac»«/math»\" /> liters per second.</p>\n<p>After how many seconds will the two tanks have the same amount of water?&nbsp;</p>",
+        "choices": {
+          "minChoice": 1,
+          "maxChoice": 1,
+          "layoutColumns": 2,
+          "shuffle": true,
+          "listType": "NONE",
+          "choiceItems": [
+            {
+              "feedback": "",
+              "choiceId": 628,
+              "weight": 100.0,
+              "answer": "<p>120</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 0,
+              "weight": 0.0,
+              "answer": "<p>12</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 728,
+              "weight": 0.0,
+              "answer": "<p>280</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 955,
+              "weight": 0.0,
+              "answer": "<p>70</p>"
+            }
+          ]
+        },
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2022-09-18T10:41:50.916",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "976ad445-acca-4d02-acb7-cc9f35be0b89",
+      "validation": {
+        "validResponse": {
+          "type": "MULTIPLE_CHOICE",
+          "choiceIds": [
+            628
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2024-08-16T17:06:12.218",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "lina.kreidieh@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 2,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "lina.kreidieh@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": true
+    },
+    {
+      "metadata": {
+        "keywords": [
+          "Three-dimensional",
+          "two-dimensional",
+          "shape"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "REMEMBERING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ],
+        "conditionsOfUse": [
+          "https://www.shutterstock.com/image-vector/2dimensional-shapes-vector-set-isolated-on-1713253606",
+          "https://www.shutterstock.com/image-vector/3d-shape-set-isolated-on-white-593696201"
+        ],
+        "formatType": "QUESTION",
+        "author": "vq03_ma@test.com",
+        "authoredDate": "2022-05-30T00:00:00.000",
+        "curriculumOutcomes": [],
+        "skillId": "20cf1d6e-24cf-4c84-8789-72ef5511abc2",
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MA5_MLO_301_Q4",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "MULTIPLE_SELECTION",
+      "body": {
+        "hints": [
+          "<p>Two-dimensional shapes do not have volume.</p>",
+          "<p>Three-dimensional shapes have volume.</p>"
+        ],
+        "generalFeedback": "<p>These two shapes are two-dimensional.</p>\n<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/54/ZlCeyuEo6n.jpg\" />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/54/4dEReI3o1M.jpg\" />&nbsp;</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "prompt": "<p>Which shapes are two-dimensional?</p>\n<p>&nbsp;</p>\n<p>&nbsp;</p>",
+        "choices": {
+          "minChoice": 2,
+          "maxChoice": 2,
+          "layoutColumns": 2,
+          "shuffle": true,
+          "listType": "NONE",
+          "choiceItems": [
+            {
+              "feedback": "",
+              "choiceId": 0,
+              "weight": 50.0,
+              "answer": "<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/52/ygfIxw3giB.jpg\" width=\"237\" height=\"205\" />&nbsp;</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 1,
+              "weight": 50.0,
+              "answer": "<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/52/CTWewHW0A1.jpg\" width=\"222\" height=\"222\" />&nbsp;</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 2,
+              "weight": 0.0,
+              "answer": "<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/53/Aqz3fV8Wlb.jpg\" width=\"252\" height=\"143\" />&nbsp;</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 3,
+              "weight": 0.0,
+              "answer": "<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/30/04/53/CU9iL1w6MS.jpg\" width=\"220\" height=\"220\" />&nbsp;</p>"
+            }
+          ]
+        },
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2022-05-30T04:55:30.221",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "31a2a109-bd55-43bf-8420-99658a8555bd",
+      "validation": {
+        "validResponse": {
+          "type": "MULTIPLE_SELECTION",
+          "choiceIds": [
+            0,
+            1
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2024-06-12T16:37:08.022",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "lina.kreidieh@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 5,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "vq03_ma@test.com",
+      "status": "PUBLISHED",
+      "summative": false
+    },
+    {
+      "metadata": {
+        "keywords": [
+          "place value",
+          "decimal",
+          "tenths",
+          "hundredths"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "APPLYING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Doaa Hewait",
+        "authoredDate": "2022-05-19T00:00:00.000",
+        "curriculumOutcomes": [],
+        "skillId": "b7d18f6c-45a5-4770-9ddc-aff2f2e7bfb4",
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MA5_MLO_307_Q_3",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "MULTIPLE_SELECTION",
+      "body": {
+        "hints": [
+          "<p>The value of each place is 10 times the value of the place to its right.</p>\n<p>The value of each place is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" />&nbsp;of the value of the place to its left.</p>",
+          "<p>8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>"
+        ],
+        "generalFeedback": "<p>The value of each place is 10 times the value of the place to its right. <img style=\"float: right;\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/28/12/05/1YqgQpQqTO.jpg\" width=\"401\" height=\"202\" />&nbsp;</p>\n<p>So, in number 3.882, the digit 8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>\n<p>The value of each place is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" /> of the value of the place to its left.</p>\n<p>So, in number 3.882, 8 in the hundredths place is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" />of 8 in the tenths place.</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "prompt": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Select the correct answer</span></p>\n<p>Choose two different ways to describe the relationship between the digit 8 in the number 3.882<img style=\"float: right;\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/05/28/12/05/1YqgQpQqTO.jpg\" width=\"401\" height=\"202\" />&nbsp;&nbsp;</p>",
+        "choices": {
+          "minChoice": 2,
+          "maxChoice": 2,
+          "layoutColumns": 1,
+          "shuffle": true,
+          "listType": "NONE",
+          "choiceItems": [
+            {
+              "feedback": "",
+              "choiceId": 0,
+              "weight": 50.0,
+              "answer": "<p>8 in the tenths place is 10 times as much as 8 in the hundredths place.</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 1,
+              "weight": 0.0,
+              "answer": "<p>8 in the tenths place is 100 times as much as 8 in the hundredths place.</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 2,
+              "weight": 0.0,
+              "answer": "<p>8 in the hundredths&nbsp; place is 10 times as much as 8 in the tenths place.</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 3,
+              "weight": 50.0,
+              "answer": "<p>8 in the hundredths place is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" />of 8 in the tenths place.</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 96,
+              "weight": 0.0,
+              "answer": "<p>8 in the hundredths place is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2253%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E100%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2248.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2226.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2226.5%22%20y%3D%2252%22%3E100%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 100\" width=\"53\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»100«/mn»«/mfrac»«/math»\" />of 8 in the tenths place.</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 686,
+              "weight": 0.0,
+              "answer": "<p>8 in the tenths place is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" />of 8 in the hundredths place.</p>"
+            }
+          ]
+        },
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2022-05-20T02:05:55.032",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "a43a3c92-1b4f-4182-a422-9efdc77644ba",
+      "validation": {
+        "validResponse": {
+          "type": "MULTIPLE_SELECTION",
+          "choiceIds": [
+            0,
+            3
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2022-10-13T07:25:10.187",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "cclteam@alefeducation.com",
+      "maxScore": 1,
+      "version": 7,
+      "tags": {},
+      "adt": false,
+      "stage": "PENDING_REVIEW",
+      "createdBy": "doaa.hewait@contractoralefeducation.com",
+      "status": "DRAFT",
+      "summative": false
+    },
+    {
+      "metadata": {
+        "keywords": [
+          "القُرآنُ",
+          "السُّنَّةُ.",
+          "التَّفسيرُ."
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Ahmed AlHadi",
+        "authoredDate": "2025-07-21T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "123",
+            "name": "2.1.3.4.G11",
+            "description": "يقارن بين مصادر الشريعة الإسلامية.",
+            "curriculum": "UAE MOE",
+            "grade": "11",
+            "subject": "Islamic Studies"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": []
+      },
+      "code": "IS11_MLO_009_Q1_ai_1",
+      "createdByUser": {
+        "uuid": "eff4dff4-5bbc-479f-9190-82b051396678",
+        "name": "Mariam Al Naqbi Al Naqbi",
+        "email": "mariam.alnaqbi@alefeducation.com"
+      },
+      "language": "AR",
+      "variants": [],
+      "type": "MULTIPLE_CHOICE",
+      "body": {
+        "hints": [
+          "<p>فكّر في المصادر التي جاءت عن الله تعالى ورسوله ﷺ.</p>",
+          "<p>فكر في المصدرين الأساسيين للتشريع الإسلامي، وهما الكتاب والسنة.</p>"
+        ],
+        "generalFeedback": "<p>المصدران الرئيسيان للتشريع الإسلامي هما القرآن والسنة.<br>اجتهد علماء الأمة في حفظ كل ما صدر عن الرسول ﷺ من قول أو فعل أو تقرير أو صفة، وهذا يشمل السنة النبوية التي تعتبر المصدر الثاني بعد القرآن في التشريع الإسلامي.<br>لذلك، الإجابة الصحيحة هي الخيار الأول: القرآن والسنة.</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "prompt": "<p>اخترِ الإجابَةَ الصَّحيحةَ: مَا هُمَا المَصْدَرَانِ الرَّئيسِيَّانِ للتَّشريعِ الإِسْلَامِيِّ؟<br /><br /><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Choose the correct option.</span><br /></p>",
+        "choices": {
+          "minChoice": 1,
+          "maxChoice": 1,
+          "layoutColumns": 1,
+          "shuffle": true,
+          "listType": "NONE",
+          "choiceItems": [
+            {
+              "feedback": "",
+              "choiceId": 27,
+              "weight": 100.0,
+              "answer": "<p>القُرآنُ والسُّنَّةُ</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 0,
+              "weight": 0.0,
+              "answer": "<p>القُرآنُ والتَّفسيرُ</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 510,
+              "weight": 0.0,
+              "answer": "<p>السُّنَّةُ والتَّاريخُ</p>"
+            },
+            {
+              "feedback": "",
+              "choiceId": 428,
+              "weight": 0.0,
+              "answer": "<p>القُرآنُ والفِقْهُ</p>"
+            }
+          ]
+        },
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2025-07-21T08:20:21.328",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "AR",
+      "rubricId": null,
+      "id": "936aa4ee-20c0-4c6a-97b2-5b66bfd4ac4c",
+      "validation": {
+        "validResponse": {
+          "type": "MULTIPLE_CHOICE",
+          "choiceIds": [
+            27
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2025-07-21T08:20:21.328",
+      "toolkits": [],
+      "updatedByUser": {
+        "uuid": "eff4dff4-5bbc-479f-9190-82b051396678",
+        "name": "Mariam Al Naqbi Al Naqbi",
+        "email": "mariam.alnaqbi@alefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "mariam.alnaqbi@alefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {
+        "ai_generated": "true"
+      },
+      "adt": false,
+      "stage": "IN_PROGRESS",
+      "createdBy": "mariam.alnaqbi@alefeducation.com",
+      "status": "DRAFT",
+      "summative": false
+    }
+]
