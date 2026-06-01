@@ -1,0 +1,157 @@
+{
+    "question_id": "52745043-7b30-48d8-bfc3-abb12eb16210",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "معلومة",
+          "ضمنيّة",
+          "عبارة"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "ANALYZING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "7",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "vd01_ar@test.com",
+        "authoredDate": "2019-09-04T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_level",
+            "id": "5880",
+            "name": "ARB.3.1.02.020",
+            "description": "يحدد الفكر الرئيسة للنص بعد تحليله المعلومات الصريحة والضمنية، مستشهدا بمصادر متعددة من الأدلة",
+            "curriculum": "UAE MOE",
+            "grade": "7",
+            "subject": "Arabic"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": "A1",
+        "proficiency": "READING",
+        "subSkill": "READING_COMPREHENSION",
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "AR7_MLO_122_Q_4",
+      "createdByUser": null,
+      "language": "AR",
+      "variants": [],
+      "type": "MATCHING",
+      "body": {
+        "prompt": "<p><strong>اربطْ كلَّ معلومةٍ ضمنيَّـةٍ بالجملةِ الَّتي تدلُّ عليها فيما يأتي:&nbsp; </strong></p>",
+        "matchers": {
+          "shuffle": true,
+          "choices": [
+            {
+              "id": 60,
+              "weight": 25.0,
+              "value": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ الَّذي يتلاشى ويتبخَّرُ هو وقتٌ ضائعٌ.</span></p>",
+              "feedback": null
+            },
+            {
+              "id": 483,
+              "weight": 25.0,
+              "value": "<p><span style=\"font-weight: 400;\">الَّذي قام بإنجازِ المهمَّاتِ قبلَ المحاضرةِ حقّقَ فهمًا أفضلَ ممّنِ استمعَ إلى الشَّرحِ أوّلًا.</span></p>",
+              "feedback": null
+            },
+            {
+              "id": 876,
+              "weight": 25.0,
+              "value": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ لا ينبغي أنْ يكونَ نسيمًا منعشًا ولا متعةً خالصَةً.</span></p>",
+              "feedback": null
+            },
+            {
+              "id": 369,
+              "weight": 25.0,
+              "value": "<p><span style=\"font-weight: 400;\">يمكنُ تنفيذ البرامجِ التّعليميَّةِ بأيّ وقتٍ ودونَ متطلَّبات مُسبقةٍ.</span></p>",
+              "feedback": null
+            }
+          ],
+          "answers": [
+            {
+              "id": 11,
+              "value": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ الحقيقيُّ يُعنى بثباتِ المعلوماتِ.</span></p>"
+            },
+            {
+              "id": 487,
+              "value": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ الصّعبُ يؤدّي إلى نتيجةٍ أفضلَ.</span></p>"
+            },
+            {
+              "id": 898,
+              "value": "<p><span style=\"font-weight: 400;\">ضرورةُ بذلِ الجهدِ في التَّعلُّمِ.</span></p>"
+            },
+            {
+              "id": 915,
+              "value": "<p><span style=\"font-weight: 400;\">تصميمُ التَّعلُّمِ بأسهلِ الطُّرِقِ الممكنةِ.&nbsp;&nbsp;</span></p>"
+            }
+          ]
+        },
+        "hints": [
+          "<p><span style=\"font-weight: 400;\">&nbsp;فهمُ سياقِ الجملِ يُساعدُ في الرَّبطِ بينها وبينَ ما يُناسبُها.</span></p>",
+          "<p><span style=\"font-weight: 400;\">لاحظْ ما تُشيرُ إليهِ العباراتُ الآتيـةُ: \"يتلاشى ويتبخَّرُ\"، \"نسيمًا منعشًا\" و\"دونَ متطلّباتٍ\".</span></p>"
+        ],
+        "generalFeedback": "<p><span style=\"font-weight: 400;\">المعلومةُ الضِّمنيَّـةُ: هي معلومةٌ تُستنتَجُ منَ جملةٍ تعطي فكرةً غيرَ مباشرةٍ.</span></p>",
+        "correctAnswerFeedback": "<p><span style=\"font-weight: 400;\">كلُّ سياقٍ في الجملة يُشيرُ إلى ما يُناسبُهُ وإلى ما ترمي إليهِ الجملةُ منْ فكرةٍ ومعلومةٍ.</span></p>",
+        "wrongAnswerFeedback": "<p><span style=\"font-weight: 400;\">كلُّ سياقٍ في الجملة يُشيرُ إلى ما يُناسبُهُ وإلى ما ترمي إليهِ الجملةُ منْ فكرةٍ ومعلومةٍ.</span></p>",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2019-09-04T18:52:07.664",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "AR",
+      "rubricId": null,
+      "id": "52745043-7b30-48d8-bfc3-abb12eb16210",
+      "validation": {
+        "validResponse": {
+          "type": "MATCHING",
+          "answerMapping": [
+            {
+              "choiceId": 60,
+              "answerId": 11
+            },
+            {
+              "choiceId": 483,
+              "answerId": 487
+            },
+            {
+              "choiceId": 876,
+              "answerId": 898
+            },
+            {
+              "choiceId": 369,
+              "answerId": 915
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2024-10-02T09:17:21.109",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "taghreed@alefeducation.com",
+      "maxScore": 1,
+      "version": 7,
+      "tags": null,
+      "adt": false,
+      "stage": "IN_PROGRESS",
+      "createdBy": "vd01_ar@test.com",
+      "status": "DRAFT",
+      "summative": false
+    }
+  }

@@ -1,0 +1,197 @@
+{
+  "schemaVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "type": "DND",
+  "subType": "BLANK_ON_QUESTION",
+  "metadata": {
+    "general": {
+      "code": "CS_ELA10_LO12_GoFurther_Q_3",
+      "externalId": "000b5509-32f5-469e-bae8-34380c74d61e",
+      "title": null,
+      "language": "EN_US",
+      "keywords": [
+        "writing",
+        "language",
+        "argue"
+      ],
+      "parentReference": null,
+      "source": "Jessica Brampton"
+    },
+    "lifecycle": {
+      "status": "PUBLISHED"
+    },
+    "technical": {
+      "penAndPaper": false
+    },
+    "educational": {
+      "resourceType": "TEQ1",
+      "difficultyLevel": "EASY",
+      "cognitiveDimensions": [
+        "UNDERSTANDING"
+      ],
+      "knowledgeDimensions": [
+        "CONCEPTUAL"
+      ],
+      "summativeAssessment": true,
+      "cefrLevel": null,
+      "proficiency": null,
+      "lexileLevel": null,
+      "logitValue": null
+    },
+    "rights": {
+      "copyrights": [
+        "ALEF"
+      ]
+    },
+    "classification": {
+      "grade": "10",
+      "subject": "ELA",
+      "curriculum": "CCSS",
+      "curriculumOutcomes": [
+        {
+          "type": "sub_standard",
+          "id": "6319",
+          "name": "W.10.1.a",
+          "description": "Introduce precise claim(s), distinguish the claim(s) from alternate or opposing claims, and create an organization that establishes clear relationships among claim(s), counterclaims,reasons, and evidence.",
+          "curriculum": "CCSS",
+          "grade": "10",
+          "subject": "ELA"
+        }
+      ],
+      "subDomain": []
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",
+        "migration:originalCreatedAt": "2024-03-28T18:18:44.754",
+        "migration:authoredDate": "2024-03-28T00:00:00.000"
+      }
+    }
+  },
+  "itemBody": {
+    "version": "1.0",
+    "title": null,
+    "subTitle": null,
+    "instruction": null,
+    "audio": null,
+    "video": null,
+    "image": null,
+    "backgroundLayout": null,
+    "timeSpentConfig": null,
+    "splitContent": null,
+    "sideImage": null,
+    "showDragHandle": true,
+    "shuffled": true,
+    "optionsStyle": "option-style-1",
+    "dropLimit": 1,
+    "optionsPosition": "bottom",
+    "statement": null,
+    "sentence": {
+      "text": "<p>When writing a story, you should focus on the information making sense. You can do this by using &nbsp;@_@ , avoiding &nbsp;@_@ , and being aware of the &nbsp;@_@&nbsp;.</p>"
+    },
+    "targets": [
+      {
+        "id": 1,
+        "weight": 0.3333,
+        "swappable": false,
+        "swapGroupId": 0,
+        "position": null
+      },
+      {
+        "id": 2,
+        "weight": 0.3333,
+        "swappable": false,
+        "swapGroupId": 0,
+        "position": null
+      },
+      {
+        "id": 3,
+        "weight": 0.3333,
+        "swappable": false,
+        "swapGroupId": 0,
+        "position": null
+      }
+    ],
+    "options": [
+      {
+        "id": 1,
+        "content": [
+          {
+            "type": "text",
+            "text": "clear, concise language"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "content": [
+          {
+            "type": "text",
+            "text": "jargon"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "content": [
+          {
+            "type": "text",
+            "text": "audience's interests"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "content": [
+          {
+            "type": "text",
+            "text": "critic's opinons"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "content": [
+          {
+            "type": "text",
+            "text": "long and confusing language"
+          }
+        ]
+      }
+    ]
+  },
+  "responseDeclaration": {
+    "maxAttempts": 1
+  },
+  "outcomeDeclaration": {
+    "scoringType": "PARTIAL_MATCH",
+    "scoring": {
+      "normalizedMin": 0,
+      "normalizedMax": 1,
+      "defaultNormalizedValue": 0
+    },
+    "validResponse": {
+      "shouldAutoGraded": true,
+      "correctAnswers": [
+        {
+          "targetId": 1,
+          "optionIds": [1],
+          "matchMode": "ALL"
+        },
+        {
+          "targetId": 2,
+          "optionIds": [2],
+          "matchMode": "ALL"
+        },
+        {
+          "targetId": 3,
+          "optionIds": [3],
+          "matchMode": "ALL"
+        }
+      ]
+    }
+  }
+}

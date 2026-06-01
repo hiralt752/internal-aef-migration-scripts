@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset upload and publish</title>
+  <style>
+    :root {
+      --bg: #f6f8fa;
+      --card: #fff;
+      --text: #1f2328;
+      --muted: #656d76;
+      --border: #d0d7de;
+      --accent: #0969da;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 1.5rem;
+    }
+    .wrap { max-width: 52rem; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
+    .subtitle { color: var(--muted); margin: 0 0 1.5rem; font-size: 0.95rem; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    h2 { font-size: 1.1rem; margin: 0 0 0.75rem; }
+    h3 { font-size: 0.9rem; margin: 1rem 0 0.5rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.85em;
+    }
+    code {
+      background: #eff1f3;
+      padding: 0.15em 0.35em;
+      border-radius: 4px;
+    }
+    pre {
+      background: #f6f8fa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+      margin: 0.5rem 0 0;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.5rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.6rem; border: 1px solid var(--border); }
+    th { background: #f6f8fa; font-weight: 600; }
+    ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+    li { margin: 0.25rem 0; }
+    .method { font-weight: 600; color: var(--accent); }
+    .perm { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+    .flow {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+    }
+    .flow ol { margin: 0; padding-left: 1.25rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Asset upload and publish</h1>
+    <p class="subtitle">3-step flow · Use your environment’s <strong>authoring-content-service</strong> base URL. API path: <code>/api/assets</code></p>
+
+    <section>
+      <h2>Step 1 — Get presigned upload URL</h2>
+      <p><span class="method">GET</span> <code>/api/assets/presigned-upload-url</code></p>
+      <p class="perm">Permission: <strong>CREATE</strong> on Asset module</p>
+
+      <h3>Required query parameters</h3>
+      <table>
+        <thead>
+          <tr><th>Parameter</th><th>Type</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fileName</code></td><td>string</td><td><code>photo.jpg</code></td></tr>
+          <tr><td><code>contentType</code></td><td>string</td><td><code>image/jpeg</code></td></tr>
+          <tr><td><code>fileSize</code></td><td>long</td><td><code>1048576</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Response — save for steps 2 and 3</h3>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>uploadId</code></td><td>Required in step 3</td></tr>
+          <tr><td><code>fileId</code></td><td>Required in step 3</td></tr>
+          <tr><td><code>presignedUrl.url</code></td><td>Upload target in step 2</td></tr>
+          <tr><td><code>presignedUrl.fields</code></td><td>Form fields for step 2</td></tr>
+        </tbody>
+      </table>
+
+      <pre>GET /api/assets/presigned-upload-url?fileName=photo.jpg&amp;contentType=image/jpeg&amp;fileSize=1048576</pre>
+    </section>
+
+    <section>
+      <h2>Step 2 — Upload file to storage</h2>
+      <p><span class="method">POST</span> to <code>presignedUrl.url</code> from step 1 (not the authoring service)</p>
+      <ul>
+        <li>Content-Type: <code>multipart/form-data</code></li>
+        <li>Add each item in <code>presignedUrl.fields</code> as form fields (<code>key</code> → <code>value</code>)</li>
+        <li>Add the file as the final form field (often <code>file</code>)</li>
+      </ul>
+      <p>Upload must succeed (typically HTTP 204) before step 3.</p>
+    </section>
+
+    <section>
+      <h2>Step 3 — Create and publish asset</h2>
+      <p><span class="method">POST</span> <code>/api/assets/create-and-publish</code></p>
+      <p class="perm">Permission: <strong>PUBLISH</strong> on Asset module</p>
+
+      <h3>Required JSON body fields</h3>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fileName</code></td><td>string</td><td>Same as step 1</td></tr>
+          <tr><td><code>fileId</code></td><td>UUID</td><td>Step 1 response</td></tr>
+          <tr><td><code>uploadId</code></td><td>string</td><td>Step 1 response</td></tr>
+          <tr><td><code>title</code></td><td>string</td><td>Asset title</td></tr>
+          <tr><td><code>description</code></td><td>string</td><td>Asset description</td></tr>
+          <tr><td><code>type</code></td><td>string</td><td>e.g. <code>IMAGE</code>, <code>VIDEO</code>, <code>PDF</code></td></tr>
+        </tbody>
+      </table>
+      <p>Optional: <code>altText</code>, <code>metadata</code>, <code>systemMetadata</code>, <code>tagIds</code> (empty arrays are fine).</p>
+
+      <pre>{
+  "fileName": "photo.jpg",
+  "fileId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "uploadId": "upload-abc-123",
+  "title": "My asset",
+  "description": "Short description",
+  "type": "IMAGE",
+  "metadata": [],
+  "systemMetadata": [],
+  "tagIds": []
+}</pre>
+
+      <h3>Response (201 Created)</h3>
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>assetId</code></td><td>Created asset id</td></tr>
+          <tr><td><code>title</code></td><td>Published version title</td></tr>
+          <tr><td><code>status</code></td><td>Published status</td></tr>
+          <tr><td><code>createdAt</code></td><td>Creation timestamp</td></tr>
+          <tr><td><code>contentPath</code></td><td>Content path</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="flow">
+      <h2 style="margin-top:0">Flow summary</h2>
+      <ol>
+        <li><code>GET /presigned-upload-url</code> → <code>uploadId</code>, <code>fileId</code>, <code>presignedUrl</code></li>
+        <li><code>POST</code> file to <code>presignedUrl.url</code> using <code>presignedUrl.fields</code></li>
+        <li><code>POST /create-and-publish</code> with <code>uploadId</code>, <code>fileId</code>, and asset metadata</li>
+      </ol>
+    </div>
+  </div>
+</body>
+</html>

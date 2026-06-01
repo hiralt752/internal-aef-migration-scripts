@@ -1,0 +1,152 @@
+{
+    "metadata": {
+        "keywords": [
+            "your learning path"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+            "REMEMBERING"
+        ],
+        "knowledgeDimensions": [
+            "CONCEPTUAL"
+        ],
+        "lexileLevel": "1",
+        "copyrights": [
+            "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Sarween Zaza",
+        "authoredDate": "2019-08-24T00:00:00.000",
+        "curriculumOutcomes": [
+            {
+                "type": "strand",
+                "id": "188776",
+                "name": "EN6_STUDY_SKILLS",
+                "description": "Study Skills (for Onboarding MLO's)",
+                "curriculum": "UAE MOE",
+                "grade": "6",
+                "subject": "English CC"
+            }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+    },
+    "code": "EN6_MLO_000_1",
+    "createdByUser": null,
+    "language": "EN_GB",
+    "variants": [],
+    "type": "IMAGE_LABELLING_DRAG_DROP",
+    "body": {
+        "prompt": "<p>Drag and drop the right label for each platform icon.</p>",
+        "blanks": [
+            {
+                "id": 163,
+                "weight": 33.33,
+                "position": {
+                    "x": 0.14067252359099,
+                    "y": 0.14038429832514507
+                }
+            },
+            {
+                "id": 431,
+                "weight": 33.33,
+                "position": {
+                    "x": 0.5088787485113412,
+                    "y": 0.14318009717055707
+                }
+            },
+            {
+                "id": 715,
+                "weight": 33.33,
+                "position": {
+                    "x": 0.8535306231396595,
+                    "y": 0.13919732034777996
+                }
+            }
+        ],
+        "choices": {
+            "shuffle": true,
+            "showDragHandle": true,
+            "choiceItems": [
+                {
+                    "id": 181,
+                    "value": "<div>Learning Path</div>",
+                    "feedback": "<p>......</p>",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 836,
+                    "value": "<div>\n<div>Activity Center</div>\n</div>",
+                    "feedback": "<p>......</p>",
+                    "alternateChoiceIds": null
+                },
+                {
+                    "id": 906,
+                    "value": "<div>Homepage</div>",
+                    "feedback": "<p>......</p>",
+                    "alternateChoiceIds": null
+                }
+            ]
+        },
+        "backgroundImage": {
+            "src": "/data/ccl/assessment/questions/2020/08/22/12/22/xhEDmfqyCx.PNG",
+            "width": 73,
+            "height": 20
+        },
+        "hints": [],
+        "generalFeedback": "<p>......</p>",
+        "correctAnswerFeedback": "<p>......</p>",
+        "wrongAnswerFeedback": "<p>......</p>",
+        "partialAnswerFeedback": "<p>......</p>",
+        "passage": null
+    },
+    "constraints": null,
+    "createdAt": "2019-08-24T11:11:32.192",
+    "organisations": [
+        "shared"
+    ],
+    "variant": "EN_GB",
+    "rubricId": null,
+    "id": "2e5a1d55-956c-458d-8437-9d75eccceefc",
+    "validation": {
+        "validResponse": {
+            "type": "IMAGE_LABELLING_DRAG_DROP",
+            "answerMapping": [
+                {
+                    "blankId": 163,
+                    "choiceId": 906
+                },
+                {
+                    "blankId": 431,
+                    "choiceId": 181
+                },
+                {
+                    "blankId": 715,
+                    "choiceId": 836
+                }
+            ]
+        },
+        "scoringType": "EXACT_MATCH"
+    },
+    "updatedAt": "2020-08-22T12:31:40.107",
+    "toolkits": null,
+    "updatedByUser": null,
+    "scoring": null,
+    "updatedBy": "sarween@alefeducation.com",
+    "maxScore": 1,
+    "version": 1,
+    "tags": null,
+    "adt": false,
+    "stage": "APPROVED",
+    "createdBy": "sarween@alefeducation.com",
+    "status": "PUBLISHED",
+    "summative": false
+}

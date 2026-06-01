@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MATCHING Question Type — Schema Verification (MATCHING-Specific Fields Only)</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; font-size: 0.9em; }
+  th, td { border: 1px solid #dddddd; text-align: left; padding: 10px; vertical-align: top; }
+  th { background-color: #f8f9fa; color: #333; }
+  code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; color: #d63384; }
+  h1, h2, h3, h4 { color: #2c3e50; }
+  h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+  h3 { color: #34495e; margin-top: 25px; }
+
+  .status-direct   { font-weight: bold; color: #198754; }
+  .status-possible { font-weight: bold; color: #fd7e14; }
+  .status-none     { font-weight: bold; color: #dc3545; }
+  .status-hardcode { font-weight: bold; color: #6f42c1; }
+
+  /* Three-tier confidence system */
+  .conf-known   { display:inline-block; background:#d1e7dd; color:#0a3622; border:1px solid #a3cfbb; border-radius:4px; padding:2px 7px; font-size:0.78em; font-weight:bold; white-space:nowrap; }
+  .conf-assumed { display:inline-block; background:#fff3cd; color:#664d03; border:1px solid #ffe08a; border-radius:4px; padding:2px 7px; font-size:0.78em; font-weight:bold; white-space:nowrap; }
+  .conf-unknown { display:inline-block; background:#f8d7da; color:#58151c; border:1px solid #f1aeb5; border-radius:4px; padding:2px 7px; font-size:0.78em; font-weight:bold; white-space:nowrap; }
+
+  .note       { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+  .info       { background-color: #cfe2ff; border-left: 4px solid #0d6efd; padding: 10px; margin: 15px 0; }
+  .danger     { background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 10px; margin: 15px 0; }
+  .success    { background-color: #d1e7dd; border-left: 4px solid #198754; padding: 10px; margin: 15px 0; }
+  .assume-box { background-color: #fff8e1; border-left: 4px solid #ff9800; padding: 10px; margin: 10px 0; font-size:0.9em; }
+  .known-box  { background-color: #e8f5e9; border-left: 4px solid #43a047; padding: 10px; margin: 10px 0; font-size:0.9em; }
+  .data-box   { background-color: #e8f0fe; border-left: 4px solid #3d5afe; padding: 10px; margin: 10px 0; font-size:0.9em; font-family: monospace; font-size: 0.85em; }
+
+  .schema-ref { font-size: 0.85em; color: #6c757d; font-style: italic; }
+  .required   { color: #dc3545; font-weight: bold; font-size: 0.8em; }
+  .toc { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+  .toc a { color: #0d6efd; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
+  .enum-badge { position: relative; cursor: help; border-bottom: 2px dotted #0d6efd; padding: 2px 0; }
+  .tooltip {
+    display: none; position: absolute; bottom: 125%; left: 50%;
+    transform: translateX(-50%); background: #1a1a1a; color: #fff;
+    padding: 10px 12px; border-radius: 6px; white-space: nowrap;
+    z-index: 1000; font-size: 11px; border: 1px solid #0d6efd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .tooltip::after {
+    content: ''; position: absolute; top: 100%; left: 50%;
+    margin-left: -5px; border: 5px solid transparent; border-top-color: #1a1a1a;
+  }
+  .enum-badge:hover .tooltip { display: block; }
+  .enum-values { font-family: monospace; font-size: 10px; display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid #444; }
+  .enum-values div { padding: 2px 0; }
+  .rule-table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.88em; }
+  .rule-table th { background: #e8eaf6; }
+  .rule-table td.cond   { background: #f5f5f5; font-family: monospace; font-size: 0.85em; }
+  .rule-table td.result { background: #e8f5e9; font-family: monospace; font-size: 0.85em; }
+  .flow-step { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 14px; margin: 6px 0; font-size: 0.92em; }
+  .flow-step strong { color: #e65100; }
+  .verify-list { background:#fce4ec; border:1px solid #f48fb1; border-radius:6px; padding:12px 18px; margin:10px 0; font-size:0.9em; }
+  .verify-list li { margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  PROFESSIONAL SUMMARY BANNER                                   -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div style="background:#e8f0fe; border:2px solid #3d5afe; border-radius:8px; padding:16px 20px; margin-bottom:16px; font-size:0.95em;">
+  <strong>📋 Document Purpose &amp; Scope</strong><br><br>
+  This document highlights only the <strong>assumed, MATCHING-specific schema structures requiring verification</strong>.
+  Standard global fields (metadata, schemaVersion, modalFeedback hint-mapper, itemBody.prompt, outcomeDeclaration.scoring boundaries, and responseDeclaration.maxAttempts) have been <strong>intentionally omitted</strong> as they are already verified under the global master schema.
+  The JSON payload in this document has been <strong>aligned with the global master schema</strong>: <code>itemBody.prompt</code> is moved into <code>itemBody.statement.content</code>, <code>outcomeDeclaration.feedback.general</code> is replaced with <code>outcomeDeclaration.seeWhy</code>, <code>modalFeedback.hints</code> is corrected to <code>modalFeedback.needHelp</code>, and all content item type values are corrected from <code>"string"</code> to <code>"text"</code>.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  CONFIDENCE LEGEND                                            -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div style="background:#fff3cd; border:2px solid #ffc107; border-radius:8px; padding:14px 18px; margin-bottom:16px; font-size:0.92em;">
+  <strong>⚠️ Confidence Tiers Used in This Document</strong>
+  <ul style="margin:8px 0 0 18px;">
+    <li><span class="conf-known">✓ VERIFIED</span> — confirmed from existing QB architecture or AAT data. Included only where needed as context for an assumed field.</li>
+    <li><span class="conf-assumed">~ ASSUMED</span> — derived using similar QB question type (SELECT_A_BLANK). The assumption is stated inline. Must be verified.</li>
+    <li><span class="conf-unknown">? PENDING</span> — no confirmed basis. Requires verification before implementation.</li>
+  </ul>
+</div>
+
+<div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 18px; margin-bottom:20px; font-size:0.9em;">
+  <strong>Part of:</strong> AAT → QB Migration Mapping —
+  This sub-doc covers only the <strong>MATCHING-specific assumed fields</strong>.
+  All verified global fields are documented in the master schema reference.
+</div>
+
+<h1>MATCHING Question Type — MATCHING-Specific Schema Verification (<code>application/json</code>)</h1>
+<p>
+  Maps legacy AAT <code>MATCHING</code> questions to <code>MatchingQuestionResource</code> for <code>POST /api/v1/questions</code>.<br>
+  <strong>Scope:</strong> Only fields that are <span class="conf-assumed">~ ASSUMED</span> or <span class="conf-unknown">? PENDING</span> and are unique to the MATCHING architecture are documented here.
+</p>
+
+<div class="info">
+  <strong>Status Legend:</strong>
+  <span class="status-direct">Direct</span> — direct copy &nbsp;|&nbsp;
+  <span class="status-possible">Transform</span> — requires logic &nbsp;|&nbsp;
+  <span class="status-hardcode">Hardcode</span> — fixed value &nbsp;|&nbsp;
+  <span class="status-none">No Data</span> — not in legacy &nbsp;&nbsp;&nbsp;
+  <strong>Confidence:</strong>
+  <span class="conf-known">✓ VERIFIED</span> source stated &nbsp;|&nbsp;
+  <span class="conf-assumed">~ ASSUMED</span> inferred &nbsp;|&nbsp;
+  <span class="conf-unknown">? PENDING</span> needs confirmation
+</div>
+
+<div class="toc">
+  <strong>Table of Contents</strong>
+  <ol>
+    <li><a href="#sec1">subType — <code>"MATCHING_PAIRS"</code></a></li>
+    <li><a href="#sec2">itemBody.sourceItems[] — Left Column Structure</a></li>
+    <li><a href="#sec3">itemBody.targetItems[] — Right Column Structure</a></li>
+    <li><a href="#sec4">responseDeclaration.type — <code>"PAIR_MATCH"</code></a></li>
+    <li><a href="#sec5">outcomeDeclaration.validResponse.correctAnswers — Pair ID Mapping</a></li>
+    <li><a href="#sec6">Corrected MATCHING-Specific JSON Snippet</a></li>
+    <li><a href="#sec7">Verification Checklist</a></li>
+  </ol>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec1">1. <code>subType</code> — <code>"MATCHING_PAIRS"</code></h2>
+
+<div class="assume-box">
+  <span class="conf-assumed">~ ASSUMED</span>
+  The <code>subType</code> value <code>"MATCHING_PAIRS"</code> is inferred from the naming conventions observed in other QB question types (e.g., <code>BLANK_ON_QUESTION</code> for DnD, <code>IMAGE_ON_IMAGE</code> for Image Labelling). No official MATCHING QB schema was available to confirm this value. An alternative such as <code>"STANDARD"</code> or <code>"PAIR"</code> is also possible. <strong>Must be confirmed against a real migrated MATCHING QB record.</strong>
+</div>
+
+<table class="rule-table">
+  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Assumed Value</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>subType</code></td>
+    <td>String (enum)</td>
+    <td class="required">YES</td>
+    <td class="status-hardcode">Hardcode</td>
+    <td><code>"MATCHING_PAIRS"</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      Inferred from QB subType naming convention. Known QB subTypes for reference:
+      <code>BLANK_ON_QUESTION</code>, <code>IMAGE_ON_IMAGE</code>, <code>TEXT_ON_IMAGE</code>, <code>SEQUENCE_TEXT</code>, <code>SPLIT_SCREEN</code>.
+      The correct value for MATCHING must be confirmed from the QB schema or a real QB output.
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Context:</strong> <code>type</code> is hardcoded to <code>"MATCHING"</code> <span class="conf-known">✓ VERIFIED</span> from AAT data. Only the <code>subType</code> value within that type is unconfirmed.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec2">2. <code>itemBody.sourceItems[]</code> — Left Column Structure <span class="schema-ref">— MatchingSourceItem (name assumed)</span></h2>
+
+<div class="assume-box">
+  <span class="conf-assumed">~ ASSUMED</span>
+  The field name <code>sourceItems</code> and its internal structure are assumed based on the SELECT_A_BLANK QB architecture. No real MATCHING QB output was available to confirm the exact field names, the structure of each item, or whether a <code>weight</code> or <code>feedback</code> field is present at the item level. <strong>All field names and the array structure below must be confirmed.</strong>
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>itemBody.sourceItems</code></td>
+    <td>Array&lt;MatchingSourceItem&gt;</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.choices</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      The QB field name <code>sourceItems</code> is assumed — the array itself maps to AAT <code>body.matchers.choices</code> (left-side items).
+      Confirm whether the QB field is named <code>sourceItems</code>, <code>leftItems</code>, <code>choices</code>, or otherwise.
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sourceItems[].id</code></td>
+    <td>Integer</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.choices[].id</code></td>
+    <td><span class="conf-known">✓ VERIFIED</span></td>
+    <td>
+      Original AAT ID is preserved — no incremental remapping (e.g., AAT <code>id: 60</code> → QB <code>id: 60</code>).
+      This is intentional: easier migration, lower risk, no remapping table required.
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sourceItems[].text</code></td>
+    <td>Html/String</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.choices[].value</code></td>
+    <td><span class="conf-known">✓ VERIFIED</span></td>
+    <td>
+      Content of the left-side item. Direct copy from AAT <code>choices[].value</code>.
+      The QB field name <code>text</code> is assumed — confirm whether it may instead be <code>content</code> or <code>value</code>.
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sourceItems[].weight</code></td>
+    <td>Number</td>
+    <td></td>
+    <td class="status-possible">Transform</td>
+    <td><code>body.matchers.choices[].weight</code></td>
+    <td><span class="conf-unknown">? PENDING</span></td>
+    <td>
+      AAT uses <code>"weight": 25.0</code> per source item. Two open questions:
+      <br>1. <strong>Does the QB schema include a <code>weight</code> field on each item?</strong>
+      <br>2. <strong>If yes — is the value preserved as-is (<code>25.0</code>), or normalized to decimal (<code>25.0 → 0.25</code>)?</strong>
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.sourceItems[].feedback</code></td>
+    <td>String/null</td>
+    <td></td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.choices[].feedback</code></td>
+    <td><span class="conf-unknown">? PENDING</span></td>
+    <td>
+      AAT may carry a per-item feedback field on choices. Two open questions:
+      <br>1. <strong>Does the QB schema support per-item <code>feedback</code> on sourceItems?</strong>
+      <br>2. <strong>If empty — should it be omitted from the payload or sent as an empty string?</strong>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec3">3. <code>itemBody.targetItems[]</code> — Right Column Structure <span class="schema-ref">— MatchingTargetItem (name assumed)</span></h2>
+
+<div class="assume-box">
+  <span class="conf-assumed">~ ASSUMED</span>
+  The field name <code>targetItems</code> and its internal structure are assumed based on the SELECT_A_BLANK QB architecture. No real MATCHING QB output was available to confirm the exact field names or the shape of each item. <strong>All field names below must be confirmed.</strong>
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>itemBody.targetItems</code></td>
+    <td>Array&lt;MatchingTargetItem&gt;</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.answers</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      The QB field name <code>targetItems</code> is assumed — the array itself maps to AAT <code>body.matchers.answers</code> (right-side items).
+      Confirm whether the QB field is named <code>targetItems</code>, <code>rightItems</code>, <code>answers</code>, or otherwise.
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.targetItems[].id</code></td>
+    <td>Integer</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.answers[].id</code></td>
+    <td><span class="conf-known">✓ VERIFIED</span></td>
+    <td>
+      Original AAT ID is preserved — no incremental remapping (e.g., AAT <code>id: 11</code> → QB <code>id: 11</code>).
+      These preserved IDs are the bridge used in <code>correctAnswers[].targetItemId</code>. See §5.
+    </td>
+  </tr>
+  <tr>
+    <td><code>itemBody.targetItems[].text</code></td>
+    <td>Html/String</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>body.matchers.answers[].value</code></td>
+    <td><span class="conf-known">✓ VERIFIED</span></td>
+    <td>
+      Content of the right-side item. Direct copy from AAT <code>answers[].value</code>.
+      The QB field name <code>text</code> is assumed — confirm whether it may instead be <code>content</code> or <code>value</code>.
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec4">4. <code>responseDeclaration.type</code> — <code>"PAIR_MATCH"</code></h2>
+
+<div class="assume-box">
+  <span class="conf-assumed">~ ASSUMED</span>
+  The value <code>"PAIR_MATCH"</code> for <code>responseDeclaration.type</code> is inferred from the nature of the MATCHING interaction: each response is a pair of a source ID and a target ID. No QB schema or real output was available to confirm this enum value. <strong>Must be confirmed — alternatives such as <code>"MATCH"</code> or <code>"PAIR"</code> are possible.</strong>
+</div>
+
+<table class="rule-table">
+  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Assumed Value</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>responseDeclaration.type</code></td>
+    <td>String (enum)</td>
+    <td class="required">YES</td>
+    <td class="status-hardcode">Hardcode</td>
+    <td><code>"PAIR_MATCH"</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      Inferred from MATCHING semantics: each user response is a source ↔ target pair.
+      Known QB response types for reference: <code>ORDERED</code> (Sequence), <code>MULTIPLE</code> (MCQ), <code>FILL</code> (DnD).
+      Confirm the exact enum value used by the QB schema for MATCHING.
+    </td>
+  </tr>
+  <tr>
+    <td><code>responseDeclaration.cardinality</code></td>
+    <td>String (enum)</td>
+    <td class="required">YES</td>
+    <td class="status-hardcode">Hardcode</td>
+    <td><code>"MULTIPLE"</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      Assumed <code>"MULTIPLE"</code> because the user submits multiple pairs simultaneously, not a single response.
+      Confirm whether the QB schema uses a different cardinality enum for pair-based responses.
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Context:</strong> <code>responseDeclaration.maxAttempts</code> is a global field (always <code>1</code> across all QB question types) and is therefore excluded from this document.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec5">5. <code>outcomeDeclaration.validResponse.correctAnswers</code> — Pair ID Mapping</h2>
+
+<div class="assume-box">
+  <span class="conf-assumed">~ ASSUMED</span>
+  The structure of each entry in <code>correctAnswers[]</code> — specifically the field names <code>sourceItemId</code> and <code>targetItemId</code> — is assumed from existing QB patterns. The ID <em>values</em> are verified (original AAT IDs preserved). The <em>field names</em> used to carry those IDs in the QB payload are unconfirmed. <strong>The exact field names must be confirmed against the QB schema.</strong>
+</div>
+
+<div class="data-box">
+  <strong>ID mapping flow (end-to-end):</strong><br>
+  AAT: <code>validation.answerMapping = [{ sourceId: 60, targetId: 11 }, { sourceId: 61, targetId: 12 }]</code><br>
+  ↓<br>
+  QB: <code>correctAnswers = [{ "sourceItemId": 60, "targetItemId": 11 }, { "sourceItemId": 61, "targetItemId": 12 }]</code><br><br>
+  <strong>Key point:</strong> IDs 60, 61 (sourceItems) and 11, 12 (targetItems) are preserved as-is from AAT.
+  The pair structure itself is assumed — confirm the exact QB field names (<code>sourceItemId</code> / <code>targetItemId</code>).
+</div>
+
+<table>
+  <thead><tr><th>API Field</th><th>Type</th><th>Req</th><th>Status</th><th>Legacy AAT Field</th><th>Confidence</th><th>Notes</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>validResponse.correctAnswers</code></td>
+    <td>Array&lt;MatchingAnswer&gt;</td>
+    <td class="required">YES</td>
+    <td class="status-possible">Transform</td>
+    <td><code>validation.answerMapping</code></td>
+    <td><span class="conf-known">✓ VERIFIED</span></td>
+    <td>
+      AAT field name <code>answerMapping</code> confirmed from AAT data.
+      Each entry in the array becomes one pair in <code>correctAnswers[]</code>.
+      The <em>internal structure</em> of each pair object is assumed — see rows below.
+    </td>
+  </tr>
+  <tr>
+    <td><code>correctAnswers[].sourceItemId</code></td>
+    <td>Integer</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>answerMapping[].sourceId</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      The ID <em>value</em> is the original AAT source item ID (preserved, no remapping).
+      The QB field <em>name</em> <code>sourceItemId</code> is assumed — confirm it is not named <code>leftId</code>, <code>choiceId</code>, or simply <code>source</code>.
+    </td>
+  </tr>
+  <tr>
+    <td><code>correctAnswers[].targetItemId</code></td>
+    <td>Integer</td>
+    <td class="required">YES</td>
+    <td class="status-direct">Direct</td>
+    <td><code>answerMapping[].targetId</code></td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      The ID <em>value</em> is the original AAT target item ID (preserved, no remapping).
+      The QB field <em>name</em> <code>targetItemId</code> is assumed — confirm it is not named <code>rightId</code>, <code>answerId</code>, or simply <code>target</code>.
+    </td>
+  </tr>
+  <tr>
+    <td><code>validResponse.shouldAutoGraded</code></td>
+    <td>Boolean</td>
+    <td class="required">YES</td>
+    <td class="status-hardcode">Hardcode</td>
+    <td>—</td>
+    <td><span class="conf-assumed">~ ASSUMED</span></td>
+    <td>
+      Assumed <code>true</code> — consistent with all other QB question types.
+      Confirm this field exists in the MATCHING <code>validResponse</code> block and that its value is always <code>true</code>.
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec6">6. Corrected MATCHING-Specific JSON Snippet</h2>
+
+<div class="assume-box">
+  <span class="conf-assumed">~ ASSUMED</span>
+  Global fields (<code>schemaVersion</code>, <code>metadata</code>, global <code>itemBody</code> properties, <code>outcomeDeclaration.scoring</code> boundaries) are shown collapsed as <code>{ ... }</code> — they follow the verified global master schema and are not the subject of this document.
+  Only the MATCHING-specific sections are expanded. Fields marked <span class="conf-assumed">~ ASSUMED</span> or <span class="conf-unknown">? PENDING</span> require confirmation before implementation.
+</div>
+
+<div class="known-box">
+  <strong>JSON payload corrections applied vs. previous version:</strong>
+  <ul style="margin:8px 0 0 18px;">
+    <li><code>itemBody.prompt</code> moved into <code>itemBody.statement.content[]</code> — aligned with global master schema.</li>
+    <li><code>outcomeDeclaration.feedback.general</code> removed and replaced with <code>outcomeDeclaration.seeWhy</code>.</li>
+    <li><code>modalFeedback.hints</code> corrected to <code>modalFeedback.needHelp</code>.</li>
+    <li>All content item <code>"type": "string"</code> corrected to <code>"type": "text"</code>.</li>
+  </ul>
+</div>
+
+<pre><code>{
+  "schemaVersion": {
+    "major": 1,                     // <Integer> [HARDCODED]
+    "minor": 0,                     // <Integer> [HARDCODED]
+    "patch": 0                      // <Integer> [HARDCODED]
+  },
+
+  "type": "MATCHING",               // <String> [HARDCODED]
+  "subType": "MATCHING_PAIRS",      // <String> [HARDCODED]
+  
+  "metadata": {
+    "general": {
+      "code": "<String>",           // e.g., "AR7_MLO_122_Q_4"
+      "externalId": "<UUID>",       // e.g., "52745043-7b30-48d8-bfc3-abb12eb16210"
+      "title": null,                // <Null> [HARDCODED]
+      "language": "<String>",       // e.g., "AR" or "EN_US"
+      "keywords": ["<String>"],     // Array of Strings
+      "parentReference": null,      // <Null> [HARDCODED]
+      "source": "<String>"          // Author name or email
+    },
+    "lifecycle": {
+      "status": "<String>"          // e.g., "DRAFT" or "PUBLISHED"
+    },
+    "technical": {
+      "penAndPaper": "<Boolean>"    // e.g., false
+    },
+    "educational": {
+      "resourceType": "<String>",   // e.g., "TEQ1"
+      "difficultyLevel": "<String>",// e.g., "DIFFICULT"
+      "cognitiveDimensions": ["<String>"], 
+      "knowledgeDimensions": ["<String>"], 
+      "summativeAssessment": "<Boolean>", 
+      "cefrLevel": "<String_or_Null>", 
+      "proficiency": "<String_or_Null>", 
+      "lexileLevel": "<String_or_Null>", 
+      "logitValue": "<Float_or_Null>"
+    },
+    "rights": {
+      "copyrights": ["<String>"],
+      "conditionsOfUse": ["<String>"]
+    },
+    "classification": {
+      "grade": "<String>",          // Extracted from outcomes
+      "subject": "<String>",        // Extracted from outcomes
+      "curriculum": "<String>",     // Extracted from outcomes
+      "curriculumOutcomes": [
+        {
+          "type": "<String>",
+          "id": "<String>",
+          "name": "<String>",
+          "description": "<String>",
+          "curriculum": "<String>",
+          "grade": "<String>",
+          "subject": "<String>"
+        }
+      ],
+      "subDomain": ["<String>"]
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",                  // <String> [HARDCODED]
+        "migration:originalCreatedAt": "<ISO_Date>",// e.g., "2019-09-04T18:52:07.664"
+        "migration:authoredDate": "<ISO_Date>"
+      }
+    }
+  },
+
+  "itemBody": {
+    "version": "1.0",               // <String> [HARDCODED]
+    "title": null,                  // <Null> [HARDCODED]
+    "subTitle": null,               // <Null> [HARDCODED]
+    "instruction": null,            // <Null> [HARDCODED]
+    "audio": null,                  // <Null> [HARDCODED]
+    "video": null,                  // <Null> [HARDCODED]
+    "backgroundLayout": null,       // <Null> [HARDCODED]
+    "timeSpentConfig": null,        // <Null> [HARDCODED]
+    "splitContent": null,           // <Null> [HARDCODED]
+    "sideImage": null,              // <Null> [HARDCODED]
+    "shuffled": "<Boolean>",        // e.g., true
+    
+    "statement": {
+      "content": [
+        {
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // Legacy prompt
+        }
+      ]
+    },
+    "sentence": null,               // <Null> [ADDED: Global TL Requirement]
+
+    "sourceItems": [
+      {
+        "id": "<Integer>",          // Legacy choiceId (e.g., 60)
+        "weight": "<Float>",        // e.g., 25.0
+        "content": {                // [UPDATED: Polymorphic wrapper]
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // Legacy choice value
+        },
+        "feedback": "<String_or_Null>" 
+      }
+    ],
+    "targetItems": [
+      {
+        "id": "<Integer>",          // Legacy answerId (e.g., 11)
+        "content": {                // [UPDATED: Polymorphic wrapper]
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // Legacy answer value
+        }
+      }
+    ]
+  },
+
+  "responseDeclaration": {
+    "type": "PAIR_MATCH",           // <String> [HARDCODED]
+    "cardinality": "MULTIPLE",      // <String> [HARDCODED]
+    "maxAttempts": 1                // <Integer> [HARDCODED]
+  },
+
+  "outcomeDeclaration": {
+    "scoringType": "<String>",      // e.g., "EXACT_MATCH"
+    "scoring": {
+      "normalizedMin": 0,           // <Integer> [HARDCODED]
+      "normalizedMax": 1,           // <Integer> [HARDCODED]
+      "defaultNormalizedValue": 0   // <Integer> [HARDCODED]
+    },
+    "maxScore": "<Integer_or_Float>", 
+    
+    "feedback": {                   // Optional Block
+      "correct": {
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy correctAnswerFeedback
+          }
+        ]
+      },
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy wrongAnswerFeedback
+          }
+        ]
+      },
+      "partial": {
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy partialAnswerFeedback
+          }
+        ]
+      }
+    },
+
+    "seeWhy": {                     // Optional Block
+      "layout": "TEXT",             // <String> [HARDCODED]
+      "content": [
+        {
+          "type": "text",           // <String> [HARDCODED]
+          "text": "<HTML_String>"   // legacy generalFeedback
+        }
+      ],
+      "audio": null                 // <Null> [HARDCODED]
+    },
+
+    "validResponse": {              // Optional Block
+      "shouldAutoGraded": true,     // <Boolean> [HARDCODED]
+      "correctAnswers": [
+        {
+          "sourceItemId": "<Integer>", // Points to sourceItems[].id
+          "targetItemId": "<Integer>"  // Points to targetItems[].id
+        }
+      ]
+    }
+  },
+
+  "modalFeedback": {                // Optional Block (Hints)
+    "needHelp": {
+      "content": {
+        "layout": "TEXT",           // <String> [HARDCODED]
+        "content": [
+          {
+            "type": "text",         // <String> [HARDCODED]
+            "text": "<HTML_String>" // legacy hints
+          }
+        ]
+      }
+    },
+    "passageId": null               // <Null> [HARDCODED]
+  }
+}
+</code></pre>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<hr>
+<h2 id="sec7">7. Verification Checklist</h2>
+
+<div class="verify-list">
+  <strong>📌 MATCHING-specific items requiring confirmation before implementation:</strong>
+  <ol>
+    <li>
+      <strong>subType</strong> — confirm the correct enum value for MATCHING.<br>
+      <em>Assumed:</em> <code>"MATCHING_PAIRS"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"STANDARD"</code>, <code>"PAIR"</code>, or other.
+    </li>
+    <li>
+      <strong>itemBody.sourceItems field name</strong> — confirm the QB array name for left-side choices.<br>
+      <em>Assumed:</em> <code>"sourceItems"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"leftItems"</code>, <code>"choices"</code>.
+    </li>
+    <li>
+      <strong>itemBody.targetItems field name</strong> — confirm the QB array name for right-side answers.<br>
+      <em>Assumed:</em> <code>"targetItems"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"rightItems"</code>, <code>"answers"</code>.
+    </li>
+    <li>
+      <strong>sourceItems[].text / targetItems[].text field name</strong> — confirm the QB field name for item content.<br>
+      <em>Assumed:</em> <code>"text"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"content"</code>, <code>"value"</code>.
+    </li>
+    <li>
+      <strong>sourceItems[].weight normalization</strong> — confirm QB behavior.<br>
+      <em>Option A:</em> Preserve as-is (e.g., <code>25.0</code>) &nbsp;|&nbsp; <em>Option B:</em> Normalize to decimal (e.g., <code>25.0 → 0.25</code>).
+    </li>
+    <li>
+      <strong>sourceItems[].feedback (empty field handling)</strong> — confirm payload behavior.<br>
+      <em>Option A:</em> Omit field if empty &nbsp;|&nbsp; <em>Option B:</em> Include as empty string.
+    </li>
+    <li>
+      <strong>responseDeclaration.type</strong> — confirm the QB enum value for MATCHING response type.<br>
+      <em>Assumed:</em> <code>"PAIR_MATCH"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"MATCH"</code>, <code>"PAIR"</code>.
+    </li>
+    <li>
+      <strong>correctAnswers[].sourceItemId field name</strong> — confirm the QB field name for the source side of each pair.<br>
+      <em>Assumed:</em> <code>"sourceItemId"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"leftId"</code>, <code>"choiceId"</code>, <code>"source"</code>.
+    </li>
+    <li>
+      <strong>correctAnswers[].targetItemId field name</strong> — confirm the QB field name for the target side of each pair.<br>
+      <em>Assumed:</em> <code>"targetItemId"</code> &nbsp;|&nbsp; <em>Alternatives possible:</em> <code>"rightId"</code>, <code>"answerId"</code>, <code>"target"</code>.
+    </li>
+    <li>
+      <strong>validResponse.shouldAutoGraded</strong> — confirm this field exists in MATCHING's <code>validResponse</code> and is always <code>true</code>.
+    </li>
+  </ol>
+  <br>
+  <strong>To resolve all of the above: provide one real <code>MATCHING</code> AAT record + its migrated QB output (or the QB schema for the MATCHING resource type).</strong>
+</div>
+
+<hr>
+<div class="success">
+  <strong>✅ Summary of Assumed MATCHING-Specific Fields</strong><br><br>
+  <table class="rule-table" style="margin-top:10px;">
+    <thead><tr><th>Field</th><th>Assumed Value / Structure</th><th>Confidence</th></tr></thead>
+    <tbody>
+    <tr><td class="cond"><code>subType</code></td><td class="result"><code>"MATCHING_PAIRS"</code></td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>itemBody.sourceItems</code> (field name)</td><td class="result">Array from <code>body.matchers.choices</code></td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>itemBody.sourceItems[].weight</code></td><td class="result">Normalization behavior unknown</td><td><span class="conf-unknown">? PENDING</span></td></tr>
+    <tr><td class="cond"><code>itemBody.sourceItems[].feedback</code> (empty handling)</td><td class="result">Omit vs. empty string — unknown</td><td><span class="conf-unknown">? PENDING</span></td></tr>
+    <tr><td class="cond"><code>itemBody.targetItems</code> (field name)</td><td class="result">Array from <code>body.matchers.answers</code></td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>responseDeclaration.type</code></td><td class="result"><code>"PAIR_MATCH"</code></td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>responseDeclaration.cardinality</code></td><td class="result"><code>"MULTIPLE"</code></td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>correctAnswers[].sourceItemId</code> (field name)</td><td class="result">Original AAT source ID</td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>correctAnswers[].targetItemId</code> (field name)</td><td class="result">Original AAT target ID</td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    <tr><td class="cond"><code>validResponse.shouldAutoGraded</code></td><td class="result"><code>true</code></td><td><span class="conf-assumed">~ ASSUMED</span></td></tr>
+    </tbody>
+  </table>
+  <br>
+  <strong>All global fields not listed above are already verified under the master schema and require no further confirmation.</strong>
+</div>
+
+</body>
+</html>

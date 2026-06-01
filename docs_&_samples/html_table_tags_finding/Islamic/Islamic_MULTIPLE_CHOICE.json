@@ -1,0 +1,12 @@
+[
+  {
+    "question_id": "695ae67e-fd6e-4832-bb16-e6caf3fec602",
+    "question_type": "MULTIPLE_CHOICE",
+    "keys": [
+      "response.body.choices.choiceItems[0].answer",
+      "response.body.choices.choiceItems[1].answer",
+      "response.body.choices.choiceItems[2].answer",
+      "response.body.choices.choiceItems[3].answer"
+    ]
+  }
+]

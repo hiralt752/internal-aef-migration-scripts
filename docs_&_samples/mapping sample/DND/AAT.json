@@ -1,0 +1,667 @@
+[
+  {
+    "question_id": "000b5509-32f5-469e-bae8-34380c74d61e",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "writing",
+          "language",
+          "argue"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": true,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Jessica Brampton",
+        "authoredDate": "2024-03-28T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "6319",
+            "name": "W.10.1.a",
+            "description": "Introduce precise claim(s), distinguish the claim(s) from alternate or opposing claims, and create an organization that establishes clear relationships among claim(s), counterclaims,reasons, and evidence.",
+            "curriculum": "CCSS",
+            "grade": "10",
+            "subject": "ELA"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "CS_ELA10_LO12_GoFurther_Q_3",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+      "body": {
+        "prompt": "<p>When writing a story, you should focus on the information making sense. You can do this by using &nbsp;<blank-field id=\"790\" class=\"mceNonEditable\"></blank-field> , avoiding &nbsp;<blank-field id=\"483\" class=\"mceNonEditable\"></blank-field> , and being aware of the &nbsp;<blank-field id=\"726\" class=\"mceNonEditable\"></blank-field>&nbsp;.</p>",
+        "blanks": [
+          {
+            "id": 790,
+            "weight": 33.33
+          },
+          {
+            "id": 483,
+            "weight": 33.33
+          },
+          {
+            "id": 726,
+            "weight": 33.33
+          }
+        ],
+        "choices": {
+          "shuffle": true,
+          "showDragHandle": true,
+          "choiceItems": [
+            {
+              "id": 220,
+              "value": "clear, concise language",
+              "feedback": ""
+            },
+            {
+              "id": 109,
+              "value": "jargon",
+              "feedback": ""
+            },
+            {
+              "id": 221,
+              "value": "audience’s interests",
+              "feedback": ""
+            },
+            {
+              "id": 89,
+              "value": "critic's opinons",
+              "feedback": ""
+            },
+            {
+              "id": 357,
+              "value": "long and confusing language",
+              "feedback": ""
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2024-03-28T18:18:44.754",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "000b5509-32f5-469e-bae8-34380c74d61e",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+          "answerMapping": [
+            {
+              "blankId": 790,
+              "choiceId": 220
+            },
+            {
+              "blankId": 483,
+              "choiceId": 109
+            },
+            {
+              "blankId": 726,
+              "choiceId": 221
+            }
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2024-04-04T16:19:33.389",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "jessica.brampton@alefeducation.com",
+      "maxScore": 1,
+      "version": 2,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "jessica.brampton@alefeducation.com",
+      "status": "PUBLISHED",
+      "summative": true
+    }
+  },
+  {
+    "question_id": "000f8d02-e565-4bc8-aade-cf593d725d9f",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "root",
+          "prefix",
+          "meaning"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "UNDERSTANDING",
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": "8",
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ],
+        "conditionsOfUse": [
+          "https://www.shutterstock.com/image-photo/white-truck-driving-on-asphalt-road-2469501197 "
+        ],
+        "formatType": "QUESTION",
+        "author": "Csa Ela3",
+        "authoredDate": "2024-12-21T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "skill",
+            "id": "32142",
+            "name": "L.8.4.b.i",
+            "description": "Use root words and affixes to determine the meaning of a word",
+            "curriculum": "English Reading",
+            "grade": "8",
+            "subject": "ELA"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "PW_ER_08_LO018_Q_6",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+      "body": {
+        "prompt": "<p>Drag and drop a suffix to complete the word.</p>\n<p>&nbsp;</p>\n<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2025/01/23/10/43/GR80pymDjZ.png\" width=\"422\" height=\"329\" />&nbsp;</p>\n<p>&nbsp;</p>\n<p>&nbsp;<blank-field id=\"209\" class=\"mceNonEditable\"></blank-field> port: to carry across</p>",
+        "blanks": [
+          {
+            "id": 209,
+            "weight": 100.0
+          }
+        ],
+        "choices": {
+          "shuffle": true,
+          "showDragHandle": true,
+          "choiceItems": [
+            {
+              "id": 360,
+              "value": "trans-",
+              "feedback": ""
+            },
+            {
+              "id": 349,
+              "value": "im-",
+              "feedback": ""
+            },
+            {
+              "id": 739,
+              "value": "inter-",
+              "feedback": ""
+            },
+            {
+              "id": 606,
+              "value": "con-",
+              "feedback": ""
+            }
+          ]
+        },
+        "hints": [
+          "<p>Think about which prefix means “<em>in</em>.”</p>"
+        ],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2024-12-22T04:26:36.841",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "000f8d02-e565-4bc8-aade-cf593d725d9f",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+          "answerMapping": [
+            {
+              "blankId": 209,
+              "choiceId": 360
+            }
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2025-04-12T17:08:05.096",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "csaela3@alefedu.net",
+      "maxScore": 1,
+      "version": 3,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "csaela3@alefedu.net",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "001a40a1-1070-4a6d-9328-92ea39a3db7d",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "theme, ",
+          " tone, ",
+          "mood,",
+          "thinking "
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "ANALYZING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Vrushali Sheth",
+        "authoredDate": "2023-01-31T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "4321",
+            "name": "RL.7.4",
+            "description": "Determine the meaning of words and phrases as they are used in a text, including figurative and\nconnotative meanings; analyze the impact ofrhymes and otherrepetitions of sounds (e.g., alliteration)\non a specific verse or stanza of a poem or section of a story or drama.",
+            "curriculum": "CCSS",
+            "grade": "7",
+            "subject": "ELA"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "CS_ELA7_L006_Analyze_Q_12",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+      "body": {
+        "prompt": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;There was another problem. People were asking her questions.\\n\\n\\&quot;Rima, when did you go to Brazil?\\&quot;\\n\\n“Rima, how did it feel to meet a famous actor?” \\n\\nEvery day, Rima had to tell more lies to make her profile seem true. She felt worried all the time.                                                                                                                   Read the passage. The author sets a _________________________ tone in this passage.\\n&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4522,&quot;4&quot;:{&quot;1&quot;:2,&quot;2&quot;:65280},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">There was another problem. People were asking her questions.<br /><br />\"Rima, when did you go to Brazil?\"<br /><br />“Rima, how did it feel to meet a famous actor?” <br /><br />Every day, Rima had to tell more lies to make her profile seem true. She felt worried all the time. Read the passage. The author sets a &nbsp;<blank-field id=\"924\" class=\"mceNonEditable\"></blank-field>&nbsp; tone in this passage.<br /></span></p>",
+        "blanks": [
+          {
+            "id": 924,
+            "weight": 100.0
+          }
+        ],
+        "choices": {
+          "shuffle": true,
+          "showDragHandle": true,
+          "choiceItems": [
+            {
+              "id": 623,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;worried &quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4522,&quot;4&quot;:{&quot;1&quot;:2,&quot;2&quot;:65280},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">worried </span>",
+              "feedback": ""
+            },
+            {
+              "id": 680,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;free&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4522,&quot;4&quot;:{&quot;1&quot;:2,&quot;2&quot;:65280},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">free</span>",
+              "feedback": ""
+            },
+            {
+              "id": 358,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;disappointed&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4522,&quot;4&quot;:{&quot;1&quot;:2,&quot;2&quot;:65280},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">disappointed</span>",
+              "feedback": ""
+            },
+            {
+              "id": 276,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;sad &quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4522,&quot;4&quot;:{&quot;1&quot;:2,&quot;2&quot;:65280},&quot;6&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">sad </span>",
+              "feedback": ""
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2023-01-31T11:33:53.683",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "001a40a1-1070-4a6d-9328-92ea39a3db7d",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+          "answerMapping": [
+            {
+              "blankId": 924,
+              "choiceId": 623
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2023-01-31T11:33:53.683",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "mitr-vrushali@alef.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "PENDING_REVIEW",
+      "createdBy": "mitr-vrushali@alef.com",
+      "status": "DRAFT",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "002928ed-0fa3-4e70-a239-7fb20a73b71f",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "adjective",
+          "cashier",
+          "affectionate"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "APPLYING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Vrushali Sheth",
+        "authoredDate": "2023-02-03T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "6086",
+            "name": "W.9.3.a",
+            "description": "Engage and orient the reader by setting out a problem, situation, or observation, establishing one\nor multiple point(s) of view, and introducing a narrator and/or characters; create a smooth\nprogression of experiences or events.",
+            "curriculum": "CCSS",
+            "grade": "9",
+            "subject": "ELA"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "CS_ELA9_LOO3_GoFurther_Q_16",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+      "body": {
+        "prompt": "<p><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;After a very long period, Max and Tim, two pals, finally crossed paths. &nbsp;They soon got into arguments over who was poorer and who was richer. Suddenly, the ground began to shake abruptly, and they quickly understood it was an earthquake. Tim ducked rapidly beneath the desk and ____________________________.                                                  The beginning of a story is given. Choose a conclusion for it.                   &quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4512,&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\"><img style=\"float: right;\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2023/02/03/05/13/cd3hyEIaQ4.png\" width=\"300\" height=\"200\" /></span><span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;After a very long period, Max and Tim, two pals, finally crossed paths. &nbsp;They soon got into arguments over who was poorer and who was richer. Suddenly, the ground began to shake abruptly, and they quickly understood it was an earthquake. Tim ducked rapidly beneath the desk and ____________________________.                                                  The beginning of a story is given. Choose a conclusion for it.                   &quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4512,&quot;8&quot;:{&quot;1&quot;:[{&quot;1&quot;:2,&quot;2&quot;:0,&quot;5&quot;:{&quot;1&quot;:2,&quot;2&quot;:0}},{&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:3},{&quot;1&quot;:1,&quot;2&quot;:0,&quot;4&quot;:1}]},&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">After a very long period, Max and Tim, two pals, finally crossed paths. &nbsp;They soon got into arguments over who was poorer and who was richer. Suddenly, the ground began to shake abruptly, and they quickly understood it was an earthquake. Tim ducked rapidly beneath the desk and &nbsp;<blank-field id=\"287\" class=\"mceNonEditable\"></blank-field>&nbsp;. The beginning of a story is given. Choose a conclusion for it. </span></p>",
+        "blanks": [
+          {
+            "id": 287,
+            "weight": 100.0
+          }
+        ],
+        "choices": {
+          "shuffle": true,
+          "showDragHandle": true,
+          "choiceItems": [
+            {
+              "id": 881,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;called out to his friend to safely hide there until the earthquake stopped&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4480,&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">called out to his friend to safely hide there until the earthquake stopped</span>",
+              "feedback": ""
+            },
+            {
+              "id": 49,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;dragged Max along with him to save his friend&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4480,&quot;10&quot;:2,&quot;11&quot;:4,&quot;15&quot;:&quot;Arial&quot;}\">dragged Max along with him to save his friend</span>",
+              "feedback": ""
+            },
+            {
+              "id": 989,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;went to sleep&quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4224,&quot;10&quot;:2,&quot;15&quot;:&quot;Arial&quot;}\">went to sleep</span>",
+              "feedback": ""
+            },
+            {
+              "id": 583,
+              "value": "<span data-sheets-value=\"{&quot;1&quot;:2,&quot;2&quot;:&quot;ate noodles &quot;}\" data-sheets-userformat=\"{&quot;2&quot;:4224,&quot;10&quot;:2,&quot;15&quot;:&quot;Arial&quot;}\">ate noodles </span>",
+              "feedback": ""
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2023-02-03T04:47:52.741",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "002928ed-0fa3-4e70-a239-7fb20a73b71f",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+          "answerMapping": [
+            {
+              "blankId": 287,
+              "choiceId": 881
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2023-02-03T05:13:54.44",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "mitr-vrushali@alef.com",
+      "maxScore": 1,
+      "version": 1,
+      "tags": {},
+      "adt": false,
+      "stage": "PENDING_REVIEW",
+      "createdBy": "mitr-vrushali@alef.com",
+      "status": "DRAFT",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "003fb5a7-c491-4cdf-bb98-5bc6ba9870b5",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "opinion",
+          "writing",
+          "narrative writing"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": true,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "REMEMBERING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL",
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "7",
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ],
+        "conditionsOfUse": [
+          "https://www.shutterstock.com/image-photo/dolphin-547308685"
+        ],
+        "formatType": "QUESTION",
+        "author": "Catherine Casteel",
+        "authoredDate": "2023-08-25T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "6305",
+            "name": "W 7.9.a",
+            "description": "Apply grade 7 Reading standards to literature (e.g., “Compare and contrast a fictional portrayal of a time, place, or character and a historical account of the same period as a means of understanding how authors of fiction use or alter history”).",
+            "curriculum": "CCSS",
+            "grade": "7",
+            "subject": "ELA"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": "A2",
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "CS_ELA7_L024_GoFurther_Q12",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+      "body": {
+        "prompt": "<p>Read the opinion.&nbsp;</p>\n<p>&nbsp;</p>\n<p><em>I believe that people should not swim with dolphins.</em></p>\n<p>&nbsp;</p>\n<p>Drag and drop the sentence that states the <em>same</em> opinion to the table.</p>\n<p>&nbsp;</p>\n<table style=\"border-collapse: collapse; width: 100%;\" border=\"1\">\n<tbody>\n<tr>\n<td style=\"width: 50%; text-align: center;\"><strong>Original Opinion</strong></td>\n<td style=\"width: 50%; text-align: center;\"><strong>Re-written Opinion</strong></td>\n</tr>\n<tr>\n<td style=\"width: 50%;\">I believe that people should not swim with dolphins.</td>\n<td style=\"width: 50%;\">&nbsp;<blank-field id=\"915\" class=\"mceNonEditable\"></blank-field>&nbsp;</td>\n</tr>\n</tbody>\n</table>\n<p>&nbsp;</p>\n<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2023/09/25/09/29/fzILw1G7I0.jpg\" />&nbsp;</p>",
+        "blanks": [
+          {
+            "id": 915,
+            "weight": 100.0
+          }
+        ],
+        "choices": {
+          "shuffle": true,
+          "showDragHandle": true,
+          "choiceItems": [
+            {
+              "id": 997,
+              "value": "Dolphins and people should not swim together.",
+              "feedback": ""
+            },
+            {
+              "id": 358,
+              "value": "Dolphins and people often swim together.",
+              "feedback": ""
+            },
+            {
+              "id": 604,
+              "value": "People like to swim with dolphins.",
+              "feedback": ""
+            },
+            {
+              "id": 158,
+              "value": "People can swim with dolphins.",
+              "feedback": ""
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2023-08-25T19:12:58.851",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "003fb5a7-c491-4cdf-bb98-5bc6ba9870b5",
+      "validation": {
+        "validResponse": {
+          "type": "FILL_IN_THE_BLANK_DRAG_DROP",
+          "answerMapping": [
+            {
+              "blankId": 915,
+              "choiceId": 997
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2023-09-25T09:30:02.624",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "lotteberger1@alef.com",
+      "maxScore": 1,
+      "version": 2,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "csa-catherine@alef.com",
+      "status": "PUBLISHED",
+      "summative": true
+    }
+  }
+]

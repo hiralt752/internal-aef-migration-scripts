@@ -1,0 +1,58 @@
+[
+  {
+    "question_id": "352f19de-cbb4-4c5f-ab7e-d77fcefb4ea0",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "f47c1bbe-b37c-49e7-bc72-f2db457c6bea",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "2982dfa0-55a4-4f8c-800f-6da96eafcc29",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "83bb4300-5014-4bf5-a501-78f4a0718a27",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "0c325cb8-3952-496d-98bd-6ef01eaf7bed",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "432fb40b-1393-47ef-9e40-4669114291e5",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "61f7b4ae-72d5-4846-ac55-8586aabb1528",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "2940fea7-4840-47bc-8089-9834452c2e78",
+    "question_type": "IMAGE_LABELLING_DRAG_DROP",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  }
+]

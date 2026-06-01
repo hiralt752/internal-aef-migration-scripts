@@ -1,0 +1,246 @@
+{
+  "schemaVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "type": "MATCHING",
+  "subType": "MATCHING_PAIRS",
+  "metadata": {
+    "general": {
+      "code": "AR7_MLO_122_Q_4",
+      "externalId": "52745043-7b30-48d8-bfc3-abb12eb16210",
+      "title": null,
+      "language": "AR",
+      "keywords": [
+        "معلومة",
+        "ضمنيّة",
+        "عبارة"
+      ],
+      "parentReference": null,
+      "source": "vd01_ar@test.com"
+    },
+    "lifecycle": {
+      "status": "DRAFT"
+    },
+    "technical": {
+      "penAndPaper": false
+    },
+    "educational": {
+      "resourceType": "TEQ1",
+      "difficultyLevel": "DIFFICULT",
+      "cognitiveDimensions": [
+        "ANALYZING"
+      ],
+      "knowledgeDimensions": [
+        "CONCEPTUAL"
+      ],
+      "summativeAssessment": false,
+      "cefrLevel": "A1",
+      "proficiency": "READING",
+      "lexileLevel": "7",
+      "logitValue": null
+    },
+    "rights": {
+      "copyrights": [
+        "ALEF"
+      ],
+      "conditionsOfUse": []
+    },
+    "classification": {
+      "grade": "7",
+      "subject": "Arabic",
+      "curriculum": "UAE MOE",
+      "curriculumOutcomes": [
+        {
+          "type": "sub_level",
+          "id": "5880",
+          "name": "ARB.3.1.02.020",
+          "description": "يحدد الفكر الرئيسة للنص بعد تحليله المعلومات الصريحة والضمنية، مستشهدا بمصادر متعددة من الأدلة",
+          "curriculum": "UAE MOE",
+          "grade": "7",
+          "subject": "Arabic"
+        }
+      ],
+      "subDomain": []
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",
+        "migration:originalCreatedAt": "2019-09-04T18:52:07.664",
+        "migration:authoredDate": "2019-09-04T00:00:00.000"
+      }
+    }
+  },
+  "itemBody": {
+    "version": "1.0",
+    "title": null,
+    "subTitle": null,
+    "instruction": null,
+    "audio": null,
+    "video": null,
+    "backgroundLayout": null,
+    "timeSpentConfig": null,
+    "splitContent": null,
+    "sideImage": null,
+    "shuffled": true,
+    "statement": {
+      "content": [
+        {
+          "type": "text",
+          "text": "<p><strong>اربطْ كلَّ معلومةٍ ضمنيَّـةٍ بالجملةِ الَّتي تدلُّ عليها فيما يأتي:&nbsp; </strong></p>"
+        }
+      ]
+    },
+    "sentence": null,
+    "sourceItems": [
+      {
+        "id": 60,
+        "weight": 25.0,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ الَّذي يتلاشى ويتبخَّرُ هو وقتٌ ضائعٌ.</span></p>"
+        },
+        "feedback": null
+      },
+      {
+        "id": 483,
+        "weight": 25.0,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">الَّذي قام بإنجازِ المهمَّاتِ قبلَ المحاضرةِ حقّقَ فهمًا أفضلَ ممّنِ استمعَ إلى الشَّرحِ أوّلًا.</span></p>"
+        },
+        "feedback": null
+      },
+      {
+        "id": 876,
+        "weight": 25.0,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ لا ينبغي أنْ يكونَ نسيمًا منعشًا ولا متعةً خالصَةً.</span></p>"
+        },
+        "feedback": null
+      },
+      {
+        "id": 369,
+        "weight": 25.0,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">يمكنُ تنفيذ البرامجِ التّعليميَّةِ بأيّ وقتٍ ودونَ متطلَّبات مُسبقةٍ.</span></p>"
+        },
+        "feedback": null
+      }
+    ],
+    "targetItems": [
+      {
+        "id": 11,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ الحقيقيُّ يُعنى بثباتِ المعلوماتِ.</span></p>"
+        }
+      },
+      {
+        "id": 487,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">التَّعلُّمُ الصّعبُ يؤدّي إلى نتيجةٍ أفضلَ.</span></p>"
+        }
+      },
+      {
+        "id": 898,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">ضرورةُ بذلِ الجهدِ في التَّعلُّمِ.</span></p>"
+        }
+      },
+      {
+        "id": 915,
+        "content": {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">تصميمُ التَّعلُّمِ بأسهلِ الطُّرِقِ الممكنةِ.&nbsp;&nbsp;</span></p>"
+        }
+      }
+    ]
+  },
+  "responseDeclaration": {
+    "type": "PAIR_MATCH",
+    "cardinality": "MULTIPLE",
+    "maxAttempts": 1
+  },
+  "outcomeDeclaration": {
+    "scoringType": "EXACT_MATCH",
+    "scoring": {
+      "normalizedMin": 0,
+      "normalizedMax": 1,
+      "defaultNormalizedValue": 0
+    },
+    "maxScore": 1,
+    "feedback": {
+      "correct": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p><span style=\"font-weight: 400;\">كلُّ سياقٍ في الجملة يُشيرُ إلى ما يُناسبُهُ وإلى ما ترمي إليهِ الجملةُ منْ فكرةٍ ومعلومةٍ.</span></p>"
+          }
+        ]
+      },
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<p><span style=\"font-weight: 400;\">كلُّ سياقٍ في الجملة يُشيرُ إلى ما يُناسبُهُ وإلى ما ترمي إليهِ الجملةُ منْ فكرةٍ ومعلومةٍ.</span></p>"
+          }
+        ]
+      }
+    },
+    "seeWhy": {
+      "layout": "TEXT",
+      "content": [
+        {
+          "type": "text",
+          "text": "<p><span style=\"font-weight: 400;\">المعلومةُ الضِّمنيَّـةُ: هي معلومةٌ تُستنتَجُ منَ جملةٍ تعطي فكرةً غيرَ مباشرةٍ.</span></p>"
+        }
+      ],
+      "audio": null
+    },
+    "validResponse": {
+      "shouldAutoGraded": true,
+      "correctAnswers": [
+        {
+          "sourceItemId": 60,
+          "targetItemId": 11
+        },
+        {
+          "sourceItemId": 483,
+          "targetItemId": 487
+        },
+        {
+          "sourceItemId": 876,
+          "targetItemId": 898
+        },
+        {
+          "sourceItemId": 369,
+          "targetItemId": 915
+        }
+      ]
+    }
+  },
+  "modalFeedback": {
+    "needHelp": {
+      "content": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "<p><span style=\"font-weight: 400;\">&nbsp;فهمُ سياقِ الجملِ يُساعدُ في الرَّبطِ بينها وبينَ ما يُناسبُها.</span></p>"
+          },
+          {
+            "type": "text",
+            "text": "<p><span style=\"font-weight: 400;\">لاحظْ ما تُشيرُ إليهِ العباراتُ الآتيـةُ: \"يتلاشى ويتبخَّرُ\"، \"نسيمًا منعشًا\" و\"دونَ متطلّباتٍ\".</span></p>"
+          }
+        ]
+      }
+    },
+    "passageId": null
+  }
+}

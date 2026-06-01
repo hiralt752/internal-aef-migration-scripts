@@ -1,0 +1,185 @@
+{
+  "schemaVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "type": "FILL_IN_THE_BLANK",
+  "subType": "BLANK_ON_TEXT",
+  "metadata": {
+    "general": {
+      "code": "EA5_MLO_040_Q_22",
+      "externalId": "0036d828-fdc8-4305-9918-751f575c6528",
+      "title": null,
+      "language": "EN_US",
+      "keywords": [
+        "was",
+        "past tense",
+        "third person plural pronoun"
+      ],
+      "parentReference": null,
+      "source": "ELL_Writer_11@qbslearning.com"
+    },
+    "lifecycle": {
+      "status": "PUBLISHED"
+    },
+    "technical": {
+      "penAndPaper": false
+    },
+    "educational": {
+      "resourceType": "TEQ2",
+      "difficultyLevel": "DIFFICULT",
+      "cognitiveDimensions": [
+        "APPLYING",
+        "UNDERSTANDING"
+      ],
+      "knowledgeDimensions": [
+        "PROCEDURAL"
+      ],
+      "summativeAssessment": false,
+      "cefrLevel": null,
+      "proficiency": null,
+      "lexileLevel": "5",
+      "logitValue": null
+    },
+    "rights": {
+      "copyrights": [
+        "ALEF",
+        "SHUTTERSTOCK"
+      ]
+    },
+    "classification": {
+      "grade": "5",
+      "subject": "English Access MOE",
+      "curriculum": "UAE MOE",
+      "curriculumOutcomes": [
+        {
+          "type": "sub_standard",
+          "id": "570091",
+          "name": "En5.G.Future tenses.14.1.",
+          "description": "future time (going to)",
+          "curriculum": "UAE MOE",
+          "grade": "5",
+          "subject": "English Access MOE"
+        }
+      ],
+      "subDomain": []
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",
+        "migration:originalCreatedAt": "2019-12-22T13:14:03.696",
+        "migration:authoredDate": "2019-12-22T00:00:00.000"
+      }
+    }
+  },
+  "itemBody": {
+    "version": "1.0",
+    "title": null,
+    "subTitle": null,
+    "instruction": null,
+    "audio": null,
+    "video": null,
+    "backgroundLayout": null,
+    "timeSpentConfig": null,
+    "splitContent": null,
+    "sideImage": null,
+    "fibImage": null,
+    "optionsStyle": "option-style-1",
+    "wordBankLayout": "none",
+    "wordBankDistractor": [],
+    "columns": 1,
+    "numberedSentence": false,
+    "centered": false,
+    "statement": {
+      "content": {
+        "type": "text",
+        "text": ""
+      }
+    },
+    "sentence": {
+      "text": "<p><span>Read the text. Complete the sentence from the word bank below to show what has already happened.</span></p><p>&nbsp;</p><p style=\"text-align: center;\"><em>Word Bank</em></p><table style=\"border-collapse: collapse; width: 100%; height: 27px;\" border=\"1\"><tbody><tr style=\"height: 27px;\"><td style=\"width: 25%; height: 27px; text-align: center;\">was</td><td style=\"width: 25%; height: 27px; text-align: center;\">were</td><td style=\"width: 25%; height: 27px; text-align: center;\">is</td><td style=\"width: 25%; height: 27px; text-align: center;\">am</td></tr></tbody></table><p><span><br />Mary and her friend @_@ going to ride their bikes in the park. Mary was so happy.</span></p><p>&nbsp;</p>"
+    },
+    "items": [
+      {
+        "id": 1,
+        "weight": 1.0,
+        "feedback": "<p>Mary and her friend <em>were</em> going to ride their bikes in the park. Mary was so happy.</p>",
+        "rules": [],
+        "decimalNotation": null,
+        "periodNotation": null,
+        "answerType": "text",
+        "inputType": "TEXT_BLANK",
+        "swappable": false,
+        "swapGroupId": 0,
+        "withBlankPicker": false,
+        "allowEquivalentNumber": false,
+        "simplestFormFraction": false,
+        "decimals": null,
+        "itemId": null,
+        "position": null,
+        "wirisXml": null,
+        "wirisSvg": null
+      }
+    ],
+    "variables": []
+  },
+  "responseDeclaration": {
+    "maxAttempts": 1,
+    "multipleAnswer": false
+  },
+  "outcomeDeclaration": {
+    "scoringType": "EXACT_MATCH",
+    "scoring": {
+      "normalizedMin": 0,
+      "normalizedMax": 1,
+      "defaultNormalizedValue": 0
+    },
+    "seeWhy": {
+      "layout": "TEXT",
+      "audio": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "You use the word <em>were</em> with <em>they</em> to talk about what has already happened in the past."
+        }
+      ]
+    },
+    "feedback": {
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",
+            "text": "<em>They</em> is a third-person plural pronoun."
+          }
+        ]
+      }
+    },
+    "validation": {
+      "scoringType": "EXACT_MATCH",
+      "validResponse": {
+        "correctAnswers": [
+          {
+            "blankId": 1,
+            "correctAnswer": "were",
+            "alternateAnswers": [],
+            "answerInWidgetFormat": null
+          }
+        ]
+      }
+    }
+  },
+  "modalFeedback": {
+    "needHelp": {
+      "content": {
+        "layout": "TEXT",
+        "content": [
+          {
+            "type": "text",
+            "text": "You will use the pronoun <em>they</em> for Stacey and her friend."
+          }
+        ]
+      }
+    }
+  }
+}

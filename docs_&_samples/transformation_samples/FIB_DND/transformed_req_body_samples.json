@@ -1,0 +1,842 @@
+[
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "DND",
+    "subType": "BLANK_ON_QUESTION",
+    "metadata": {
+      "general": {
+        "code": "CS_ELA10_LO12_GoFurther_Q_3",
+        "externalId": "000b5509-32f5-469e-bae8-34380c74d61e",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "writing",
+          "language",
+          "argue"
+        ],
+        "parentReference": null,
+        "source": "Jessica Brampton"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": true,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": null,
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF"
+        ]
+      },
+      "classification": {
+        "grade": "10",
+        "subject": "ELA",
+        "curriculum": "CCSS",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "6319",
+            "name": "W.10.1.a",
+            "description": "Introduce precise claim(s), distinguish the claim(s) from alternate or opposing claims, and create an organization that establishes clear relationships among claim(s), counterclaims,reasons, and evidence.",
+            "curriculum": "CCSS",
+            "grade": "10",
+            "subject": "ELA"
+          }
+        ],
+        "subDomain": []
+      },
+      "annotation": {}
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "image": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "showDragHandle": true,
+      "shuffled": true,
+      "optionsStyle": "option-style-1",
+      "dropLimit": 1,
+      "optionsPosition": "bottom",
+      "statement": null,
+      "sentence": {
+        "text": "<p>When writing a story, you should focus on the information making sense. You can do this by using  @_@ , avoiding  @_@ , and being aware of the  @_@ .</p>"
+      },
+      "targets": [
+        {
+          "id": 1,
+          "weight": 0.3333,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        },
+        {
+          "id": 2,
+          "weight": 0.3333,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        },
+        {
+          "id": 3,
+          "weight": 0.3333,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        }
+      ],
+      "options": [
+        {
+          "id": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "clear, concise language"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "jargon"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "audience’s interests"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "content": [
+            {
+              "type": "text",
+              "text": "critic's opinons"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "content": [
+            {
+              "type": "text",
+              "text": "long and confusing language"
+            }
+          ]
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1
+    },
+    "outcomeDeclaration": {
+      "scoringType": "PARTIAL_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "shouldAutoGraded": true,
+        "correctAnswers": [
+          {
+            "targetId": 1,
+            "optionIds": [
+              1
+            ],
+            "matchMode": "ALL"
+          },
+          {
+            "targetId": 2,
+            "optionIds": [
+              2
+            ],
+            "matchMode": "ALL"
+          },
+          {
+            "targetId": 3,
+            "optionIds": [
+              3
+            ],
+            "matchMode": "ALL"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "DND",
+    "subType": "BLANK_ON_QUESTION",
+    "metadata": {
+      "general": {
+        "code": "PW_ER_08_LO018_Q_6",
+        "externalId": "000f8d02-e565-4bc8-aade-cf593d725d9f",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "root",
+          "prefix",
+          "meaning"
+        ],
+        "parentReference": null,
+        "source": "Csa Ela3"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ2",
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "UNDERSTANDING",
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": "8",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ]
+      },
+      "classification": {
+        "grade": "8",
+        "subject": "ELA",
+        "curriculum": "English Reading",
+        "curriculumOutcomes": [
+          {
+            "type": "skill",
+            "id": "32142",
+            "name": "L.8.4.b.i",
+            "description": "Use root words and affixes to determine the meaning of a word",
+            "curriculum": "English Reading",
+            "grade": "8",
+            "subject": "ELA"
+          }
+        ],
+        "subDomain": []
+      },
+      "annotation": {}
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "image": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "showDragHandle": true,
+      "shuffled": true,
+      "optionsStyle": "option-style-1",
+      "dropLimit": 1,
+      "optionsPosition": "bottom",
+      "statement": null,
+      "sentence": {
+        "text": "<p>Drag and drop a suffix to complete the word.</p>\n<p> </p>\n<p><img height=\"329\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2025/01/23/10/43/GR80pymDjZ.png\" width=\"422\"/> </p>\n<p> </p>\n<p> @_@ port: to carry across</p>"
+      },
+      "targets": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        }
+      ],
+      "options": [
+        {
+          "id": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "trans-"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "im-"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "inter-"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "content": [
+            {
+              "type": "text",
+              "text": "con-"
+            }
+          ]
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1
+    },
+    "outcomeDeclaration": {
+      "scoringType": "PARTIAL_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "shouldAutoGraded": true,
+        "correctAnswers": [
+          {
+            "targetId": 1,
+            "optionIds": [
+              1
+            ],
+            "matchMode": "ALL"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "DND",
+    "subType": "BLANK_ON_QUESTION",
+    "metadata": {
+      "general": {
+        "code": "CS_ELA7_L006_Analyze_Q_12",
+        "externalId": "001a40a1-1070-4a6d-9328-92ea39a3db7d",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "theme, ",
+          " tone, ",
+          "mood,",
+          "thinking "
+        ],
+        "parentReference": null,
+        "source": "Vrushali Sheth"
+      },
+      "lifecycle": {
+        "status": "DRAFT"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "ANALYZING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": null,
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": []
+      },
+      "classification": {
+        "grade": "7",
+        "subject": "ELA",
+        "curriculum": "CCSS",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "4321",
+            "name": "RL.7.4",
+            "description": "Determine the meaning of words and phrases as they are used in a text, including figurative and\nconnotative meanings; analyze the impact ofrhymes and otherrepetitions of sounds (e.g., alliteration)\non a specific verse or stanza of a poem or section of a story or drama.",
+            "curriculum": "CCSS",
+            "grade": "7",
+            "subject": "ELA"
+          }
+        ],
+        "subDomain": []
+      },
+      "annotation": {}
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "image": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "showDragHandle": true,
+      "shuffled": true,
+      "optionsStyle": "option-style-1",
+      "dropLimit": 1,
+      "optionsPosition": "bottom",
+      "statement": null,
+      "sentence": {
+        "text": "<p><span data-sheets-userformat='{\"2\":4522,\"4\":{\"1\":2,\"2\":65280},\"6\":{\"1\":[{\"1\":2,\"2\":0,\"5\":{\"1\":2,\"2\":0}},{\"1\":0,\"2\":0,\"3\":3},{\"1\":1,\"2\":0,\"4\":1}]},\"8\":{\"1\":[{\"1\":2,\"2\":0,\"5\":{\"1\":2,\"2\":0}},{\"1\":0,\"2\":0,\"3\":3},{\"1\":1,\"2\":0,\"4\":1}]},\"10\":2,\"11\":4,\"15\":\"Arial\"}' data-sheets-value='{\"1\":2,\"2\":\"There was another problem. People were asking her questions.\\n\\n\\\"Rima, when did you go to Brazil?\\\"\\n\\n“Rima, how did it feel to meet a famous actor?” \\n\\nEvery day, Rima had to tell more lies to make her profile seem true. She felt worried all the time.                                                                                                                   Read the passage. The author sets a _________________________ tone in this passage.\\n\"}'>There was another problem. People were asking her questions.<br/><br/>\"Rima, when did you go to Brazil?\"<br/><br/>“Rima, how did it feel to meet a famous actor?” <br/><br/>Every day, Rima had to tell more lies to make her profile seem true. She felt worried all the time. Read the passage. The author sets a  @_@  tone in this passage.<br/></span></p>"
+      },
+      "targets": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        }
+      ],
+      "options": [
+        {
+          "id": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "worried"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "free"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "disappointed"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "content": [
+            {
+              "type": "text",
+              "text": "sad"
+            }
+          ]
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "shouldAutoGraded": true,
+        "correctAnswers": [
+          {
+            "targetId": 1,
+            "optionIds": [
+              1
+            ],
+            "matchMode": "ALL"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "DND",
+    "subType": "BLANK_ON_QUESTION",
+    "metadata": {
+      "general": {
+        "code": "CS_ELA9_LOO3_GoFurther_Q_16",
+        "externalId": "002928ed-0fa3-4e70-a239-7fb20a73b71f",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "adjective",
+          "cashier",
+          "affectionate"
+        ],
+        "parentReference": null,
+        "source": "Vrushali Sheth"
+      },
+      "lifecycle": {
+        "status": "DRAFT"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "APPLYING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": false,
+        "cefrLevel": null,
+        "proficiency": null,
+        "lexileLevel": null,
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": []
+      },
+      "classification": {
+        "grade": "9",
+        "subject": "ELA",
+        "curriculum": "CCSS",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "6086",
+            "name": "W.9.3.a",
+            "description": "Engage and orient the reader by setting out a problem, situation, or observation, establishing one\nor multiple point(s) of view, and introducing a narrator and/or characters; create a smooth\nprogression of experiences or events.",
+            "curriculum": "CCSS",
+            "grade": "9",
+            "subject": "ELA"
+          }
+        ],
+        "subDomain": []
+      },
+      "annotation": {}
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "image": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "showDragHandle": true,
+      "shuffled": true,
+      "optionsStyle": "option-style-1",
+      "dropLimit": 1,
+      "optionsPosition": "bottom",
+      "statement": null,
+      "sentence": {
+        "text": "<p><span data-sheets-userformat='{\"2\":4512,\"8\":{\"1\":[{\"1\":2,\"2\":0,\"5\":{\"1\":2,\"2\":0}},{\"1\":0,\"2\":0,\"3\":3},{\"1\":1,\"2\":0,\"4\":1}]},\"10\":2,\"11\":4,\"15\":\"Arial\"}' data-sheets-value='{\"1\":2,\"2\":\"After a very long period, Max and Tim, two pals, finally crossed paths.  They soon got into arguments over who was poorer and who was richer. Suddenly, the ground began to shake abruptly, and they quickly understood it was an earthquake. Tim ducked rapidly beneath the desk and ____________________________.                                                  The beginning of a story is given. Choose a conclusion for it.                   \"}'><img height=\"200\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2023/02/03/05/13/cd3hyEIaQ4.png\" style=\"float: right;\" width=\"300\"/></span><span data-sheets-userformat='{\"2\":4512,\"8\":{\"1\":[{\"1\":2,\"2\":0,\"5\":{\"1\":2,\"2\":0}},{\"1\":0,\"2\":0,\"3\":3},{\"1\":1,\"2\":0,\"4\":1}]},\"10\":2,\"11\":4,\"15\":\"Arial\"}' data-sheets-value='{\"1\":2,\"2\":\"After a very long period, Max and Tim, two pals, finally crossed paths.  They soon got into arguments over who was poorer and who was richer. Suddenly, the ground began to shake abruptly, and they quickly understood it was an earthquake. Tim ducked rapidly beneath the desk and ____________________________.                                                  The beginning of a story is given. Choose a conclusion for it.                   \"}'>After a very long period, Max and Tim, two pals, finally crossed paths.  They soon got into arguments over who was poorer and who was richer. Suddenly, the ground began to shake abruptly, and they quickly understood it was an earthquake. Tim ducked rapidly beneath the desk and  @_@ . The beginning of a story is given. Choose a conclusion for it. </span></p>"
+      },
+      "targets": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        }
+      ],
+      "options": [
+        {
+          "id": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "called out to his friend to safely hide there until the earthquake stopped"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "dragged Max along with him to save his friend"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "went to sleep"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "content": [
+            {
+              "type": "text",
+              "text": "ate noodles"
+            }
+          ]
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "shouldAutoGraded": true,
+        "correctAnswers": [
+          {
+            "targetId": 1,
+            "optionIds": [
+              1
+            ],
+            "matchMode": "ALL"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "type": "DND",
+    "subType": "BLANK_ON_QUESTION",
+    "metadata": {
+      "general": {
+        "code": "CS_ELA7_L024_GoFurther_Q12",
+        "externalId": "003fb5a7-c491-4cdf-bb98-5bc6ba9870b5",
+        "title": null,
+        "language": "EN_US",
+        "keywords": [
+          "opinion",
+          "writing",
+          "narrative writing"
+        ],
+        "parentReference": null,
+        "source": "Catherine Casteel"
+      },
+      "lifecycle": {
+        "status": "PUBLISHED"
+      },
+      "technical": {
+        "penAndPaper": false
+      },
+      "educational": {
+        "resourceType": "TEQ1",
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "REMEMBERING",
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL",
+          "CONCEPTUAL"
+        ],
+        "summativeAssessment": true,
+        "cefrLevel": "A2",
+        "proficiency": null,
+        "lexileLevel": "7",
+        "logitValue": null
+      },
+      "rights": {
+        "copyrights": [
+          "ALEF",
+          "SHUTTERSTOCK"
+        ]
+      },
+      "classification": {
+        "grade": "7",
+        "subject": "ELA",
+        "curriculum": "CCSS",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "6305",
+            "name": "W 7.9.a",
+            "description": "Apply grade 7 Reading standards to literature (e.g., “Compare and contrast a fictional portrayal of a time, place, or character and a historical account of the same period as a means of understanding how authors of fiction use or alter history”).",
+            "curriculum": "CCSS",
+            "grade": "7",
+            "subject": "ELA"
+          }
+        ],
+        "subDomain": []
+      },
+      "annotation": {}
+    },
+    "itemBody": {
+      "version": "1.0",
+      "title": null,
+      "subTitle": null,
+      "instruction": null,
+      "audio": null,
+      "video": null,
+      "image": null,
+      "backgroundLayout": null,
+      "timeSpentConfig": null,
+      "splitContent": null,
+      "sideImage": null,
+      "showDragHandle": true,
+      "shuffled": true,
+      "optionsStyle": "option-style-1",
+      "dropLimit": 1,
+      "optionsPosition": "bottom",
+      "statement": null,
+      "sentence": {
+        "text": "<p>Read the opinion. </p>\n<p> </p>\n<p><em>I believe that people should not swim with dolphins.</em></p>\n<p> </p>\n<p>Drag and drop the sentence that states the <em>same</em> opinion to the table.</p>\n<p> </p>\n<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">\n<tbody>\n<tr>\n<td style=\"width: 50%; text-align: center;\"><strong>Original Opinion</strong></td>\n<td style=\"width: 50%; text-align: center;\"><strong>Re-written Opinion</strong></td>\n</tr>\n<tr>\n<td style=\"width: 50%;\">I believe that people should not swim with dolphins.</td>\n<td style=\"width: 50%;\"> @_@ </td>\n</tr>\n</tbody>\n</table>\n<p> </p>\n<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2023/09/25/09/29/fzILw1G7I0.jpg\"/> </p>"
+      },
+      "targets": [
+        {
+          "id": 1,
+          "weight": 1.0,
+          "swappable": false,
+          "swapGroupId": 0,
+          "position": null
+        }
+      ],
+      "options": [
+        {
+          "id": 1,
+          "content": [
+            {
+              "type": "text",
+              "text": "Dolphins and people should not swim together."
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "content": [
+            {
+              "type": "text",
+              "text": "Dolphins and people often swim together."
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "content": [
+            {
+              "type": "text",
+              "text": "People like to swim with dolphins."
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "content": [
+            {
+              "type": "text",
+              "text": "People can swim with dolphins."
+            }
+          ]
+        }
+      ]
+    },
+    "responseDeclaration": {
+      "maxAttempts": 1
+    },
+    "outcomeDeclaration": {
+      "scoringType": "EXACT_MATCH",
+      "scoring": {
+        "normalizedMin": 0,
+        "normalizedMax": 1,
+        "defaultNormalizedValue": 0
+      },
+      "validResponse": {
+        "shouldAutoGraded": true,
+        "correctAnswers": [
+          {
+            "targetId": 1,
+            "optionIds": [
+              1
+            ],
+            "matchMode": "ALL"
+          }
+        ]
+      }
+    }
+  }
+]

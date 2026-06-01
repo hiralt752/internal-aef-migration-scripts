@@ -1,0 +1,64 @@
+[
+  {
+    "question_id": "8a77bda7-2ced-4194-a240-9bd579c68939",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.choices.choiceItems[0].answer",
+      "response.body.choices.choiceItems[1].answer",
+      "response.body.choices.choiceItems[2].answer",
+      "response.body.choices.choiceItems[3].answer",
+      "response.body.choices.choiceItems[4].answer",
+      "response.body.choices.choiceItems[5].answer"
+    ]
+  },
+  {
+    "question_id": "97244bb0-ab91-4e74-8626-622d2c8c0788",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.passage.content"
+    ]
+  },
+  {
+    "question_id": "4a472359-7daf-4cf9-94cc-b725265c1e75",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.partialAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "2f3e5086-f709-4aa2-9009-959f98d15348",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.generalFeedback"
+    ]
+  },
+  {
+    "question_id": "c8ef6fb8-2217-47aa-abb3-9973be8b75a6",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.partialAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "b1fa589d-8c7e-4563-b621-2711d128d699",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.partialAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  },
+  {
+    "question_id": "ed63e65f-9f89-4339-a4fc-7b278d329c8d",
+    "question_type": "MULTIPLE_SELECTION",
+    "keys": [
+      "response.body.correctAnswerFeedback",
+      "response.body.partialAnswerFeedback",
+      "response.body.wrongAnswerFeedback"
+    ]
+  }
+]

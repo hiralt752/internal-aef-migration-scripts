@@ -1,0 +1,154 @@
+{
+  "schemaVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "type": "DROPDOWN",
+  "subType": "DROPDOWN_SENTENCE",
+  "metadata": {
+    "general": {
+      "code": "MOE_EN_11_LO053_Q5",
+      "externalId": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+      "title": null,
+      "language": "EN_US",
+      "keywords": [
+        "enjoyment",
+        "audience",
+        "players"
+      ],
+      "parentReference": null,
+      "source": "layla.itani@contractoralefeducation.com"
+    },
+    "lifecycle": {
+      "status": "PUBLISHED"
+    },
+    "technical": {
+      "penAndPaper": false
+    },
+    "educational": {
+      "resourceType": "TEQ1",
+      "difficultyLevel": "EASY",
+      "cognitiveDimensions": [
+        "UNDERSTANDING"
+      ],
+      "knowledgeDimensions": [
+        "FACTUAL"
+      ],
+      "summativeAssessment": true,
+      "cefrLevel": null,
+      "proficiency": null,
+      "lexileLevel": null,
+      "logitValue": null
+    },
+    "rights": {
+      "copyrights": []
+    },
+    "classification": {
+      "grade": "11",
+      "subject": "English",
+      "curriculum": "UAE MOE",
+      "curriculumOutcomes": [
+        {
+          "type": "standard",
+          "id": "6224",
+          "name": "ENG.07.RV.CS.2.1",
+          "description": "Read and identify specific information in extended written or multimodal texts on familiar and unfamiliar concrete topics that are clearly structured and may use some nonstandard language or expressions.",
+          "curriculum": "UAE MOE",
+          "grade": "11",
+          "subject": "English"
+        }
+      ],
+      "subDomain": []
+    },
+    "annotation": {
+      "tags": {
+        "migration:source": "AAT",
+        "migration:originalCreatedAt": "2026-01-08T07:54:29.413",
+        "migration:authoredDate": "2026-01-08T00:00:00.000"
+      }
+    }
+  },
+  "itemBody": {
+    "version": "1.0",
+    "title": null,
+    "subTitle": null,
+    "instruction": null,
+    "audio": null,
+    "video": null,
+    "backgroundLayout": null,
+    "timeSpentConfig": null,
+    "splitContent": null,
+    "sideImage": null,
+    "shuffled": true,
+    "statement": null,
+    "sentence": {
+      "text": "<p><strong>Read. Then, complete the sentence.</strong></p><p>&nbsp;</p><p><strong>Virtual Sports: A New Kind of Arena</strong><span style=\"font-weight: 400;\">&nbsp;</span></p><p>&nbsp;</p><p><span style=\"font-weight: 400;\">Virtual sports have grown from a small hobby into an activity many people enjoy. These competitions, called E-sports, take place in digital games where players compete through screens instead of on a field. The excitement still feels strong for players and spectators.&nbsp;</span></p><p>&nbsp;</p><p><span style=\"font-weight: 400;\">A key part of virtual sports is multi-player games. People join teams with friends or players from other places. They talk through headsets, plan their steps, and move quickly. Because of this, strategy is very important. Teams choose when to move forward, stay back, or use certain skills.&nbsp;</span></p><p>&nbsp;</p><p><span style=\"font-weight: 400;\">Large E-sports tournaments bring in many fans, especially when events happen in big rooms with huge screens, or when they are streamed online. Many tournaments last several days. Gaming also helps students build communication and fast-thinking skills. Some schools support strong players by helping them join clubs or teams.&nbsp;</span></p><p>&nbsp;</p><p><span style=\"font-weight: 400;\">Virtual sports continue to grow and show that competition can happen anywhere—on a field, in a gym, or in a digital game world. People enjoy watching good moves, smart plays, and close games.</span></p><p>&nbsp;</p><p><span style=\"font-weight: 400;\">Virtual sports can be enjoyed by both players and &nbsp;@_@&nbsp;.</span></p>"
+    },
+    "items": [
+      {
+        "id": 1,
+        "weight": 1.0,
+        "title": null,
+        "subtitle": null,
+        "image": null,
+        "options": [
+          {
+            "id": 1,
+            "content": {
+              "type": "text",
+              "text": "spectators"
+            },
+            "feedback": ""
+          },
+          {
+            "id": 2,
+            "content": {
+              "type": "text",
+              "text": "teachers"
+            },
+            "feedback": ""
+          },
+          {
+            "id": 3,
+            "content": {
+              "type": "text",
+              "text": "coaches"
+            },
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "responseDeclaration": {
+    "maxAttempts": 1
+  },
+  "outcomeDeclaration": {
+    "scoringType": "EXACT_MATCH",
+    "scoring": {
+      "normalizedMin": 0,
+      "normalizedMax": 1,
+      "defaultNormalizedValue": 0
+    },
+    "feedback": {
+      "incorrect": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Think about who watches the games."
+          }
+        ]
+      }
+    },
+    "validResponse": {
+      "shouldAutoGraded": true,
+      "correctAnswers": [
+        {
+          "dropDownId": 1,
+          "optionId": 1
+        }
+      ]
+    }
+  }
+}

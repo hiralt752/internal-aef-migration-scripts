@@ -1,0 +1,745 @@
+[
+  {
+    "question_id": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "enjoyment",
+          "audience",
+          "players"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": true,
+        "difficultyLevel": "EASY",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": null,
+        "copyrights": [],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Layla Itani",
+        "authoredDate": "2026-01-08T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "standard",
+            "id": "6224",
+            "name": "ENG.07.RV.CS.2.1",
+            "description": "Read and identify specific information in extended written or multimodal texts on familiar and unfamiliar concrete topics that are clearly structured and may use some nonstandard language or expressions.",
+            "curriculum": "UAE MOE",
+            "grade": "11",
+            "subject": "English"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MOE_EN_11_LO053_Q5",
+      "createdByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>Read. Then, complete the sentence.</strong></p>\n<p>&nbsp;</p>\n<p><strong>Virtual Sports: A New Kind of Arena</strong><span style=\"font-weight: 400;\">&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports have grown from a small hobby into an activity many people enjoy. These competitions, called E-sports, take place in digital games where players compete through screens instead of on a field. The excitement still feels strong for players and spectators.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">A key part of virtual sports is multi-player games. People join teams with friends or players from other places. They talk through headsets, plan their steps, and move quickly. Because of this, strategy is very important. Teams choose when to move forward, stay back, or use certain skills.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Large E-sports tournaments bring in many fans, especially when events happen in big rooms with huge screens, or when they are streamed online. Many tournaments last several days. Gaming also helps students build communication and fast-thinking skills. Some schools support strong players by helping them join clubs or teams.&nbsp;</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports continue to grow and show that competition can happen anywhere—on a field, in a gym, or in a digital game world. People enjoy watching good moves, smart plays, and close games.</span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">Virtual sports can be enjoyed by both players and &nbsp;<blank-field id=\"779\" class=\"mceNonEditable\"></blank-field>&nbsp;.</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 779,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 851,
+                  "value": "<span style=\"font-weight: 400;\">spectators</span>",
+                  "feedback": ""
+                },
+                {
+                  "id": 336,
+                  "value": "<p><span style=\"font-weight: 400;\">teachers</span></p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 776,
+                  "value": "<p><span style=\"font-weight: 400;\">coaches</span></p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [
+          "<p><span style=\"font-weight: 400;\">Think about who watches the games.</span></p>"
+        ],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2026-01-08T07:54:29.413",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "00083f0d-5770-4465-bcd6-52c66133dcb9",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 779,
+              "choiceId": 851
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2026-01-08T07:54:29.413",
+      "toolkits": null,
+      "updatedByUser": {
+        "uuid": "ef4dfee2-447c-400a-9023-b8fd6ecf60ce",
+        "name": "Layla Itani",
+        "email": "layla.itani@contractoralefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "layla.itani@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 0,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "layla.itani@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": true
+    }
+  },
+  {
+    "question_id": "9bfb7035-a716-4800-af1c-e5c1d048c3df",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "place ",
+          "period",
+          "place value"
+        ],
+        "resourceType": "TEQ1",
+        "summativeAssessment": false,
+        "difficultyLevel": "MEDIUM",
+        "cognitiveDimensions": [
+          "UNDERSTANDING"
+        ],
+        "knowledgeDimensions": [
+          "FACTUAL"
+        ],
+        "lexileLevel": "5",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Lina Kreidieh",
+        "authoredDate": "2024-09-06T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "skill",
+            "id": "2598",
+            "name": "SK.1594",
+            "description": "Recognize that in a multi-digit number, a digit in one place represents 10 times as much as it represents in the place to its right and 1/10 of what it represents in the place to its left.",
+            "curriculum": "UAE MOE",
+            "grade": "5",
+            "subject": "Math"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "MA5_L013_ExploreLearn_Q_23",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><span style=\"font-weight: 400;\"><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Select the correct answer.</span></span></p>\n<p>&nbsp;</p>\n<p><span style=\"font-weight: 400;\">0.7 is <blank-field id=\"196\" class=\"mceNonEditable\"></blank-field> 7.0</span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 196,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 145,
+                  "value": "<img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" /> of",
+                  "feedback": ""
+                },
+                {
+                  "id": 980,
+                  "value": "<p><img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2253%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E100%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2248.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2226.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2226.5%22%20y%3D%2252%22%3E100%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 100\" width=\"53\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»100«/mn»«/mfrac»«/math»\" /> of</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 920,
+                  "value": "<p>10 times</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 904,
+                  "value": "<p>100 times</p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [
+          "<p>Use a place-value chart to help identify the value of each digit.</p>\n<p><img src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/07/29/06/10/k7TdesgUEz.jpg\" width=\"325\" height=\"230\" /></p>",
+          "<p>In a multi-digit number, a digit in one place represents 10 times as much as it represents in the place to its right and <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" /> of what it represents in the place to its left.</p>"
+        ],
+        "generalFeedback": "<p>The digit 7 in 0.7 is in the tenths place.</p>\n<p>The digit 7 in 7.0 is in the ones place.&nbsp;</p>\n<p>&nbsp;</p>\n<p>So, 0.7 is <img class=\"Wirisformula\" style=\"max-width: none; vertical-align: -22px;\" role=\"math\" src=\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Awrs%3D%22http%3A%2F%2Fwww.wiris.com%2Fxml%2Fcvs-extension%22%20height%3D%2259%22%20width%3D%2239%22%20wrs%3Abaseline%3D%2237%22%3E%3C!--MathML%3A%20%3Cmath%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1998%2FMath%2FMathML%22%3E%3Cmfrac%3E%3Cmn%3E1%3C%2Fmn%3E%3Cmn%3E10%3C%2Fmn%3E%3C%2Fmfrac%3E%3C%2Fmath%3E--%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%2F%3E%3C%2Fdefs%3E%3Cline%20stroke%3D%22%23000000%22%20stroke-linecap%3D%22square%22%20stroke-width%3D%221%22%20x1%3D%223.5%22%20x2%3D%2234.5%22%20y1%3D%2229.5%22%20y2%3D%2229.5%22%2F%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2220%22%3E1%3C%2Ftext%3E%3Ctext%20font-family%3D%22Signika%22%20font-size%3D%2222%22%20text-anchor%3D%22middle%22%20x%3D%2219.5%22%20y%3D%2252%22%3E10%3C%2Ftext%3E%3C%2Fsvg%3E\" alt=\"1 over 10\" width=\"39\" height=\"59\" align=\"middle\" data-mathml=\"«math xmlns=¨http://www.w3.org/1998/Math/MathML¨»«mfrac»«mn»1«/mn»«mn»10«/mn»«/mfrac»«/math»\" /> of 7.0.</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2024-09-06T18:21:58.069",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "9bfb7035-a716-4800-af1c-e5c1d048c3df",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 196,
+              "choiceId": 145
+            }
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2024-09-06T21:02:07.876",
+      "toolkits": [],
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "hana.shatila@contractoralefeducation.com",
+      "maxScore": 1,
+      "version": 1,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "lina.kreidieh@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "1bda3a3b-8d85-4800-9757-f9d7c5d3b5a3",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "ما المقصود",
+          "بعلم"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "6",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Mariam Al Naqbi Al Naqbi",
+        "authoredDate": "2021-05-26T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "sub_standard",
+            "id": "818283",
+            "name": "2.1.2.5.G6",
+            "description": "يُعلِّل تسمية السيدة عائشة -رضي الله عنها- بأول عالمة في الإسلام",
+            "curriculum": "UAE MOE",
+            "grade": "6",
+            "subject": "Islamic_Studies"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "IS6_MLO_052_Q_37",
+      "createdByUser": null,
+      "language": "AR",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><strong>اخترِ الإجَابة الصَّحيحَـة من القائمة المنسدلة :</strong></p>\n<p>&nbsp;</p>\n<p><strong><img style=\"float: left;\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2021/05/25/11/50/z87D1uiqh9.jpg\" width=\"726\" height=\"77\" /> </strong></p>\n<p>&nbsp;</p>\n<p><strong>المَقصود بعلــم الفَرائِـض ؟&nbsp; هو عِلْــمُ &nbsp;<blank-field id=\"37\" class=\"mceNonEditable\"></blank-field>&nbsp;</strong></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 37,
+              "weight": 100.0,
+              "choices": [
+                {
+                  "id": 233,
+                  "value": "المَواريث .",
+                  "feedback": ""
+                },
+                {
+                  "id": 633,
+                  "value": "<p>الزكـاة</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 766,
+                  "value": "<p>الفقـه</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 538,
+                  "value": "<p>القصاص</p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [
+          "<p>صار إليه مالُه بعد موته.</p>",
+          "<p>مفرد ميراث.</p>"
+        ],
+        "generalFeedback": "<p>علم الفرائض أو علم المواريث هو أحد أهم العلوم الإسلامية وهو العلم الذي يعنى بأحوال تَرِكة الميت وميراثه من حيث قسمها على مستحقيها، وهو أول العلوم التي ترفع من الأرض.</p>",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2021-05-25T23:59:34.13",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "AR",
+      "rubricId": null,
+      "id": "1bda3a3b-8d85-4800-9757-f9d7c5d3b5a3",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 37,
+              "choiceId": 233
+            }
+          ]
+        },
+        "scoringType": "EXACT_MATCH"
+      },
+      "updatedAt": "2022-04-06T22:14:30.542",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "mariam.alnaqbi@alefeducation.com",
+      "maxScore": 1,
+      "version": 1,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "mariam.alnaqbi@alefeducation.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "ffc5a760-b9ae-46ae-bdc6-b7e7df7885a6",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "expanded octet"
+        ],
+        "resourceType": "TEQ4",
+        "summativeAssessment": false,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "UNDERSTANDING",
+          "APPLYING"
+        ],
+        "knowledgeDimensions": [
+          "PROCEDURAL"
+        ],
+        "lexileLevel": "10",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Diana Habib",
+        "authoredDate": "2025-09-22T00:00:00.000",
+        "curriculumOutcomes": [
+          {
+            "type": "skill",
+            "id": "1415",
+            "name": "SK.954",
+            "description": "identify the exceptions to the octet rule",
+            "curriculum": "UAE MOE",
+            "grade": "10",
+            "subject": "Advanced_Chemistry"
+          }
+        ],
+        "skillId": null,
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": []
+      },
+      "code": "CH10_MLO_441_Q_16",
+      "createdByUser": {
+        "uuid": "caaf94fc-68cd-45c8-88a4-25a7f699711a",
+        "name": "Diana Habib",
+        "email": "diana.habib@contractoralefeducation.com"
+      },
+      "language": "EN_US",
+      "variants": [],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Select the correct answers from the drop-down menus.<img style=\"float: right;\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2021/11/11/12/29/nEcCynu8u7.jpg\" /></span></p>\n<p>The total number of valence electrons in the structure is <blank-field id=\"635\" class=\"mceNonEditable\"></blank-field>.</p>\n<p>There are <blank-field id=\"792\" class=\"mceNonEditable\"></blank-field> bonding electron pairs and <blank-field id=\"157\" class=\"mceNonEditable\"></blank-field><span class=\"math-tex\"><span id=\"MathJax-Element-7-Frame\" class=\"mjx-chtml MathJax_CHTML\" style=\"box-sizing: border-box; display: inline-table; line-height: 0; text-indent: 0px; text-align: left; text-transform: none; font-style: normal; font-size: 22px; letter-spacing: normal; overflow-wrap: normal; word-spacing: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0px; min-height: 0px; border: 0px; margin: 0px; padding: 1px 0px; position: relative; outline: none !important;\" tabindex=\"0\" role=\"presentation\" data-mathml=\"&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mstyle displaystyle=&quot;true&quot; scriptlevel=&quot;0&quot;&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;34&lt;/mn&gt;&lt;mo&gt;&amp;#x2212;&lt;/mo&gt;&lt;mn&gt;8&lt;/mn&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;26&lt;/mn&gt;&lt;/mstyle&gt;&lt;/math&gt;\"><span id=\"MJXc-Node-36\" class=\"mjx-math\" aria-hidden=\"true\"><span id=\"MJXc-Node-37\" class=\"mjx-mrow\"><span id=\"MJXc-Node-38\" class=\"mjx-mstyle\"><span id=\"MJXc-Node-39\" class=\"mjx-mrow\"><span id=\"MJXc-Node-45\" class=\"mjx-mn MJXc-space3\"><span class=\"mjx-char MJXc-TeX-main-R\"> lone electron pairs.</span></span></span></span></span></span></span></span></p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 635,
+              "weight": 33.33,
+              "choices": [
+                {
+                  "id": 30,
+                  "value": "34",
+                  "feedback": ""
+                },
+                {
+                  "id": 612,
+                  "value": "<p>17</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 647,
+                  "value": "<p>26</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 406,
+                  "value": "<p>32</p>",
+                  "feedback": ""
+                }
+              ]
+            },
+            {
+              "id": 792,
+              "weight": 33.33,
+              "choices": [
+                {
+                  "id": 353,
+                  "value": "4",
+                  "feedback": ""
+                },
+                {
+                  "id": 536,
+                  "value": "<p>13</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 308,
+                  "value": "<p>12</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 837,
+                  "value": "<p>18</p>",
+                  "feedback": ""
+                }
+              ]
+            },
+            {
+              "id": 157,
+              "weight": 33.33,
+              "choices": [
+                {
+                  "id": 490,
+                  "value": "13",
+                  "feedback": ""
+                },
+                {
+                  "id": 154,
+                  "value": "<p>17</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 901,
+                  "value": "<p>12</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 363,
+                  "value": "<p>4</p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2025-09-22T20:21:51.134",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "ffc5a760-b9ae-46ae-bdc6-b7e7df7885a6",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 635,
+              "choiceId": 30
+            },
+            {
+              "blankId": 792,
+              "choiceId": 353
+            },
+            {
+              "blankId": 157,
+              "choiceId": 490
+            }
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2025-10-13T08:22:22.802",
+      "toolkits": [],
+      "updatedByUser": {
+        "uuid": "6978caa0-8da1-485a-87c4-7d0287994209",
+        "name": "Brenda Demo",
+        "email": "brenda.poel@alefeducation.com"
+      },
+      "scoring": null,
+      "updatedBy": "brenda.poel@alefeducation.com",
+      "maxScore": 1,
+      "version": 1,
+      "tags": {},
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "diana.habib@contractoralefeducation.com",
+      "status": "PUBLISHED",
+      "summative": false
+    }
+  },
+  {
+    "question_id": "9428ac76-a913-43ae-b777-dd6acf8d9ca0",
+    "status_code": 200,
+    "response": {
+      "metadata": {
+        "keywords": [
+          "E, coli",
+          "antibiotic resistance"
+        ],
+        "resourceType": "TEQ2",
+        "summativeAssessment": true,
+        "difficultyLevel": "DIFFICULT",
+        "cognitiveDimensions": [
+          "ANALYZING",
+          "REMEMBERING"
+        ],
+        "knowledgeDimensions": [
+          "CONCEPTUAL"
+        ],
+        "lexileLevel": "12",
+        "copyrights": [
+          "ALEF"
+        ],
+        "conditionsOfUse": [],
+        "formatType": "QUESTION",
+        "author": "Omar Z",
+        "authoredDate": "2022-01-21T00:00:00.000",
+        "curriculumOutcomes": [],
+        "skillId": "20ec05f1-45f7-43f8-b2eb-924e1f0a062f",
+        "cefrLevel": null,
+        "proficiency": null,
+        "subSkill": null,
+        "logitValue": null,
+        "penAndPaper": false,
+        "domains": null
+      },
+      "code": "BI12_MLO_052_Q_2",
+      "createdByUser": null,
+      "language": "EN_US",
+      "variants": [
+        {
+          "id": "e4c63b2e-c10d-4a69-bbf8-ca24d58621a9",
+          "code": "BI12_MLO_052_Q_2",
+          "variant": "AR",
+          "language": "AR",
+          "version": 3
+        }
+      ],
+      "type": "SELECT_A_BLANK",
+      "body": {
+        "prompt": "<p><span style=\"font-style: italic; font-weight: bold; color: #1774aa;\">Select the best choice from the drop-down menus.</span> <img style=\"float: right;\" src=\"../alef-assessment-content/data/ccl/assessment/questions/2022/01/21/07/51/VbiL3jj02q.png\" width=\"458\" height=\"381\" />&nbsp;&nbsp;</p>\n<p>&nbsp;</p>\n<p>Ceratin strains of E.coli bacteria can be very harmful to humans.</p>\n<p>&nbsp;</p>\n<p>According to the bar graph, this bacterium is now fully resistant to <blank-field id=\"252\" class=\"mceNonEditable\"></blank-field>. The <strong>best</strong> treatment for E coli is &nbsp;<blank-field id=\"866\" class=\"mceNonEditable\"></blank-field>.</p>",
+        "blanks": {
+          "shuffle": true,
+          "blankItems": [
+            {
+              "id": 252,
+              "weight": 50.0,
+              "choices": [
+                {
+                  "id": 149,
+                  "value": "antibiotic E",
+                  "feedback": ""
+                },
+                {
+                  "id": 742,
+                  "value": "<p>antibiotic A</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 712,
+                  "value": "<p>antibiotic B</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 786,
+                  "value": "<p>antibiotic C</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 301,
+                  "value": "<p>antibiotic D</p>",
+                  "feedback": ""
+                }
+              ]
+            },
+            {
+              "id": 866,
+              "weight": 50.0,
+              "choices": [
+                {
+                  "id": 834,
+                  "value": "antibiotic B",
+                  "feedback": ""
+                },
+                {
+                  "id": 649,
+                  "value": "<p>antibiotic A</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 159,
+                  "value": "<p>antibiotic C</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 812,
+                  "value": "<p>antibiotic D</p>",
+                  "feedback": ""
+                },
+                {
+                  "id": 186,
+                  "value": "<p>antibiotic E</p>",
+                  "feedback": ""
+                }
+              ]
+            }
+          ]
+        },
+        "hints": [],
+        "generalFeedback": "",
+        "correctAnswerFeedback": "",
+        "wrongAnswerFeedback": "",
+        "partialAnswerFeedback": "",
+        "passage": null
+      },
+      "constraints": null,
+      "createdAt": "2022-01-21T07:59:27.456",
+      "organisations": [
+        "shared"
+      ],
+      "variant": "EN_US",
+      "rubricId": null,
+      "id": "9428ac76-a913-43ae-b777-dd6acf8d9ca0",
+      "validation": {
+        "validResponse": {
+          "type": "SELECT_A_BLANK",
+          "validBlankChoices": [
+            {
+              "blankId": 252,
+              "choiceId": 149
+            },
+            {
+              "blankId": 866,
+              "choiceId": 834
+            }
+          ]
+        },
+        "scoringType": "PARTIAL_MATCH"
+      },
+      "updatedAt": "2022-02-04T06:59:45.505",
+      "toolkits": null,
+      "updatedByUser": null,
+      "scoring": null,
+      "updatedBy": "may@alefeducation.com",
+      "maxScore": 1,
+      "version": 1,
+      "tags": null,
+      "adt": false,
+      "stage": "APPROVED",
+      "createdBy": "vq19_sc@test.com",
+      "status": "PUBLISHED",
+      "summative": true
+    }
+  }
+]
