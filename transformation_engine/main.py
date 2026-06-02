@@ -3,7 +3,7 @@ import json
 from transformers.mcq_transformer import MCQTransformer
 from transformers.msq_transformer import MSQTransformer
 
-
+from transformers.img_dnd_tranformer import ImageLabellingDNDTransformer
 INPUT_FILE = "data_source/transformation/transformation_question.json"
 OUTPUT_FILE = "data_source/transformation/transformation_output.json"
 
@@ -15,6 +15,9 @@ def get_transformer(question_type, raw):
 
     if question_type == "MULTIPLE_SELECTION":
         return MSQTransformer(raw)
+    
+    if question_type == "IMAGE_LABELLING_DRAG_DROP":
+        return ImageLabellingDNDTransformer(raw)
 
     raise Exception(f"Unsupported type: {question_type}")
 
