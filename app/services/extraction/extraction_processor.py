@@ -61,82 +61,119 @@ class ExtractionProcessor:
         self,
         csv_file
     ):
-
-        subject_name = (
-            os.path.splitext(
-                csv_file
-            )[0]
-        )
-
-        logger.info(
-            f"Started subject: "
-            f"{subject_name}"
-        )
-
-        job_data = (
-            JobRepository
-            .create_job(
-                subject_name
+        try:
+            subject_name = (
+                os.path.splitext(
+                    csv_file
+                )[0]
             )
-        )
-
-        job_id = (
-            job_data["job_id"]
-        )
-
-        subject_output_dir = (
-            os.path.join(
-                RAW_EXTRACTION_DIR,
-                subject_name
-            )
-        )
-
-        metadata_file = os.path.join(
-            subject_output_dir,
-            "extraction_metadata.json"
-        )
-
-        create_directory(
-            subject_output_dir
-        )
-
-        existing_metadata = (
-            load_metadata(
-                metadata_file
-            )
-        )
-
-        if (
-            existing_metadata
-            and
-            existing_metadata.get(
-                "status"
-            )
-            == "COMPLETED"
-        ):
 
             logger.info(
-                f"{subject_name} "
-                f"already extracted. "
-                f"Skipping."
+                f"Started subject: "
+                f"{subject_name}"
             )
 
-            return
+            job_data = (
+                JobRepository
+                .create_job(
+                    subject_name
+                )
+            )
 
-        csv_path = os.path.join(
-            CSV_INPUT_DIR,
-            csv_file
-        )
+            job_id = (
+                job_data["job_id"]
+            )
+
+            subject_output_dir = (
+                os.path.join(
+                    RAW_EXTRACTION_DIR,
+                    subject_name
+                )
+            )
+
+            metadata_file = os.path.join(
+                subject_output_dir,
+                "extraction_metadata.json"
+            )
+
+            create_directory(
+                subject_output_dir
+            )
+
+            existing_metadata = (
+                load_metadata(
+                    metadata_file
+                )
+            )
+
+            if (
+                existing_metadata
+                and
+                existing_metadata.get(
+                    "status"
+                )
+                == "COMPLETED"
+            ):
+
+                logger.info(
+                    f"{subject_name} "
+                    f"already extracted. "
+                    f"Skipping."
+                )
+
+                return
+
+            csv_path = os.path.join(
+                CSV_INPUT_DIR,
+                csv_file
+            )
+        except KeyboardInterrupt:
+
+            logger.warning(
+                f"{subject_name} interrupted."
+            )
+
+            metadata = {
+                "subject": subject_name,
+                "status": "INTERRUPTED"
+            }
+
+            save_json(
+                metadata_file,
+                metadata
+            )
+
+            JobRepository.archive_job(
+                job_id=self.job_id
+            )
+
+            raise
+
 
         # ==================================
         # READ CSV
         # ==================================
+        
+        try:
 
-        question_ids = (
-            read_question_ids(
-                csv_path
+            question_ids = (
+                read_question_ids(
+                    csv_path
+                )
             )
-        )
+
+        except ValueError as exception:
+
+            logger.error(
+                str(exception)
+            )
+
+            print(
+                "\n"
+                + str(exception)
+                + "\n"
+            )
+            return
 
         (
             unique_question_ids,
@@ -582,9 +619,32 @@ class ExtractionProcessor:
             f"CSV files"
         )
 
-        for csv_file in (
-            csv_files
-        ):
-            await self.process_subject(
-                csv_file
+        try:
+
+            for csv_file in csv_files:
+
+                await self.process_subject(
+                    csv_file
+                )
+
+        except KeyboardInterrupt:
+
+            logger.warning(
+                "Extraction interrupted by user."
             )
+
+            print(
+                "\nExtraction interrupted."
+                "\nProgress saved."
+                "\nResume available on next run."
+            )
+
+            raise
+
+        except Exception as exception:
+
+            logger.exception(
+                str(exception)
+            )
+
+            raise

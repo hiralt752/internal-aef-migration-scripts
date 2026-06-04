@@ -3,41 +3,88 @@ from collections import Counter
 import pandas as pd
 
 
-def read_question_ids(
-    csv_path
-):
+def read_question_ids(csv_path):
     """
     Read Question IDs from CSV.
+
+    Expected Format:
+    - UTF-16
+    - Tab Separated
+    - Question Id column
+
+    Returns:
+        list[str]
+
+    Raises:
+        ValueError
     """
 
-    df = pd.read_csv(
-        csv_path,
-        encoding="utf-16",
-        sep="\t"
-    )
+    try:
 
-    df.columns = (
-        df.columns
-        .str.strip()
-    )
-
-    if (
-        "Question Id"
-        not in df.columns
-    ):
-        raise ValueError(
-            f"'Question Id' column "
-            f"missing in {csv_path}"
+        df = pd.read_csv(
+            csv_path,
+            encoding="utf-16",
+            sep="\t"
         )
 
-    question_ids = (
+    except UnicodeDecodeError:
+
+        raise ValueError(
+            f"""
+Invalid CSV Encoding
+
+File:
+{csv_path}
+
+Expected:
+UTF-16
+
+Possible Causes:
+- File saved as UTF-8
+- File saved as ANSI
+- File exported incorrectly
+
+Please re-save the file as:
+UTF-16 Tab Delimited
+"""
+        )
+
+    except Exception as exception:
+
+        raise ValueError(
+            f"""
+Failed to read CSV file
+
+File:
+{csv_path}
+
+Error:
+{str(exception)}
+"""
+        )
+
+    df.columns = df.columns.str.strip()
+
+    if "Question Id" not in df.columns:
+
+        raise ValueError(
+            f"""
+Missing Required Column
+
+File:
+{csv_path}
+
+Required Column:
+Question Id
+"""
+        )
+
+    return (
         df["Question Id"]
         .dropna()
         .astype(str)
         .tolist()
     )
-
-    return question_ids
 
 
 def build_question_stats(

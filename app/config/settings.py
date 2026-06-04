@@ -90,6 +90,11 @@ COMPLETED_JOB_DIR = os.path.join(
     "completed"
 )
 
+ARCHIVED_JOB_DIR = os.path.join(
+    JOB_DIR,
+    "archived"
+)
+
 FAILED_JOB_DIR = os.path.join(
     JOB_DIR,
     "failed"

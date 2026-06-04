@@ -1,12 +1,14 @@
 import json
 import os
+import shutil
 
 from datetime import datetime
 
 from config.settings import (
     ACTIVE_JOB_DIR,
     COMPLETED_JOB_DIR,
-    FAILED_JOB_DIR
+    FAILED_JOB_DIR,
+    ARCHIVED_JOB_DIR
 )
 
 
@@ -176,3 +178,24 @@ class JobRepository:
 
         if os.path.exists(source_file):
             os.remove(source_file)
+        
+@staticmethod
+def archive_job(
+    job_id
+):
+    source = (
+        ACTIVE_JOB_DIR
+        / f"{job_id}.json"
+    )
+
+    destination = (
+        ARCHIVED_JOB_DIR
+        / f"{job_id}.json"
+    )
+
+    if source.exists():
+
+        shutil.move(
+            source,
+            destination
+        )

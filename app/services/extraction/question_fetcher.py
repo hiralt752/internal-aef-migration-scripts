@@ -96,19 +96,25 @@ class QuestionFetcher:
 
             responses = []
 
-            for future in tqdm.as_completed(
-                tasks,
-                desc=(
-                    f"{subject_name}"
-                )
-            ):
+            try:
+            
 
-                result = await future
-
-                if result:
-                    responses.append(
-                        result
+                for future in tqdm.as_completed(
+                    tasks,
+                    desc=(
+                        f"{subject_name}"
                     )
+                ):
+
+                    result = await future
+
+                    if result:
+                        responses.append(
+                            result
+                        )
+            except asyncio.CancelledError:
+
+                raise KeyboardInterrupt()
 
             logger.info(
                 f"{subject_name}: "
