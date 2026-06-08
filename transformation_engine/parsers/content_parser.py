@@ -44,26 +44,48 @@ def node_to_latex(node):
     tag = etree.QName(node).localname
 
     if tag == "math":
-        return "".join(node_to_latex(c) for c in node)
+        return "".join(node_to_latex(c) + (c.tail or "")
+                       for c in node)
 
     if tag == "mrow":
-        return "".join(node_to_latex(c) for c in node)
+        return "".join(node_to_latex(c) + (c.tail or "")
+                       for c in node)
 
     if tag == "mn":
         return (node.text or "").strip()
 
-    if tag == "mi":
+    # if tag == "mi":
+    #
+    #     value = (node.text or "").strip()
+    #
+    #     if value in GREEK_MAP:
+    #         return f"{{{GREEK_MAP[value]}}}"
+    #
+    #     return value
 
+    if tag == "mi":
         value = (node.text or "").strip()
 
+        if not value:
+            return ""
+
         if value in GREEK_MAP:
-            return GREEK_MAP[value]
+            return f"{{{GREEK_MAP[value]}}}"
+
+
+        if len(value) > 1:
+            return r"\ " + value + r"\ "
 
         return value
 
     if tag == "mo":
+        raw = node.text or ""
+        value = raw.strip()
 
-        value = (node.text or "").strip()
+        if not value or value == "\u00a0":
+            return r"\ "  # ← your approach, explicit LaTeX space
+
+        # value = (node.text or "").strip()
 
         mapping = {
             "<": "<",
@@ -78,107 +100,118 @@ def node_to_latex(node):
             "=": "=",
             "+": "+",
             "-": "-",
+            "\u00a0": " ",
+            "(": "(",
+            ")": ")",
+            ".": ".",
         }
 
         return mapping.get(value, value)
 
     if tag == "mtext":
-        return f" {(node.text or '').strip()} "
+        text = (node.text or " ").strip()
+        if not text:
+            return " "
+        text_escaped = text.replace(" ", r"\ ")
+        return rf" \text{{{text_escaped}}} "
+
+    if tag == "mspace":
+        # linebreak="newline" means a new line in the rendered math block
+        if node.attrib.get("linebreak") == "newline":
+            return "\\\\ "
+        return " "
 
     if tag == "mfrac":
         return (
             r"\frac{"
-            + node_to_latex(node[0])
+            + node_to_latex(node[0]) + (node[0].tail or "")
             + "}{"
-            + node_to_latex(node[1])
+            + node_to_latex(node[1]) + (node[1].tail or "")
             + "}"
         )
 
     if tag == "msqrt":
         return (
             r"\sqrt{"
-            + node_to_latex(node[0])
+            + node_to_latex(node[0]) + (node[0].tail or "")
             + "}"
         )
 
     if tag == "mroot":
         return (
             r"\sqrt["
-            + node_to_latex(node[1])
+            + node_to_latex(node[1]) + (node[1].tail or "")
             + "]{"
-            + node_to_latex(node[0])
+            + node_to_latex(node[0]) + (node[0].tail or "")
             + "}"
         )
 
     if tag == "msup":
         return (
-            node_to_latex(node[0])
+            node_to_latex(node[0]) + (node[0].tail or "")
             + "^{"
-            + node_to_latex(node[1])
+            + node_to_latex(node[1]) + (node[1].tail or "")
             + "}"
         )
 
     if tag == "msub":
         return (
-            node_to_latex(node[0])
+            node_to_latex(node[0]) + (node[0].tail or "")
             + "_{"
-            + node_to_latex(node[1])
+            + node_to_latex(node[1]) + (node[1].tail or "")
             + "}"
         )
 
     if tag == "msubsup":
         return (
-            node_to_latex(node[0])
+            node_to_latex(node[0]) + (node[0].tail or "")
             + "_{"
-            + node_to_latex(node[1])
+            + node_to_latex(node[1]) + (node[1].tail or "")
             + "}^{"
-            + node_to_latex(node[2])
+            + node_to_latex(node[2]) + (node[2].tail or "")
             + "}"
         )
 
     if tag == "mfenced":
-
         open_char = node.attrib.get("open", "(")
         close_char = node.attrib.get("close", ")")
-
         content = "".join(
-            node_to_latex(c)
+            node_to_latex(c) + (c.tail or "")
             for c in node
         )
-
         return f"{open_char}{content}{close_char}"
 
     if tag == "mover":
         return (
-            r"\overset{"
-            + node_to_latex(node[1])
-            + "}{"
-            + node_to_latex(node[0])
-            + "}"
+                r"\overset{"
+                + node_to_latex(node[1]) + (node[1].tail or "")
+                + "}{"
+                + node_to_latex(node[0]) + (node[0].tail or "")
+                + "}"
         )
 
     if tag == "munder":
         return (
-            r"\underset{"
-            + node_to_latex(node[1])
-            + "}{"
-            + node_to_latex(node[0])
-            + "}"
+                r"\underset{"
+                + node_to_latex(node[1]) + (node[1].tail or "")
+                + "}{"
+                + node_to_latex(node[0]) + (node[0].tail or "")
+                + "}"
         )
 
     if tag == "munderover":
         return (
-            r"\overset{"
-            + node_to_latex(node[2])
-            + "}{\\underset{"
-            + node_to_latex(node[1])
-            + "}{"
-            + node_to_latex(node[0])
-            + "}}"
+                r"\overset{"
+                + node_to_latex(node[2]) + (node[2].tail or "")
+                + "}{\\underset{"
+                + node_to_latex(node[1]) + (node[1].tail or "")
+                + "}{"
+                + node_to_latex(node[0]) + (node[0].tail or "")
+                + "}}"
         )
 
     return "".join(
-        node_to_latex(c)
+        node_to_latex(c) + (c.tail or "")
         for c in node
     )
 
@@ -201,11 +234,14 @@ def mathml_to_latex(mathml):
 
         latex = node_to_latex(root)
 
-        latex = re.sub(
-            r"\s+",
-            " ",
-            latex
-        ).strip()
+        # Step 1 — collapse multiple consecutive \ spaces into one
+        latex = re.sub(r"(\\\ ){2,}", r"\ ", latex)
+
+        # Step 2 — collapse plain spaces only (NOT touching \ )
+        latex = re.sub(r"(?<!\\) {2,}", " ", latex)
+
+        # Step 3 — trim
+        latex = latex.strip()
 
         return latex
 
@@ -218,9 +254,7 @@ def mathml_to_latex(mathml):
         print(ex)
 
         return ""
-# ============================================================
-# Extract MathML from SVG comment
-# ============================================================
+
 
 def extract_mathml_from_svg(src):
     try:
@@ -240,32 +274,6 @@ def extract_mathml_from_svg(src):
 
     return ""
 
-# ============================================================
-# Extract MathML from SVG comment
-# ============================================================
-
-def extract_mathml_from_svg(src):
-    try:
-        decoded = urllib.parse.unquote(src)
-
-        match = re.search(
-            r'<!--MathML:\s*(.*?)-->',
-            decoded,
-            re.DOTALL
-        )
-
-        if match:
-            return match.group(1).strip()
-
-    except Exception as ex:
-        print(f"[SVG Extraction Error] {ex}")
-
-    return ""
-
-
-# ============================================================
-# Main HTML Parser
-# ============================================================
 
 def parse_html_content(html_content):
 
@@ -300,25 +308,11 @@ def parse_html_content(html_content):
 
         latex = ""
 
-        # ----------------------------------------------------
-        # Priority 1 : data-latex
-        # ----------------------------------------------------
-
         if img.get("data-latex"):
-
-            latex = img.get(
-                "data-latex",
-                ""
-            ).strip()
-
-        # ----------------------------------------------------
-        # Priority 2 : data-mathml
-        # ----------------------------------------------------
+            latex = img.get("data-latex", "").strip()
 
         if not latex and img.get("data-mathml"):
-
             try:
-
                 mathml = (
                     img.get("data-mathml", "")
                     .replace("«", "<")
@@ -326,46 +320,22 @@ def parse_html_content(html_content):
                     .replace("¨", '"')
                     .replace("§", "&")
                 )
-
                 latex = mathml_to_latex(mathml)
-
             except Exception as ex:
-
-                print(
-                    f"[data-mathml conversion failed] {ex}"
-                )
-
-        # ----------------------------------------------------
-        # Priority 3 : SVG embedded MathML
-        # ----------------------------------------------------
+                print(f"[data-mathml conversion failed] {ex}")
 
         if not latex:
-
             mathml = extract_mathml_from_svg(src)
-
             if mathml:
-
                 latex = mathml_to_latex(mathml)
 
-        # ----------------------------------------------------
-        # Priority 4 : alt fallback
-        # ----------------------------------------------------
-
         if not latex:
-
             latex = img.get("alt", "").strip()
-
             if latex:
-
-                print(
-                    f"[ALT FALLBACK USED] {latex}"
-                )
+                print(f"[ALT FALLBACK USED] {latex}")
 
         if latex:
-
-            img.replace_with(
-                f"\\({latex}\\)"
-            )
+            img.replace_with(f" \\({latex}\\) ")
 
     # ========================================================
     # Handle remaining images
@@ -392,10 +362,12 @@ def parse_html_content(html_content):
     # Remaining HTML
     # ========================================================
 
-    remaining_html = str(soup).strip()
+    remaining_html = re.sub(
+        r">\s*\n\s*<", "><", str(soup)
+    ).strip()
+    remaining_html = re.sub(r" {2,}", " ", remaining_html)
 
     if remaining_html:
-
         contents.insert(0, {
             "type": "text",
             "text": remaining_html
@@ -410,19 +382,14 @@ def parse_html_content(html_content):
         src = audio.get("src")
 
         if not src:
-
             source = audio.find("source")
-
             if source:
                 src = source.get("src")
 
         if src:
-
             contents.append({
                 "type": "audio",
-                "audio": {
-                    "url": src
-                }
+                "audio": {"url": src}
             })
 
     # ========================================================
@@ -434,19 +401,14 @@ def parse_html_content(html_content):
         src = video.get("src")
 
         if not src:
-
             source = video.find("source")
-
             if source:
                 src = source.get("src")
 
         if src:
-
             contents.append({
                 "type": "video",
-                "video": {
-                    "url": src
-                }
+                "video": {"url": src}
             })
 
     return contents
