@@ -6,8 +6,24 @@ from helpers.feedback_mapper import (
     map_hints_and_feedback
 )
 
+from bs4 import BeautifulSoup
+def is_bottom_image_present(html_text):
+    soup = BeautifulSoup(html_text or "", "html.parser")
 
-def build_outcome_declaration(raw):
+    elements = []
+
+    for tag in soup.find_all(["p", "div", "span", "img"]):
+        if tag.name == "img":
+            elements.append("image")
+        elif tag.get_text(strip=True):
+            elements.append("text")
+
+    if "text" in elements and "image" in elements:
+        return elements.index("image") > elements.index("text")
+
+    return False
+
+def build_outcome_declaration(raw,question_id,lesson):
 
     body = raw.get("body", {})
 
@@ -43,7 +59,7 @@ def build_outcome_declaration(raw):
             "correctAnswers": [
 
                 {
-                    "optionId": str(x),
+                    "optionId": int(x),
                     "weight": 1
                 }
 
@@ -60,7 +76,7 @@ def build_outcome_declaration(raw):
             body.get(
                 "generalFeedback",
                 ""
-            )
+            ),question_id,lesson
         )
     )
 
@@ -80,7 +96,7 @@ def build_outcome_declaration(raw):
             body.get(
                 "wrongAnswerFeedback",
                 ""
-            )
+            ),question_id,lesson
         )
     )
 
@@ -97,7 +113,7 @@ def build_outcome_declaration(raw):
 
             "content":
                 parse_html_content(
-                    correct
+                    correct,question_id,lesson
                 )
         }
 
@@ -126,7 +142,7 @@ def build_outcome_declaration(raw):
 
             "content":
                 parse_html_content(
-                    partial
+                    partial,question_id,lesson
                 )
         }
 

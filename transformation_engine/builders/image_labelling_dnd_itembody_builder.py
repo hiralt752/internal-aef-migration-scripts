@@ -1,11 +1,15 @@
 from parsers.content_parser import parse_html_content
 
 
-def build_image_labelling_dnd_item_body(raw):
+def build_image_labelling_dnd_item_body(raw,question_id,lesson):
 
     body = raw.get("body", {})
 
     choices = body.get("choices", {})
+
+    background_image = body.get("backgroundImage")
+    if background_image and "src" in background_image:
+        background_image["url"] = background_image.pop("src")
 
     return {
 
@@ -25,10 +29,7 @@ def build_image_labelling_dnd_item_body(raw):
 
         "sentence": None,
 
-        "backgroundImage":
-            body.get(
-                "backgroundImage"
-            ),
+        "image": background_image,
 
         "showDragHandle":
             choices.get(
@@ -69,7 +70,7 @@ def build_image_labelling_dnd_item_body(raw):
                 choices.get(
                     "choiceItems",
                     []
-                )
+                ),question_id,lesson
             )
     }
 
@@ -94,26 +95,36 @@ def build_targets(blanks):
                 4
             ),
 
+            "swappable": False,
+
+            "swapGroupId": 0,
+
             "position": {
 
-                "x":
+                "Top":
                     blank.get(
                         "position",
                         {}
-                    ).get("x"),
+                    ).get("y"),
 
-                "y":
+                "Left":
                     blank.get(
                         "position",
                         {}
-                    ).get("y")
+                    ).get("x")
             }
         })
+
+    if targets:
+        total_weight = sum(t["weight"] for t in targets)
+        if total_weight > 0 and round(total_weight, 4) != 1.0:
+            diff = 1.0 - total_weight
+            targets[0]["weight"] = round(targets[0]["weight"] + diff, 4)
 
     return targets
 
 
-def build_image_labelling_options(choice_items):
+def build_image_labelling_options(choice_items,question_id,lesson):
 
     options = []
 
@@ -123,43 +134,22 @@ def build_image_labelling_options(choice_items):
             choice.get(
                 "value",
                 ""
-            )
+            ),question_id,lesson
         )
 
-        option_feedback = choice.get(
-            "feedback",
-            ""
+        sorted_content = _sort_option_content(
+            parsed_content
         )
 
         option = {
 
-            "optionId": index,
+            "id": index,
 
             "content":
-                _sort_option_content(
-                    parsed_content
-                )
+                sorted_content[0]
+                if sorted_content
+                else None
         }
-
-        if (
-            option_feedback
-            and option_feedback.strip()
-        ):
-
-            option["feedback"] = {
-
-                "general": {
-
-                    "content":
-                        parse_html_content(
-                            option_feedback
-                        )
-                }
-            }
-
-        else:
-
-            option["feedback"] = None
 
         options.append(option)
 

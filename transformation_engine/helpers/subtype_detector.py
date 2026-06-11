@@ -1,7 +1,7 @@
 from parsers.content_parser import parse_html_content
 
 
-def detect_subtype(choice_items):
+def detect_subtype(choice_items,question_id,lesson):
 
     has_text = False
     has_image = False
@@ -9,7 +9,7 @@ def detect_subtype(choice_items):
     for choice in choice_items:
 
         parsed = parse_html_content(
-            choice.get("answer", "")
+            choice.get("answer", ""),question_id,lesson
         )
 
         for item in parsed:

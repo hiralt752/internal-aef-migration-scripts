@@ -6,7 +6,7 @@ from parsers.media_parser import (
 )
 
 
-def build_item_body(raw):
+def build_item_body(raw,question_id,lesson):
 
     body = raw.get("body", {})
 
@@ -15,7 +15,7 @@ def build_item_body(raw):
     prompt = body.get("prompt", "")
 
     parsed_prompt = parse_html_content(
-        prompt
+        prompt,question_id,lesson
     )
 
     audio = extract_audio(prompt)
@@ -79,12 +79,12 @@ def build_item_body(raw):
                 choices.get(
                     "choiceItems",
                     []
-                )
+                ),question_id,lesson
             )
     }
 
 
-def build_options(choice_items):
+def build_options(choice_items,question_id,lesson):
 
     options = []
 
@@ -94,7 +94,7 @@ def build_options(choice_items):
             choice.get(
                 "answer",
                 ""
-            )
+            ),question_id,lesson
         )
 
         option_feedback = choice.get(
@@ -129,7 +129,7 @@ def build_options(choice_items):
                     "content":
                         parse_html_content(
                             option_feedback
-                        )
+                        ,question_id,lesson)
                 }
             }
 

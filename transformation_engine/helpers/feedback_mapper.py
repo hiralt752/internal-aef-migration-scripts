@@ -5,11 +5,11 @@ from parsers.content_parser import (
 
 def map_hints_and_feedback(
     hints,
-    wrong_feedback
+    wrong_feedback,question_id,lesson
 ):
 
     parsed_wrong = parse_html_content(
-        wrong_feedback
+        wrong_feedback,question_id,lesson
     )
 
     wrong_has_text = any(
@@ -24,7 +24,7 @@ def map_hints_and_feedback(
         for hint in hints:
 
             need_help.extend(
-                parse_html_content(hint)
+                parse_html_content(hint,question_id,lesson)
             )
 
         return {
@@ -42,7 +42,7 @@ def map_hints_and_feedback(
     if len(hints) == 1:
 
         parsed = parse_html_content(
-            hints[0]
+            hints[0],question_id,lesson
         )
 
         media = [
@@ -63,7 +63,7 @@ def map_hints_and_feedback(
         }
 
     parsed_hints = [
-        parse_html_content(h)
+        parse_html_content(h,question_id,lesson)
         for h in hints
     ]
 

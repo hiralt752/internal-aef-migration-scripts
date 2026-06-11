@@ -3,7 +3,9 @@ import urllib.parse
 from lxml import etree
 import html
 import re
+from helpers.debug_logger import DebugLogger
 
+logger = DebugLogger()
 GREEK_MAP = {
     "α": r"\alpha",
     "β": r"\beta",
@@ -19,6 +21,30 @@ GREEK_MAP = {
     "ω": r"\omega",
 }
 
+ALLOWED_TAGS = {
+    'ol', 'li', 'br', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
+    'b', 'i', 'u', 'em', 'strong', 'p', 'ul', 'sup', 'span', 'sub'
+}
+
+
+def strip_disallowed_tags(html_content, question_id=None, lesson=None):
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    for tag in soup.find_all():
+
+        if tag.name not in ALLOWED_TAGS:
+
+            logger.log(
+                question_id=question_id,
+                lesson=lesson,
+                question_type="HTML_SANITIZER",
+                reason=f"Removed tag: <{tag.name}>",
+                file_path=None
+            )
+
+            tag.unwrap()
+
+    return str(soup)
 
 def sanitize_mathml(mathml: str) -> str:
 
@@ -38,6 +64,14 @@ def sanitize_mathml(mathml: str) -> str:
 
     return mathml
 
+# ==========================================
+# Helper
+# ==========================================
+def has_children(node, expected):
+    return len(node) >= expected
+
+
+
 
 def node_to_latex(node):
 
@@ -54,14 +88,6 @@ def node_to_latex(node):
     if tag == "mn":
         return (node.text or "").strip()
 
-    # if tag == "mi":
-    #
-    #     value = (node.text or "").strip()
-    #
-    #     if value in GREEK_MAP:
-    #         return f"{{{GREEK_MAP[value]}}}"
-    #
-    #     return value
 
     if tag == "mi":
         value = (node.text or "").strip()
@@ -122,31 +148,94 @@ def node_to_latex(node):
         return " "
 
     if tag == "mfrac":
+
+        if not has_children(node, 2):
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason=f"Invalid mfrac: expected 2 children got {len(node)}",
+                file_path=None
+            )
+
+            return "".join(
+                node_to_latex(c)
+                for c in node
+            )
+
         return (
             r"\frac{"
-            + node_to_latex(node[0]) + (node[0].tail or "")
+            + node_to_latex(node[0])
+            + (node[0].tail or "")
             + "}{"
-            + node_to_latex(node[1]) + (node[1].tail or "")
+            + node_to_latex(node[1])
+            + (node[1].tail or "")
             + "}"
         )
 
     if tag == "msqrt":
+
+        if not has_children(node, 1):
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason="Invalid msqrt: no children",
+                file_path=None
+            )
+
+            return r"\sqrt{}"
+
         return (
             r"\sqrt{"
-            + node_to_latex(node[0]) + (node[0].tail or "")
+            + node_to_latex(node[0])
+            + (node[0].tail or "")
             + "}"
         )
 
     if tag == "mroot":
+
+        if len(node) < 2:
+
+            logger.log(
+                question_type="MATHML",
+                reason=f"Invalid mroot: expected 2 children got {len(node)}"
+            )
+
+            return "".join(
+                node_to_latex(c)
+                for c in node
+            )
+
         return (
             r"\sqrt["
-            + node_to_latex(node[1]) + (node[1].tail or "")
+            + node_to_latex(node[1])
+            + (node[1].tail or "")
             + "]{"
-            + node_to_latex(node[0]) + (node[0].tail or "")
+            + node_to_latex(node[0])
+            + (node[0].tail or "")
             + "}"
         )
 
     if tag == "msup":
+
+        if not has_children(node, 2):
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason=f"Invalid msup: expected 2 children got {len(node)}",
+                file_path=None
+            )
+
+            return "".join(
+                node_to_latex(c) + (c.tail or "")
+                for c in node
+            )
+
         return (
             node_to_latex(node[0]) + (node[0].tail or "")
             + "^{"
@@ -155,6 +244,22 @@ def node_to_latex(node):
         )
 
     if tag == "msub":
+
+        if len(node) < 2:
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason=f"Invalid msub: expected 2 children got {len(node)}",
+                file_path=None
+            )
+
+            return "".join(
+                node_to_latex(c) + (c.tail or "")
+                for c in node
+            )
+
         return (
             node_to_latex(node[0]) + (node[0].tail or "")
             + "_{"
@@ -163,6 +268,22 @@ def node_to_latex(node):
         )
 
     if tag == "msubsup":
+
+        if len(node) < 3:
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason=f"Invalid msubsup: expected 3 children got {len(node)}",
+                file_path=None
+            )
+
+            return "".join(
+                node_to_latex(c)
+                for c in node
+            )
+
         return (
             node_to_latex(node[0]) + (node[0].tail or "")
             + "_{"
@@ -173,41 +294,89 @@ def node_to_latex(node):
         )
 
     if tag == "mfenced":
+
         open_char = node.attrib.get("open", "(")
         close_char = node.attrib.get("close", ")")
+
         content = "".join(
             node_to_latex(c) + (c.tail or "")
             for c in node
         )
+
         return f"{open_char}{content}{close_char}"
 
     if tag == "mover":
+
+        if len(node) < 2:
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason=f"Invalid mover: expected 2 children got {len(node)}",
+                file_path=None
+            )
+
+            return "".join(
+                node_to_latex(c)
+                for c in node
+            )
+
         return (
-                r"\overset{"
-                + node_to_latex(node[1]) + (node[1].tail or "")
-                + "}{"
-                + node_to_latex(node[0]) + (node[0].tail or "")
-                + "}"
+            r"\overset{"
+            + node_to_latex(node[1])
+            + "}{"
+            + node_to_latex(node[0])
+            + "}"
         )
 
     if tag == "munder":
+
+        if not has_children(node, 2):
+
+            logger.log(
+                question_type="MATHML",
+                reason=f"Invalid munder: expected 2 children got {len(node)}"
+            )
+
+            return "".join(
+                node_to_latex(c)
+                for c in node
+            )
+
         return (
-                r"\underset{"
-                + node_to_latex(node[1]) + (node[1].tail or "")
-                + "}{"
-                + node_to_latex(node[0]) + (node[0].tail or "")
-                + "}"
+            r"\underset{"
+            + node_to_latex(node[1]) + (node[1].tail or "")
+            + "}{"
+            + node_to_latex(node[0]) + (node[0].tail or "")
+            + "}"
         )
 
     if tag == "munderover":
+
+        if len(node) < 3:
+
+            logger.log(
+                question_id=None,
+                lesson=None,
+                question_type="MATHML",
+                reason=f"Invalid munderover: expected 3 children got {len(node)}",
+                file_path=None
+            )
+
+            return "".join(
+                node_to_latex(c)
+                for c in node
+            )
+
         return (
-                r"\overset{"
-                + node_to_latex(node[2]) + (node[2].tail or "")
-                + "}{\\underset{"
-                + node_to_latex(node[1]) + (node[1].tail or "")
-                + "}{"
-                + node_to_latex(node[0]) + (node[0].tail or "")
-                + "}}"
+            r"\overset{"
+            + node_to_latex(node[2])
+            + "}{\\underset{"
+            + node_to_latex(node[1])
+            + "}{"
+            + node_to_latex(node[0])
+            + "}}"
         )
 
     return "".join(
@@ -216,7 +385,7 @@ def node_to_latex(node):
     )
 
 
-def mathml_to_latex(mathml):
+def mathml_to_latex(mathml,question_id,lesson):
 
     try:
 
@@ -252,7 +421,14 @@ def mathml_to_latex(mathml):
         print(mathml)
         print("======================")
         print(ex)
-
+        if logger:
+            logger.log(
+                question_id=question_id,
+                lesson=lesson,
+                question_type="MATHML",
+                reason=str(ex),
+                file_path=None
+            )
         return ""
 
 
@@ -275,8 +451,7 @@ def extract_mathml_from_svg(src):
     return ""
 
 
-def parse_html_content(html_content):
-
+def parse_html_content(html_content,question_id,lesson):
     soup = BeautifulSoup(
         html_content or "",
         "html.parser"
@@ -320,17 +495,32 @@ def parse_html_content(html_content):
                     .replace("¨", '"')
                     .replace("§", "&")
                 )
-                latex = mathml_to_latex(mathml)
+                latex = mathml_to_latex(mathml,question_id,lesson)
             except Exception as ex:
                 print(f"[data-mathml conversion failed] {ex}")
+                logger.log(
+                    question_id=question_id,
+                    lesson=lesson,
+                    question_type="MATHML",
+                    reason=f"[data-mathml conversion failed] {ex}",
+                    file_path=None
+                )
 
         if not latex:
             mathml = extract_mathml_from_svg(src)
             if mathml:
-                latex = mathml_to_latex(mathml)
+                latex = mathml_to_latex(mathml,question_id,lesson)
 
         if not latex:
             latex = img.get("alt", "").strip()
+            if logger:
+                logger.log(
+                    question_id=question_id,
+                    lesson=lesson,
+                    question_type="MATHML",
+                    reason=f"[ALT FALLBACK USED] {latex}",
+                    file_path=None
+                )
             if latex:
                 print(f"[ALT FALLBACK USED] {latex}")
 
@@ -362,8 +552,11 @@ def parse_html_content(html_content):
     # Remaining HTML
     # ========================================================
 
+    sanitized_html = strip_disallowed_tags(str(soup))
+
+
     remaining_html = re.sub(
-        r">\s*\n\s*<", "><", str(soup)
+        r">\s*\n\s*<", "><", sanitized_html
     ).strip()
     remaining_html = re.sub(r" {2,}", " ", remaining_html)
 

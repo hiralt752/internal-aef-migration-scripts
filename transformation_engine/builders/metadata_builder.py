@@ -40,7 +40,7 @@ def build_metadata(raw):
         },
 
         "lifecycle": {
-            "status": raw.get("status")
+            "status": "PUBLISHED"
         },
 
         "technical": {
