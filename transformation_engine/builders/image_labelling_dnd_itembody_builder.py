@@ -141,18 +141,7 @@ def build_image_labelling_options(choice_items,question_id,lesson):
 
 def _sort_option_content(contents):
 
-    image_items = []
-
-    other_items = []
-
-    for item in contents:
-
-        if item.get("type") == "image":
-
-            image_items.append(item)
-
-        else:
-
-            other_items.append(item)
-
-    return image_items + other_items
+    return (
+        next((item for item in contents if item.get("type") == "image"), None)
+        or next((item for item in contents if item), None)
+    )

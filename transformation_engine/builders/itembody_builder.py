@@ -6,7 +6,13 @@ from parsers.media_parser import (
 )
 
 
-def build_item_body(raw,question_id,lesson):
+def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None):
+    if question_type == "FIB":
+        return build_fib_item_body(raw, fib_data)
+
+    return build_item_body_mcq(raw,question_id,lesson)
+
+def build_item_body_mcq(raw,question_id,lesson):
 
     body = raw.get("body", {})
 
@@ -159,3 +165,38 @@ def _sort_option_content(contents):
             other_items.append(item)
 
     return image_items + other_items
+
+def build_fib_item_body(raw,fib_data):
+    body = raw.get("body", {})
+    prompt = body.get("prompt", "")
+    
+    return {
+        "version": "1.0",
+        "title": None,
+        "subTitle": None,
+        "instruction": None,
+        "audio": extract_audio(prompt),
+        "video": extract_video(prompt),
+        "backgroundLayout": None,
+        "timeSpentConfig": None,
+        "splitContent": None,
+        "sideImage": None,
+        "fibImage": extract_image(prompt),
+        "optionsStyle": "option-style-1",
+        "wordBankLayout": "none",
+        "wordBankDistractor": [],
+        "columns": 1,
+        "numberedSentence": False,
+        "centered": False,
+        "statement": {
+            "content": {
+                "type": "text",
+                "text": ""
+            }
+        },
+        "sentence": {
+            "text": fib_data["sentence_text"]
+        },
+        "items": fib_data["items"],
+        "variables": []
+    }

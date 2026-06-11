@@ -9,8 +9,10 @@ from helpers.fib_mapper import map_fib_structure
 
 class FIBTransformer:
 
-    def __init__(self, raw):
+    def __init__(self, raw,question_id,lesson):
         self.raw = raw
+        self.question_id = question_id
+        self.lesson = lesson
 
     def transform(self):
         body = self.raw.get(
@@ -26,7 +28,7 @@ class FIBTransformer:
                 body.get(
                     "wrongAnswerFeedback",
                     ""
-                )
+                ),self.question_id,self.lesson
             )
         )
 
@@ -51,6 +53,7 @@ class FIBTransformer:
             ),
             "outcomeDeclaration": build_outcome_declaration(
                 self.raw,
+                self.question_id,self.lesson,
                 question_type="FIB",
                 fib_data=fib_data
             )

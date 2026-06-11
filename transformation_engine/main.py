@@ -41,7 +41,7 @@ def get_transformer(question_type, raw,question_id,lesson):
     if question_type == "MATCHING":
         return MatchingTransformer(raw)
     if question_type == "FILL_IN_THE_BLANK":
-        return FIBTransformer(raw)
+        return FIBTransformer(raw,question_id,lesson)
     if question_type == "FILL_IN_THE_BLANK_DRAG_DROP":
         return DNDTransformer(raw)
     return None

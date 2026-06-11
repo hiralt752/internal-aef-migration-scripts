@@ -23,8 +23,9 @@ def is_bottom_image_present(html_text):
 
     return False
 
-def build_outcome_declaration(raw,question_id,lesson):
-
+def build_outcome_declaration(raw,question_id,lesson,question_type=None,fib_data=None):
+    if question_type == "FIB":
+        return build_fib_outcome(raw,fib_data,question_id,lesson)
     body = raw.get("body", {})
 
     validation = raw.get(
@@ -158,5 +159,68 @@ def build_outcome_declaration(raw,question_id,lesson):
     ):
 
         outcome["feedback"] = {}
+
+    return outcome
+
+def build_fib_outcome(raw, fib_data,question_id,lesson):
+    body = raw.get("body", {})
+
+    validation = raw.get(
+        "validation",
+        {}
+    )
+
+    outcome = {
+        "scoringType": validation.get(
+            "scoringType",
+            "EXACT_MATCH"
+        ),
+        "scoring": {
+            "normalizedMin": 0,
+            "normalizedMax": 1,
+            "defaultNormalizedValue": 0
+        },
+        "validation": {
+            "scoringType": validation.get(
+                "scoringType",
+                "EXACT_MATCH"
+            ),
+            "validResponse": {
+                "correctAnswers": fib_data["correct_answers"]
+            }
+        }
+    }
+
+    general_feedback = (
+        parse_html_content(
+            body.get(
+                "generalFeedback",
+                ""
+            ),question_id,lesson
+        )
+    )
+
+    if general_feedback:
+        outcome["seeWhy"] = {
+            "layout": "TEXT",
+            "content": general_feedback
+        }
+
+    feedback_mapping = (
+        map_hints_and_feedback(
+            body.get("hints", []),
+            body.get(
+                "wrongAnswerFeedback",
+                ""
+            ),question_id,lesson
+        )
+    )
+
+    if feedback_mapping["incorrect"]:
+        outcome["feedback"] = {
+            "incorrect": {
+                "content": feedback_mapping["incorrect"]
+            }
+        }
 
     return outcome
