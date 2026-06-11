@@ -211,9 +211,9 @@ def process_file(task):
             logger.log(qid, lesson, q.get("type"), "IMAGE SKIPPED", None)
             continue
 
-        if not filter_question(q, qid):
-            logger.log(qid, lesson, q.get("type"), "FILTERED", None)
-            continue
+        # if not filter_question(q, qid):
+            # logger.log(qid, lesson, q.get("type"), "FILTERED", None)
+            # continue
 
         t = q.get("type")
 
@@ -225,7 +225,6 @@ def process_file(task):
 
         if res:
             out.append(res)
-
     return lesson, qtype, out
 
 

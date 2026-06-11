@@ -23,7 +23,7 @@ GREEK_MAP = {
 
 ALLOWED_TAGS = {
     'ol', 'li', 'br', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
-    'b', 'i', 'u', 'em', 'strong', 'p', 'ul', 'sup', 'span', 'sub'
+    'b', 'i', 'u', 'em', 'strong', 'p', 'ul', 'span',
 }
 
 

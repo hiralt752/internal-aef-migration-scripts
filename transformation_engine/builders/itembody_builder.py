@@ -5,6 +5,7 @@ from parsers.media_parser import (
     extract_image
 )
 from bs4 import BeautifulSoup
+from parsers.content_parser import strip_disallowed_tags
 def _extract_side_image_from_sentence(sentence_html):
     soup = BeautifulSoup(sentence_html or "", "html.parser")
     img = soup.find("img")
@@ -14,7 +15,7 @@ def _extract_side_image_from_sentence(sentence_html):
     url = img.get("src")
     img.decompose()
     cleaned = str(soup).strip()
-    return cleaned, {"url": url} if url else None
+    return strip_disallowed_tags(cleaned), {"url": url} if url else None
 
 
 def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None):

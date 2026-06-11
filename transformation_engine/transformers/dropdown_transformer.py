@@ -3,7 +3,7 @@ from html.parser import HTMLParser
 from typing import Dict, List, Optional, Tuple
 
 from builders.metadata_builder import build_metadata
-from parsers.content_parser import parse_html_content
+from parsers.content_parser import strip_disallowed_tags
 
 
 class BlankFieldParser(HTMLParser):
@@ -209,7 +209,7 @@ def build_item_body(body: Dict) -> Dict:
         "sideImage": None,
         "shuffled": shuffled,
         "statement": None,
-        "sentence": {"text": sentence_text},
+        "sentence": {"text": strip_disallowed_tags(sentence_text)},
         "items": items,
     }
 

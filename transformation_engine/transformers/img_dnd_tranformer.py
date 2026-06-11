@@ -78,7 +78,7 @@ class ImageLabellingDNDTransformer:
 
             "outcomeDeclaration":
                 build_outcome_declaration(
-                    self.raw,self.question_id,self.lesson
+                    self.raw,self.question_id,self.lesson,"IMAGE_LABELLING_DRAG_DROP"
                 )
         }
 
