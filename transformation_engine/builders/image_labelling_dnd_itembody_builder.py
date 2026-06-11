@@ -6,7 +6,11 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
     body = raw.get("body", {})
 
     choices = body.get("choices", {})
-    
+
+    background_image = body.get("backgroundImage")
+    if background_image and "src" in background_image:
+        background_image["url"] = background_image.pop("src")
+
     return {
 
         "version": "1.0",
@@ -25,10 +29,7 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
 
         "sentence": None,
 
-        "image":
-            body.get(
-                "backgroundImage"
-            ),
+        "image": background_image,
 
         "showDragHandle":
             choices.get(
@@ -79,7 +80,7 @@ def build_targets(blanks):
     targets = []
 
     for index, blank in enumerate(blanks, start=1):
-        position = blank.get("position", {})
+
         targets.append({
 
             "id": index,
@@ -94,14 +95,31 @@ def build_targets(blanks):
                 4
             ),
 
+            "swappable": False,
+
+            "swapGroupId": 0,
+
             "position": {
-                "left": int(round(position.get("x", 0) * 100)),
-                "top": int(round(position.get("y", 0) * 100)),
-                "width": 100
-            },
-            "swappable":False,
-            "swapGroupId":0
+
+                "Top":
+                    blank.get(
+                        "position",
+                        {}
+                    ).get("y"),
+
+                "Left":
+                    blank.get(
+                        "position",
+                        {}
+                    ).get("x")
+            }
         })
+
+    if targets:
+        total_weight = sum(t["weight"] for t in targets)
+        if total_weight > 0 and round(total_weight, 4) != 1.0:
+            diff = 1.0 - total_weight
+            targets[0]["weight"] = round(targets[0]["weight"] + diff, 4)
 
     return targets
 
@@ -119,9 +137,8 @@ def build_image_labelling_options(choice_items,question_id,lesson):
             ),question_id,lesson
         )
 
-        option_feedback = choice.get(
-            "feedback",
-            ""
+        sorted_content = _sort_option_content(
+            parsed_content
         )
 
         option = {
@@ -129,9 +146,9 @@ def build_image_labelling_options(choice_items,question_id,lesson):
             "id": index,
 
             "content":
-                _sort_option_content(
-                    parsed_content
-                )
+                sorted_content[0]
+                if sorted_content
+                else {"type": "text", "text": ""}
         }
 
         options.append(option)
@@ -141,7 +158,19 @@ def build_image_labelling_options(choice_items,question_id,lesson):
 
 def _sort_option_content(contents):
 
-    return (
-        next((item for item in contents if item.get("type") == "image"), None)
-        or next((item for item in contents if item), None)
-    )
+    image_items = []
+
+    other_items = []
+
+    for item in contents:
+
+        if item.get("type") == "image":
+
+            image_items.append(item)
+
+        else:
+
+            other_items.append(item)
+
+    return image_items + other_items
+ 

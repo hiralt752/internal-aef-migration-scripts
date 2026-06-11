@@ -9,7 +9,9 @@ from transformers.img_dnd_tranformer import ImageLabellingDNDTransformer
 from transformers.dropdown_transformer import DropdownTransformer
 from transformers.matching_transformer import MatchingTransformer
 from transformers.fib_transformer import FIBTransformer
-from transformers.dnd_transformer import DNDTransformer
+# from transformers.dnd_transformer import DNDTransformer
+from transformers.fib_dnd_transformer import FIBDNDTransformer
+from helpers.contains_img_tag import contains_img_tag
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
@@ -43,7 +45,7 @@ def get_transformer(question_type, raw,question_id,lesson):
     if question_type == "FILL_IN_THE_BLANK":
         return FIBTransformer(raw,question_id,lesson)
     if question_type == "FILL_IN_THE_BLANK_DRAG_DROP":
-        return DNDTransformer(raw)
+        return FIBDNDTransformer(raw,question_id,lesson)
     return None
 
 
