@@ -2,7 +2,6 @@ import os
 import json
 import asyncio
 import time
-import random
 import re
 from datetime import datetime
 from collections import defaultdict
@@ -10,89 +9,64 @@ from collections import defaultdict
 from base_api_client import BaseApiClient
 
 
-# =========================
+# ============================================================
 # CONFIG
-# =========================
-
+# ============================================================
 ENDPOINT = "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions"
 
 INPUT_DIR = r"D:\Alef_Final_Chapter\internal-aef-migration-scripts\transformation_engine\transformation_output"
-
 REPORT_DIR = "api_reports"
 
-GLOBAL_RATE_LIMIT_SECONDS = 4   # 🔥 YOUR REQUIREMENT
+GLOBAL_RATE_LIMIT_SECONDS = 1
+WORKERS = min(32, os.cpu_count() or 4)
 
-
-# =========================
-# LOGGER
-# =========================
 
 class Logger:
     @staticmethod
     def info(msg): print(f"[INFO] {msg}")
+
     @staticmethod
     def success(msg): print(f"[SUCCESS] {msg}")
+
     @staticmethod
     def error(msg): print(f"[ERROR] {msg}")
 
 
-# =========================
-# GLOBAL RATE LIMITER (OPTION 1)
-# =========================
-
 class GlobalRateLimiter:
-
     def __init__(self, delay_seconds: float):
         self.delay = delay_seconds
         self.lock = asyncio.Lock()
-        self.last_call_time = 0
+        self.last_call = 0
 
     async def wait(self):
         async with self.lock:
-
             now = time.time()
-            wait_time = self.delay - (now - self.last_call_time)
+            wait_time = self.delay - (now - self.last_call)
 
             if wait_time > 0:
                 await asyncio.sleep(wait_time)
 
-            self.last_call_time = time.time()
+            self.last_call = time.time()
 
-
-# =========================
-# FILE DISCOVERY
-# =========================
 
 def discover_files():
     files = []
-
     for root, _, filenames in os.walk(INPUT_DIR):
         for f in filenames:
             if f.endswith(".json"):
                 files.append(os.path.join(root, f))
-
     return files
 
-
-# =========================
-# LOAD PAYLOADS
-# =========================
 
 def load_payloads(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-
         return data if isinstance(data, list) else [data]
-
     except Exception as e:
-        Logger.error(f"Failed loading {file_path} | {e}")
+        Logger.error(f"Failed loading {file_path}: {e}")
         return []
 
-
-# =========================
-# API WORKER
-# =========================
 
 class ApiWorker:
 
@@ -104,33 +78,45 @@ class ApiWorker:
         self.results = defaultdict(list)
         self.file_stats = defaultdict(lambda: {"success": 0, "fail": 0})
 
-    # -------------------------
-    async def process_file(self, file_path, payloads):
+    async def process_queue(self, queue: asyncio.Queue):
 
-        tasks = [
-            self._post_payload(file_path, payload)
-            for payload in payloads
-        ]
+        while True:
+            item = await queue.get()
 
-        await asyncio.gather(*tasks)
+            if item is None:
+                break
 
-    # -------------------------
-    async def _post_payload(self, file_path, payload):
+            file_path, payload = item
+            await self._post(file_path, payload)
+
+            queue.task_done()
+
+    async def _post(self, file_path, payload):
 
         question_id = payload.get("metadata", {}).get("general", {}).get("externalId")
+        start_time = datetime.now().isoformat()
+
+        Logger.info(
+            f"[Worker-{self.worker_id}] START API | "
+            f"file={os.path.basename(file_path)} | "
+            f"question_id={question_id}"
+        )
 
         try:
-
-            # 🔥 GLOBAL RATE LIMIT APPLIED HERE (CRITICAL)
             await self.rate_limiter.wait()
 
-            response = await self.client.post(ENDPOINT, payload=payload)
+            await self.client.post(ENDPOINT, payload=payload)
+
+            Logger.success(
+                f"[Worker-{self.worker_id}] SUCCESS | "
+                f"question_id={question_id}"
+            )
 
             self.results["SUCCESS"].append({
                 "file": file_path,
                 "questionId": question_id,
                 "status": "SUCCESS",
-                "timestamp": datetime.now().isoformat()
+                "timestamp": start_time
             })
 
             self.file_stats[file_path]["success"] += 1
@@ -139,26 +125,28 @@ class ApiWorker:
 
             status = self._extract_status(str(e))
 
+            Logger.error(
+                f"[Worker-{self.worker_id}] FAIL ({status}) | "
+                f"question_id={question_id} | error={str(e)}"
+            )
+
             self.results[status].append({
                 "file": file_path,
                 "questionId": question_id,
                 "status": status,
                 "error": str(e),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": start_time
             })
 
             self.file_stats[file_path]["fail"] += 1
 
-    # -------------------------
     def _extract_status(self, msg):
         match = re.search(r"Status:\s*(\d{3})", msg)
         return match.group(1) if match else "ERROR"
 
-    # -------------------------
     async def close(self):
         await self.client.close()
 
-    # -------------------------
     def save_report(self, run_id):
 
         base = os.path.join(REPORT_DIR, run_id, f"worker_{self.worker_id}")
@@ -170,8 +158,8 @@ class ApiWorker:
                 "success": len(self.results["SUCCESS"]),
                 "failed": sum(len(v) for k, v in self.results.items() if k != "SUCCESS")
             },
-            "file_stats": self.file_stats,
-            "results": self.results
+            "file_stats": dict(self.file_stats),
+            "results": dict(self.results)
         }
 
         with open(os.path.join(base, "summary.json"), "w", encoding="utf-8") as f:
@@ -179,53 +167,36 @@ class ApiWorker:
 
         Logger.success(f"Worker {self.worker_id} report saved")
 
-
-# =========================
-# WORK DISTRIBUTION
-# =========================
-
 def split_files(files, workers):
     chunks = [[] for _ in range(workers)]
-
     for i, f in enumerate(files):
         chunks[i % workers].append(f)
-
     return chunks
 
 
-# =========================
-# WORKER RUNNER
-# =========================
-
-async def run_worker(worker_id, files, rate_limiter, run_id):
+async def worker_runner(worker_id, files, rate_limiter, run_id):
 
     Logger.info(f"Worker {worker_id} started with {len(files)} files")
 
     worker = ApiWorker(worker_id, rate_limiter)
+    queue = asyncio.Queue()
 
-    try:
+    for file_path in files:
+        payloads = load_payloads(file_path)
+        for payload in payloads:
+            await queue.put((file_path, payload))
 
-        for file_path in files:
+    for _ in range(WORKERS):
+        await queue.put(None)
 
-            Logger.info(f"Worker {worker_id} processing {file_path}")
+    consumer_task = asyncio.create_task(worker.process_queue(queue))
 
-            payloads = load_payloads(file_path)
+    await consumer_task
 
-            if not payloads:
-                continue
-
-            await worker.process_file(file_path, payloads)
-
-    finally:
-        await worker.close()
-        worker.save_report(run_id)
+    await worker.close()
+    worker.save_report(run_id)
 
     Logger.success(f"Worker {worker_id} completed")
-
-
-# =========================
-# MAIN PIPELINE
-# =========================
 
 def run_pipeline():
 
@@ -237,33 +208,24 @@ def run_pipeline():
         Logger.error("No files found")
         return
 
-    workers = min(8, os.cpu_count() or 4)
-
     Logger.info(f"Total files: {len(files)}")
-    Logger.info(f"Workers: {workers}")
-    Logger.info(f"GLOBAL API GAP: {GLOBAL_RATE_LIMIT_SECONDS}s")
+    Logger.info(f"Workers: {WORKERS}")
+    Logger.info(f"Global Rate Limit: {GLOBAL_RATE_LIMIT_SECONDS}s per request")
 
-    # 🔥 GLOBAL RATE LIMITER (SHARED ACROSS ALL WORKERS)
     rate_limiter = GlobalRateLimiter(GLOBAL_RATE_LIMIT_SECONDS)
 
-    file_chunks = split_files(files, workers)
+    file_chunks = split_files(files, WORKERS)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
     tasks = [
-        run_worker(i, file_chunks[i], rate_limiter, run_id)
-        for i in range(workers)
+        worker_runner(i, file_chunks[i], rate_limiter, run_id)
+        for i in range(WORKERS)
     ]
 
     loop.run_until_complete(asyncio.gather(*tasks))
 
-    Logger.success("MIGRATION COMPLETE")
-
-
-# =========================
-# ENTRY POINT
-# =========================
-
+    Logger.success("PIPELINE COMPLETE")
 if __name__ == "__main__":
     run_pipeline()
