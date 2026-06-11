@@ -40,7 +40,7 @@ class MatchingTransformer:
                     "source": source_val,
                 },
                 "lifecycle": {
-                    "status": q.get("status", "DRAFT"),
+                    "status": "DRAFT",
                 },
                 "technical": {
                     "penAndPaper": metadata_source.get("penAndPaper", False),

@@ -159,7 +159,8 @@ def build_outcome_declaration(raw,question_id,lesson,question_type=None,fib_data
     ):
 
         outcome["feedback"] = {}
-
+    else:
+        outcome["feedback"] = {}
     return outcome
 
 def build_fib_outcome(raw, fib_data,question_id,lesson):
@@ -222,5 +223,6 @@ def build_fib_outcome(raw, fib_data,question_id,lesson):
                 "content": feedback_mapping["incorrect"]
             }
         }
-
+    if outcome["feedback"] : outcome["feedback"]
+    else : outcome["feedback"] = {}
     return outcome

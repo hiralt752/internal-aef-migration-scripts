@@ -9,7 +9,6 @@ from builders.fib_dnd_outcome_builder import (
 )
 
 
-
 # class DNDTransformer:
 
 #     def __init__(self, raw):

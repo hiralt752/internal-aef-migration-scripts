@@ -5,7 +5,7 @@ from copy import deepcopy
 from builders.metadata_builder import build_metadata
 
 SCHEMA_VERSION = {"major": 1, "minor": 0, "patch": 0}
-LIFECYCLE_STATUS = "PUBLISHED"
+LIFECYCLE_STATUS = "DRAFT"
 HARDCODE = {
     "version": "1.0",
     "optionsStyle": "option-style-1",
@@ -155,7 +155,7 @@ def _build_metadata(resp, legacy_status=LIFECYCLE_STATUS):
 
 def _process_dnd_prompt(prompt):
     if not prompt or not prompt.strip():
-        return None, None, None
+        return None, None, None, None
     prompt, audio = _extract_audio(prompt)
     prompt, video = _extract_video(prompt)
     cleaned = re.sub(
@@ -164,7 +164,16 @@ def _process_dnd_prompt(prompt):
         prompt,
         flags=re.IGNORECASE | re.DOTALL,
     )
-    return cleaned, audio, video
+    soup = BeautifulSoup(cleaned, "html.parser")
+    img = soup.find("img")
+    side_image = None
+    if img:
+        src = img.get("src")
+        img.decompose()
+        if src:
+            side_image = {"url": src}
+    cleaned = str(soup).strip()
+    return cleaned, audio, video, side_image
 
 
 def _build_dnd_targets(blanks):
@@ -277,7 +286,7 @@ def migrate_fill_in_blank_drag_drop(resp, status):
     blanks = body.get("blanks", [])
     prompt = body.get("prompt", "")
 
-    sentence_text, audio, video = _process_dnd_prompt(prompt)
+    sentence_text, audio, video, side_image = _process_dnd_prompt(prompt)
     targets = _build_dnd_targets(blanks)
     options = _build_dnd_options(choice_items)
     correct = _build_dnd_correct_answers(valid_resp.get("answerMapping", []), blanks, choice_items)
@@ -303,7 +312,7 @@ def migrate_fill_in_blank_drag_drop(resp, status):
         "backgroundLayout": None,
         "timeSpentConfig": None,
         "splitContent": None,
-        "sideImage": None,
+        "sideImage": side_image,
         "showDragHandle": choices.get("showDragHandle", True),
         "shuffled": choices.get("shuffle", True),
         "optionsStyle": HARDCODE["optionsStyle"],
@@ -343,7 +352,7 @@ def migrate_image_labelling(resp, status):
     correct = _build_dnd_correct_answers(valid_resp.get("answerMapping", []), blanks, choice_items)
 
     prompt = body.get("prompt", "")
-    _, audio, video = _process_dnd_prompt(prompt) if prompt else (None, None, None)
+    _, audio, video, side_image = _process_dnd_prompt(prompt) if prompt else (None, None, None, None)
     modal_fb = _build_modal_feedback(body)
 
     outcome = {
@@ -367,7 +376,7 @@ def migrate_image_labelling(resp, status):
         "backgroundLayout": None,
         "timeSpentConfig": None,
         "splitContent": None,
-        "sideImage": None,
+        "sideImage": side_image,
         "showDragHandle": choices.get("showDragHandle", True),
         "shuffled": choices.get("shuffle", True),
         "optionsStyle": HARDCODE["optionsStyle"],

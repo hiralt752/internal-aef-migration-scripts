@@ -4,6 +4,17 @@ from parsers.media_parser import (
     extract_video,
     extract_image
 )
+from bs4 import BeautifulSoup
+def _extract_side_image_from_sentence(sentence_html):
+    soup = BeautifulSoup(sentence_html or "", "html.parser")
+    img = soup.find("img")
+    if not img:
+        return sentence_html, None
+
+    url = img.get("src")
+    img.decompose()
+    cleaned = str(soup).strip()
+    return cleaned, {"url": url} if url else None
 
 
 def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None):
@@ -169,7 +180,8 @@ def _sort_option_content(contents):
 def build_fib_item_body(raw,fib_data):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
-    
+    sentence_text, side_image = _extract_side_image_from_sentence(fib_data.get("sentence_text", ""))
+
     return {
         "version": "1.0",
         "title": None,
@@ -180,7 +192,7 @@ def build_fib_item_body(raw,fib_data):
         "backgroundLayout": None,
         "timeSpentConfig": None,
         "splitContent": None,
-        "sideImage": None,
+        "sideImage": side_image,
         "fibImage": extract_image(prompt),
         "optionsStyle": "option-style-1",
         "wordBankLayout": "none",
@@ -195,7 +207,7 @@ def build_fib_item_body(raw,fib_data):
             }
         },
         "sentence": {
-            "text": fib_data["sentence_text"]
+            "text": sentence_text
         },
         "items": fib_data["items"],
         "variables": []

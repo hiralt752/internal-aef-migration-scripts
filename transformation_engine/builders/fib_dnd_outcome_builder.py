@@ -7,10 +7,6 @@ def build_dnd_outcome_declaration(raw):
         {}
     )
 
-    # ==========================
-    # Build target map
-    # ==========================
-
     target_map = {}
 
     for idx, blank in enumerate(
@@ -49,13 +45,15 @@ def build_dnd_outcome_declaration(raw):
 
     correct_answers = []
 
-    answer_mappings = validation.get(
-        "validResponse",
-        {}
-    ).get(
-        "answerMapping",
-        []
-    )
+    valid_response = validation.get(
+        "validResponse"
+    ) or {}
+ 
+ 
+    answer_mappings = valid_response.get(
+        "answerMapping"
+    ) or []
+ 
 
     for mapping in answer_mappings:
 
@@ -74,6 +72,9 @@ def build_dnd_outcome_declaration(raw):
 
             "matchMode": "ALL"
         })
+
+        if not correct_answers:
+            raise ValueError("outcomeDeclaration.validResponse.correctAnswers: correctAnswers cannot be empty")
 
     return {
 

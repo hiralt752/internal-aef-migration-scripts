@@ -8,6 +8,7 @@ from helpers.subtype_detector import detect_subtype
 from helpers.feedback_mapper import map_hints_and_feedback
 
 
+
 class MSQTransformer:
 
     def __init__(self, raw,question_id,lesson):

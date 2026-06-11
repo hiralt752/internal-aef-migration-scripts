@@ -2,7 +2,6 @@ import re
 
 from bs4 import BeautifulSoup
 
-
 def map_fib_structure(raw):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
@@ -81,7 +80,7 @@ def map_fib_structure(raw):
             ),
             "feedback": blank_data.get(
                 "feedback"
-            ) or None,
+            ) or "",
             "rules": blank_data.get(
                 "rules",
                 []

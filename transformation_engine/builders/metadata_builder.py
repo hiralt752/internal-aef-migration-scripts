@@ -2,7 +2,6 @@ from helpers.annotation_mapper import (
     build_annotation_tags
 )
 
-
 def build_metadata(raw):
 
     metadata = raw.get("metadata", {})
@@ -40,7 +39,7 @@ def build_metadata(raw):
         },
 
         "lifecycle": {
-            "status": "PUBLISHED"
+            "status": "DRAFT"
         },
 
         "technical": {
