@@ -7,7 +7,9 @@ from helpers.feedback_mapper import (
 )
 
 
-def build_outcome_declaration(raw):
+def build_outcome_declaration(raw, question_type=None, fib_data=None):
+    if question_type == "FIB":
+        return build_fib_outcome(raw, fib_data)
 
     body = raw.get("body", {})
 
@@ -142,5 +144,69 @@ def build_outcome_declaration(raw):
     ):
 
         outcome["feedback"] = {}
+
+    return outcome
+
+
+def build_fib_outcome(raw, fib_data):
+    body = raw.get("body", {})
+
+    validation = raw.get(
+        "validation",
+        {}
+    )
+
+    outcome = {
+        "scoringType": validation.get(
+            "scoringType",
+            "EXACT_MATCH"
+        ),
+        "scoring": {
+            "normalizedMin": 0,
+            "normalizedMax": 1,
+            "defaultNormalizedValue": 0
+        },
+        "validation": {
+            "scoringType": validation.get(
+                "scoringType",
+                "EXACT_MATCH"
+            ),
+            "validResponse": {
+                "correctAnswers": fib_data["correct_answers"]
+            }
+        }
+    }
+
+    general_feedback = (
+        parse_html_content(
+            body.get(
+                "generalFeedback",
+                ""
+            )
+        )
+    )
+
+    if general_feedback:
+        outcome["seeWhy"] = {
+            "layout": "TEXT",
+            "content": general_feedback
+        }
+
+    feedback_mapping = (
+        map_hints_and_feedback(
+            body.get("hints", []),
+            body.get(
+                "wrongAnswerFeedback",
+                ""
+            )
+        )
+    )
+
+    if feedback_mapping["incorrect"]:
+        outcome["feedback"] = {
+            "incorrect": {
+                "content": feedback_mapping["incorrect"]
+            }
+        }
 
     return outcome

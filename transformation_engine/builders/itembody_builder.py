@@ -6,81 +6,79 @@ from parsers.media_parser import (
 )
 
 
-def build_item_body(raw):
+def build_item_body(raw, question_type=None, fib_data=None):
+    if question_type == "FIB":
+        return build_fib_item_body(raw, fib_data)
 
+    return build_mcq_item_body(raw)
+
+
+def build_mcq_item_body(raw):
     body = raw.get("body", {})
-
     choices = body.get("choices", {})
-
     prompt = body.get("prompt", "")
-
-    parsed_prompt = parse_html_content(
-        prompt
-    )
-
+    parsed_prompt = parse_html_content(prompt)
     audio = extract_audio(prompt)
-
     video = extract_video(prompt)
-
     image = extract_image(prompt)
 
     return {
-
         "version": "1.0",
-
         "statement": {
             "content": parsed_prompt
         } if parsed_prompt else None,
-
         "instruction": None,
-
         "audio": audio,
-
         "stemVideo": video,
-
         "stemImage": None,
-
-        "shuffled":
-            choices.get(
-                "shuffle",
-                True
-            ),
-
-        "columns":
-            choices.get(
-                "layoutColumns",
-                2
-            ),
-
-        "listType":
-            choices.get(
-                "listType",
-                "NONE"
-            ),
-
+        "shuffled": choices.get("shuffle", True),
+        "columns": choices.get("layoutColumns", 2),
+        "listType": choices.get("listType", "NONE"),
         "allowTryAgain": False,
-
         "hasActiveVideoBreakpoint": False,
-
         "title": None,
-
         "subTitle": None,
-
         "video": None,
-
         "backgroundLayout": None,
-
         "splitContent": None,
-
         "timeSpentConfig": None,
+        "options": build_options(choices.get("choiceItems", [])),
+    }
 
-        "options":
-            build_options(
-                choices.get(
-                    "choiceItems",
-                    []
-                )
-            )
+
+def build_fib_item_body(raw, fib_data):
+    body = raw.get("body", {})
+    prompt = body.get("prompt", "")
+
+    return {
+        "version": "1.0",
+        "title": None,
+        "subTitle": None,
+        "instruction": None,
+        "audio": extract_audio(prompt),
+        "video": extract_video(prompt),
+        "backgroundLayout": None,
+        "timeSpentConfig": None,
+        "splitContent": None,
+        "sideImage": None,
+        "fibImage": extract_image(prompt),
+        "optionsStyle": "option-style-1",
+        "wordBankLayout": "none",
+        "wordBankDistractor": [],
+        "columns": 1,
+        "numberedSentence": False,
+        "centered": False,
+        "statement": {
+            "content": {
+                "type": "text",
+                "text": ""
+            }
+        },
+        "sentence": {
+            "text": fib_data["sentence_text"]
+        },
+        "items": fib_data["items"],
+        "variables": []
     }
 
 
