@@ -1,331 +1,285 @@
 import os
 import json
 import time
-import asyncio
+import csv
+import threading
+from queue import Queue
 from concurrent.futures import ThreadPoolExecutor, as_completed
- 
+from datetime import datetime
+
 from transformers.mcq_transformer import MCQTransformer
 from transformers.msq_transformer import MSQTransformer
 from transformers.img_dnd_tranformer import ImageLabellingDNDTransformer
 from transformers.dropdown_transformer import DropdownTransformer
 from transformers.matching_transformer import MatchingTransformer
 from transformers.fib_transformer import FIBTransformer
-# from transformers.dnd_transformer import DNDTransformer
 from transformers.fib_dnd_transformer import FIBDNDTransformer
-from helpers.contains_img_tag import contains_img_tag
 from helpers.debug_logger import DebugLogger
 
 logger = DebugLogger()
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-INPUT_ROOT = os.path.join(
-    PROJECT_ROOT,
-    "core_seperated_data_input"
-)
+INPUT_ROOT = os.path.join(PROJECT_ROOT, "core_seperated_data_input")
+OUTPUT_ROOT = os.path.join(BASE_DIR, "transformation_output")
 
-OUTPUT_ROOT = os.path.join(
-    BASE_DIR,
-    "transformation_output"
-)
+FILTER_DIR = os.path.join(PROJECT_ROOT, "filter")
+TERM1_FILTER_DIR = os.path.join(FILTER_DIR, "Term1_json_filtering")
 
-TARGET_FILES = frozenset()
+BY_LO_CODE_FILE = os.path.join(TERM1_FILTER_DIR, "byLoCode.json")
+BY_QUESTION_CODE_FILE = os.path.join(TERM1_FILTER_DIR, "byQuestionCode.json")
 
-print("🚀 TRANSFORMATION PIPELINE STARTED")
-def contains_img_tag(value) -> bool:
- 
-    if isinstance(value, str):
-        return "<img" in value.lower()
- 
-    if isinstance(value, dict):
-        return any(contains_img_tag(v) for v in value.values())
- 
-    if isinstance(value, list):
-        return any(contains_img_tag(item) for item in value)
- 
+MATCHED_CSV = os.path.join(FILTER_DIR, "matched_question_ids.csv")
+UNMATCHED_CSV = os.path.join(FILTER_DIR, "unmatched_question_ids.csv")
+
+print_lock = threading.Lock()
+
+def log(msg):
+    with print_lock:
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+
+log("PIPELINE STARTED")
+
+
+def load_filters():
+    try:
+        with open(BY_LO_CODE_FILE, "r", encoding="utf-8") as f:
+            lo = json.load(f)
+    except:
+        lo = []
+
+    try:
+        with open(BY_QUESTION_CODE_FILE, "r", encoding="utf-8") as f:
+            qc = json.load(f)
+    except:
+        qc = []
+
+    lo_codes = {x["loCode"] for x in lo if x.get("loCode")}
+
+    q_codes = set()
+    for i in qc:
+        q_codes.update(i.get("questionCode", []))
+
+    return lo_codes, q_codes
+
+
+LO_CODES, QUESTION_CODES = load_filters()
+
+
+def extract_base_code(code):
+    return code.split("_Q_")[0] if "_Q_" in code else code
+
+
+def contains_img(obj):
+    return "<img" in str(obj).lower()
+
+
+csv_queue = Queue(maxsize=10000)
+
+
+def csv_worker():
+    m = []
+    u = []
+
+    while True:
+        item = csv_queue.get()
+        if item is None:
+            break
+
+        if item["type"] == "matched":
+            m.append(item["data"])
+        else:
+            u.append(item["data"])
+
+        if len(m) >= 200:
+            with open(MATCHED_CSV, "a", newline="", encoding="utf-8") as f:
+                csv.writer(f).writerows(m)
+            m.clear()
+
+        if len(u) >= 200:
+            with open(UNMATCHED_CSV, "a", newline="", encoding="utf-8") as f:
+                csv.writer(f).writerows(u)
+            u.clear()
+
+    if m:
+        with open(MATCHED_CSV, "a", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(m)
+
+    if u:
+        with open(UNMATCHED_CSV, "a", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(u)
+
+
+def filter_question(question, question_id):
+    response = question.get("response", {})
+    code = response.get("code", "")
+
+    if not code:
+        csv_queue.put({"type": "unmatched", "data": [question_id, ""]})
+        return False
+
+    base = extract_base_code(code)
+
+    if base in LO_CODES:
+        csv_queue.put({
+            "type": "matched",
+            "data": [question_id, code, "LO_CODE", base]
+        })
+        return True
+
+    if base in QUESTION_CODES:
+        csv_queue.put({
+            "type": "matched",
+            "data": [question_id, code, "QUESTION_CODE", base]
+        })
+        return True
+
+    csv_queue.put({"type": "unmatched", "data": [question_id, code]})
     return False
- 
-def get_transformer(question_type, raw,question_id,lesson):
- 
-    if question_type == "MULTIPLE_CHOICE":
-        return MCQTransformer(raw,question_id,lesson)
-    if question_type == "MULTIPLE_SELECTION":
-        return MSQTransformer(raw,question_id,lesson)
-    if question_type == "IMAGE_LABELLING_DRAG_DROP":
-        return ImageLabellingDNDTransformer(raw,question_id,lesson)
-    if question_type == "SELECT_A_BLANK":
+
+
+def get_transformer(t, raw, qid, lesson):
+    if t == "MULTIPLE_CHOICE":
+        return MCQTransformer(raw, qid, lesson)
+    if t == "MULTIPLE_SELECTION":
+        return MSQTransformer(raw, qid, lesson)
+    if t == "IMAGE_LABELLING_DRAG_DROP":
+        return ImageLabellingDNDTransformer(raw, qid, lesson)
+    if t == "SELECT_A_BLANK":
         return DropdownTransformer(raw)
-    if question_type == "MATCHING":
+    if t == "MATCHING":
         return MatchingTransformer(raw)
-    if question_type == "FILL_IN_THE_BLANK":
-        return FIBTransformer(raw,question_id,lesson)
-    if question_type == "FILL_IN_THE_BLANK_DRAG_DROP":
-        return FIBDNDTransformer(raw,question_id,lesson)
+    if t == "FILL_IN_THE_BLANK":
+        return FIBTransformer(raw, qid, lesson)
+    if t == "FILL_IN_THE_BLANK_DRAG_DROP":
+        return FIBDNDTransformer(raw, qid, lesson)
     return None
- 
- 
-def load_json(file_path):
- 
+
+
+def load_json(path):
     try:
-        with open(
-            file_path,
-            "r",
-            encoding="utf-8"
-        ) as f:
- 
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
- 
-    except Exception as e:
- 
-        print(f"❌ Failed reading {file_path}")
-        print(e)
- 
+    except:
         return None
- 
- 
-def build_tasks():
- 
+
+
+def build_tasks(root):
     tasks = []
- 
-    try:
-        with os.scandir(INPUT_ROOT) as top:
- 
-            for lesson_entry in top:
- 
-                if not lesson_entry.is_dir(follow_symlinks=False):
-                    continue
- 
-                with os.scandir(lesson_entry.path) as sub:
- 
-                    for file_entry in sub:
- 
-                        if not file_entry.is_file():
-                            continue
-                       
-                        if TARGET_FILES:
-                            if file_entry.name not in TARGET_FILES:
-                                continue
-                        else:
-                            if not file_entry.name.endswith(".json"):
-                                continue
- 
-                        qtype = file_entry.name.replace(".json", "")
- 
-                        tasks.append(
-                            (
-                                file_entry.path,
-                                qtype,
-                                lesson_entry.name
-                            )
-                        )
- 
-    except Exception as e:
-        print(f"❌ Error building tasks: {e}")
- 
+
+    for lesson in os.scandir(root):
+        if not lesson.is_dir():
+            continue
+
+        for file in os.scandir(lesson.path):
+            if not file.is_file():
+                continue
+            if not file.name.endswith(".json"):
+                continue
+
+            qtype = file.name.replace(".json", "")
+            tasks.append((file.path, qtype, lesson.name))
+
     return tasks
- 
-def process_single_file(task):
- 
-    file_path, qtype, lesson = task
- 
-    print(f"▶️ START: {file_path}")
- 
-    start = time.time()
- 
-    data = load_json(file_path)
- 
+
+
+def process_file(task):
+    path, qtype, lesson = task
+
+    log(f"STARTED  | {path} | lesson={lesson} | type={qtype}")
+
+    data = load_json(path)
     if not data:
-        return {
-            "lesson": lesson,
-            "qtype": qtype,
-            "data": []
-        }
- 
+        return lesson, qtype, []
+
     items = data if isinstance(data, list) else [data]
- 
-    transformed = []
-    seen_question_ids = set()
- 
-    MAX_PER_QT = 5
-    count = 0
- 
-    for wrapper in items:
- 
-        try:
- 
-            if count >= MAX_PER_QT:
-                break
- 
-            question = wrapper.get("response")
-            question_id = wrapper.get("question_id")
- 
-            if question_id:
- 
-                if question_id in seen_question_ids:
-                    continue
- 
-                seen_question_ids.add(question_id)
- 
-            if not question:
-                continue
- 
-            question_type = question.get("type")
- 
-            if contains_img_tag(question):
- 
-                logger.log(
-                    question_id=question_id,
-                    lesson=lesson,
-                    question_type=question_type,
-                    reason="Question has Image in it",
-                    file_path=None
-                )
- 
-                continue
- 
-            transformer = get_transformer(
-                question_type,
-                question,
-                question_id,
-                lesson
-            )
- 
-            if transformer is None:
-                continue
- 
-            transformed_question = transformer.transform()
- 
-            if transformed_question:
- 
-                transformed.append(
-                    transformed_question
-                )
- 
-                count += 1
- 
-        except Exception as e:
- 
-            print(
-                f"❌ Transform Failed | "
-                f"{wrapper.get('question_id')} | "
-                f"{e}"
-            )
- 
-    elapsed = time.time() - start
- 
-    print(
-        f"✅ DONE: {file_path} | "
-        f"{elapsed:.2f}s | "
-        f"{len(transformed)} records"
-    )
- 
-    return {
-        "lesson": lesson,
-        "qtype": qtype,
-        "data": transformed
-    }
-def run_transformation_pipeline():
- 
-    print("\n" + "=" * 60)
-    print("🚀 TRANSFORMATION PIPELINE STARTED")
-    print("=" * 60)
- 
-    os.makedirs(
-        OUTPUT_ROOT,
-        exist_ok=True
-    )
- 
-    tasks = build_tasks()
- 
+
+    out = []
+    seen = set()
+
+    for w in items:
+        q = w.get("response")
+        qid = w.get("question_id")
+
+        if not q or qid in seen:
+            continue
+
+        seen.add(qid)
+
+        if contains_img(q):
+            logger.log(qid, lesson, q.get("type"), "IMAGE SKIPPED", None)
+            continue
+
+        if not filter_question(q, qid):
+            logger.log(qid, lesson, q.get("type"), "FILTERED", None)
+            continue
+
+        t = q.get("type")
+
+        transformer = get_transformer(t, q, qid, lesson)
+        if not transformer:
+            continue
+
+        res = transformer.transform()
+
+        if res:
+            out.append(res)
+
+    return lesson, qtype, out
+
+
+def init_csv():
+    with open(MATCHED_CSV, "w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerow(["question_id", "question_code", "match_source", "matched_value"])
+
+    with open(UNMATCHED_CSV, "w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerow(["question_id", "question_code"])
+
+
+def run():
+    log("START")
+
+    init_csv()
+
+    tasks = build_tasks(INPUT_ROOT)
     if not tasks:
- 
-        print("❌ No files found")
+        log("NO FILES FOUND")
         return
- 
-    print(f"⚡ Files Found : {len(tasks)}")
- 
-    workers = min(
-        os.cpu_count() or 4,
-        len(tasks)
-    )
- 
-    print(f"🚀 Workers     : {workers}")
- 
-    start_pipeline = time.time()
- 
-    total_records = 0
- 
-    with ThreadPoolExecutor(
-        max_workers=workers,
-        thread_name_prefix="Transformer"
-    ) as executor:
- 
-        futures = {
-            executor.submit(
-                process_single_file,
-                task
-            ): task
-            for task in tasks
-        }
- 
-        for future in as_completed(futures):
- 
-            try:
- 
-                result = future.result()
- 
-                lesson = result["lesson"]
-                qtype = result["qtype"]
-                data = result["data"]
- 
-                lesson_dir = os.path.join(
-                    OUTPUT_ROOT,
-                    lesson
-                )
- 
-                os.makedirs(
-                    lesson_dir,
-                    exist_ok=True
-                )
- 
-                output_file = os.path.join(
-                    lesson_dir,
-                    f"{qtype}.json"
-                )
- 
-                with open(
-                    output_file,
-                    "w",
-                    encoding="utf-8"
-                ) as f:
- 
-                    json.dump(
-                        data,
-                        f,
-                        indent=2,
-                        ensure_ascii=False
-                    )
- 
-                total_records += len(data)
- 
-                print(
-                    f"💾 Saved: "
-                    f"{lesson}/{qtype}.json "
-                    f"({len(data)} records)"
-                )
- 
-            except Exception as ex:
- 
-                print(f"❌ ERROR: {ex}")
- 
-    elapsed = time.time() - start_pipeline
- 
-    print("\n" + "=" * 60)
-    print("✅ PIPELINE COMPLETE")
-    print("=" * 60)
-    print(f"⏱️ Total Time    : {elapsed:.2f}s")
-    print(f"📊 Total Records : {total_records}")
- 
- 
+
+    workers = min(os.cpu_count() * 2, len(tasks))
+
+    writer = threading.Thread(target=csv_worker, daemon=True)
+    writer.start()
+
+    start = time.time()
+    total = 0
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = [ex.submit(process_file, t) for t in tasks]
+
+        for f in as_completed(futures):
+            lesson, qtype, data = f.result()
+
+            path = os.path.join(OUTPUT_ROOT, lesson)
+            os.makedirs(path, exist_ok=True)
+
+            out_file = os.path.join(path, f"{qtype}.json")
+
+            with open(out_file, "w", encoding="utf-8") as fp:
+                json.dump(data, fp, ensure_ascii=False, indent=2)
+
+            total += len(data)
+
+            log(f"FINISHED | {lesson}/{qtype} -> records={len(data)}")
+
+    csv_queue.put(None)
+    writer.join()
+
+    log("PIPELINE COMPLETED")
+    log(f"TOTAL TIME: {time.time() - start:.2f} sec")
+    log(f"TOTAL RECORDS: {total}")
+
+
 if __name__ == "__main__":
-    run_transformation_pipeline()
+    run()
