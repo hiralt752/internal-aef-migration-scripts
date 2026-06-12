@@ -165,6 +165,18 @@ def _process_dnd_prompt(prompt):
         flags=re.IGNORECASE | re.DOTALL,
     )
     soup = BeautifulSoup(cleaned, "html.parser")
+    
+    # Clean up disallowed tags in a single pass
+    for tag in soup.find_all(["div", "colgroup", "col", "audio", "video", "a", "pre"]):
+        if not tag.parent:
+            continue
+        if tag.name in ["colgroup", "col", "audio", "video"]:
+            tag.decompose()
+        elif tag.get("id") == "gtx-trans" or "gtx-trans-icon" in tag.get("class", []):
+            tag.decompose()
+        else:
+            tag.unwrap()
+        
     img = soup.find("img")
     side_image = None
     if img:

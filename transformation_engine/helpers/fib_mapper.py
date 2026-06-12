@@ -123,6 +123,17 @@ def map_fib_structure(raw):
         blank.replace_with("@_@")
         sequential_id += 1
 
+    # Clean up disallowed tags in a single pass
+    for tag in soup.find_all(["div", "colgroup", "col", "audio", "video", "a", "pre"]):
+        if not tag.parent:
+            continue
+        if tag.name in ["colgroup", "col", "audio", "video"]:
+            tag.decompose()
+        elif tag.get("id") == "gtx-trans" or "gtx-trans-icon" in tag.get("class", []):
+            tag.decompose()
+        else:
+            tag.unwrap()
+
     transformed_html = str(soup)
 
     return {
@@ -148,13 +159,17 @@ def detect_answer_type(answer):
     if not answer:
         return "text"
 
+    # Strip HTML tags to avoid false positives (e.g. '=' in style attributes)
+    from bs4 import BeautifulSoup
+    clean_answer = BeautifulSoup(answer, "html.parser").get_text()
+
     number_pattern = (
         r"^-?\d+(\.\d+)?$"
     )
 
     if re.fullmatch(
         number_pattern,
-        answer
+        clean_answer.strip()
     ):
         return "number"
 
@@ -167,7 +182,7 @@ def detect_answer_type(answer):
     ]
 
     for token in formula_indicators:
-        if token in answer:
-            return "formula"
+        if token in clean_answer:
+            return "calculated"
 
     return "text"

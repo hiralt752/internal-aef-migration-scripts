@@ -13,6 +13,17 @@ def replace_blank_fields(html):
         "html.parser"
     )
 
+    # Clean up disallowed tags in a single pass
+    for tag in soup.find_all(["div", "colgroup", "col", "audio", "video", "a", "pre"]):
+        if not tag.parent:
+            continue
+        if tag.name in ["colgroup", "col", "audio", "video"]:
+            tag.decompose()
+        elif tag.get("id") == "gtx-trans" or "gtx-trans-icon" in tag.get("class", []):
+            tag.decompose()
+        else:
+            tag.unwrap()
+
     for tag in soup.find_all(["sup", "sub"]):
         tag.unwrap()
 
