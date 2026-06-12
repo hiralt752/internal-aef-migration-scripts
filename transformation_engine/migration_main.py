@@ -9,7 +9,7 @@ from collections import defaultdict
 from base_api_client import BaseApiClient
 
 
-ENDPOINT = "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions"
+ENDPOINT = "https://shared.alefed.com/question-bank-service/api/v1/questions"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
@@ -17,7 +17,7 @@ PROJECT_ROOT = os.path.dirname(BASE_DIR)
 INPUT_DIR = os.path.join(PROJECT_ROOT, "transformation_engine", "transformation_output")
 REPORT_DIR = os.path.join(BASE_DIR, "api_reports")
 
-MAX_CONCURRENT_REQUESTS = 5  
+MAX_CONCURRENT_REQUESTS = 10
 WORKERS = min(32, os.cpu_count() or 4)
 
 

@@ -15,6 +15,7 @@ from transformers.matching_transformer import MatchingTransformer
 from transformers.fib_transformer import FIBTransformer
 from transformers.fib_dnd_transformer import FIBDNDTransformer
 from helpers.debug_logger import DebugLogger
+from helpers.csv import load_question_ids_from_csv, is_question_id_present
 
 logger = DebugLogger()
 
@@ -32,7 +33,7 @@ BY_QUESTION_CODE_FILE = os.path.join(TERM1_FILTER_DIR, "byQuestionCode.json")
 
 MATCHED_CSV = os.path.join(FILTER_DIR, "matched_question_ids.csv")
 UNMATCHED_CSV = os.path.join(FILTER_DIR, "unmatched_question_ids.csv")
-
+CSV_PATH = os.path.join(PROJECT_ROOT, "matched_question_ids.csv")
 print_lock = threading.Lock()
 
 def log(msg):
@@ -211,9 +212,10 @@ def process_file(task):
             logger.log(qid, lesson, q.get("type"), "IMAGE SKIPPED", None)
             continue
 
-        # if not filter_question(q, qid):
-            # logger.log(qid, lesson, q.get("type"), "FILTERED", None)
-            # continue
+        if not is_question_id_present(qid):
+            logger.log(qid, lesson, q.get("type"), "FILTERED", None)
+            continue
+
 
         t = q.get("type")
 
@@ -240,7 +242,7 @@ def run():
     log("START")
 
     init_csv()
-
+    load_question_ids_from_csv(CSV_PATH)
     tasks = build_tasks(INPUT_ROOT)
     if not tasks:
         log("NO FILES FOUND")
