@@ -81,6 +81,38 @@ def load_payloads(file_path):
 
 
 # ============================================================
+# LOAD ALREADY PROCESSED IDS
+# ============================================================
+def load_processed_question_ids():
+    processed_ids = set()
+
+    if not os.path.exists(REPORT_DIR):
+        return processed_ids
+
+    for file_name in os.listdir(REPORT_DIR):
+        if not file_name.endswith(".json"):
+            continue
+
+        file_path = os.path.join(REPORT_DIR, file_name)
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            if isinstance(data, list):
+                for item in data:
+                    qid = item.get("question_id")
+                    if qid:
+                        processed_ids.add(qid)
+
+        except Exception:
+            continue
+
+    Logger.info(f"Loaded {len(processed_ids)} already processed question IDs")
+    return processed_ids
+
+
+# ============================================================
 # SHARED METRICS STORE
 # ============================================================
 class GlobalMetrics:
@@ -149,7 +181,6 @@ class ApiWorker:
         response,
         timestamp
     ):
-
         file_path = os.path.join(REPORT_DIR, f"{status_code}.json")
         os.makedirs(REPORT_DIR, exist_ok=True)
 
@@ -200,7 +231,6 @@ class ApiWorker:
 
             await self.metrics.add_success()
 
-            # STORE SUCCESS/FAIL RESPONSE
             await self._store_by_status(
                 status_code,
                 question_id,
@@ -217,7 +247,6 @@ class ApiWorker:
 
             await self.metrics.add_failure(question_id)
 
-            # store exception as 500 bucket
             await self._store_by_status(
                 500,
                 question_id,
@@ -231,7 +260,7 @@ class ApiWorker:
 
 
 # ============================================================
-# PIPELINE
+# PIPELINE HELPERS
 # ============================================================
 def split_files(files, workers):
     chunks = [[] for _ in range(workers)]
@@ -240,36 +269,48 @@ def split_files(files, workers):
     return chunks
 
 
-async def worker_runner(worker_id, files, rate_limiter, metrics):
+async def worker_runner(worker_id, files, rate_limiter, metrics, processed_ids):
 
     Logger.info(f"Worker {worker_id} started with {len(files)} files")
 
     worker = ApiWorker(worker_id, rate_limiter, metrics)
     queue = asyncio.Queue()
 
+    skipped = 0
+
     for file_path in files:
         payloads = load_payloads(file_path)
+
         for payload in payloads:
-            await queue.put((file_path, payload))
+
+            question_id = payload.get("metadata", {}).get("general", {}).get("externalId")
+
+            if question_id in processed_ids:
+                skipped += 1
+                Logger.info(f"[Worker-{worker_id}] SKIP | {question_id}")
+                continue
+
+            queue.put_nowait((file_path, payload))
 
     for _ in range(WORKERS):
-        await queue.put(None)
+        queue.put_nowait(None)
 
     consumer_task = asyncio.create_task(worker.process_queue(queue))
     await consumer_task
 
     await worker.close()
 
-    Logger.success(f"Worker {worker_id} completed")
+    Logger.success(
+        f"Worker {worker_id} completed | skipped={skipped}"
+    )
 
 
 # ============================================================
-# RUN PIPELINE
+# PIPELINE RUNNER
 # ============================================================
 def run_pipeline():
 
     run_id = datetime.now().strftime("run_%Y_%m_%d_%H_%M_%S")
-
     start_time = time.time()
 
     files = discover_files()
@@ -285,30 +326,31 @@ def run_pipeline():
     rate_limiter = GlobalRateLimiter(GLOBAL_RATE_LIMIT_SECONDS)
     metrics = GlobalMetrics()
 
+    processed_ids = load_processed_question_ids()
+
     file_chunks = split_files(files, WORKERS)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
     tasks = [
-        worker_runner(i, file_chunks[i], rate_limiter, metrics)
+        worker_runner(
+            i,
+            file_chunks[i],
+            rate_limiter,
+            metrics,
+            processed_ids
+        )
         for i in range(WORKERS)
     ]
 
     loop.run_until_complete(asyncio.gather(*tasks))
 
-    end_time = time.time()
-    duration = end_time - start_time
+    duration = time.time() - start_time
 
-    # ========================================================
-    # KEEP EXISTING FAILED IDS FILE
-    # ========================================================
     failed_file = os.path.join(REPORT_DIR, run_id, "failed_question_ids.json")
     metrics.save_failed_ids(failed_file)
 
-    # ========================================================
-    # SUMMARY
-    # ========================================================
     metrics.print_summary(duration)
 
     Logger.success(f"FAILED IDS SAVED -> {failed_file}")
