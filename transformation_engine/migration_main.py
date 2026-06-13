@@ -20,6 +20,8 @@ REPORT_DIR = os.path.join(BASE_DIR, "api_reports")
 MAX_CONCURRENT_REQUESTS = 10
 WORKERS = min(32, os.cpu_count() or 4)
 
+MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024 
+
 
 class Logger:
     @staticmethod
@@ -30,6 +32,7 @@ class Logger:
 
     @staticmethod
     def error(msg): print(f"[ERROR] {msg}")
+
 
 class GlobalConcurrencyLimiter:
     """
@@ -45,6 +48,7 @@ class GlobalConcurrencyLimiter:
 
     async def __aexit__(self, exc_type, exc, tb):
         self.semaphore.release()
+
 
 def discover_files():
     files = []
@@ -64,7 +68,13 @@ def load_payloads(file_path):
         Logger.error(f"Failed loading {file_path}: {e}")
         return []
 
+
 def load_processed_question_ids():
+    """
+    Scans all report files (including chunked '*_part*.json' files
+    produced by ApiWorker._store_by_status) and collects every
+    question_id that has already been processed in previous runs.
+    """
     processed_ids = set()
 
     if not os.path.exists(REPORT_DIR):
@@ -75,6 +85,9 @@ def load_processed_question_ids():
             continue
 
         file_path = os.path.join(REPORT_DIR, file_name)
+
+        if not os.path.isfile(file_path):
+            continue
 
         try:
             with open(file_path, "r", encoding="utf-8") as f:
@@ -92,6 +105,7 @@ def load_processed_question_ids():
     Logger.info(f"Loaded {len(processed_ids)} already processed question IDs")
     return processed_ids
 
+
 class GlobalMetrics:
     def __init__(self):
         self.lock = asyncio.Lock()
@@ -104,12 +118,14 @@ class GlobalMetrics:
         async with self.lock:
             self.total += 1
             self.success += 1
+            return self.total, self.success, self.failed
 
     async def add_failure(self, question_id):
         async with self.lock:
             self.total += 1
             self.failed += 1
             self.failed_ids.append(question_id)
+            return self.total, self.success, self.failed
 
     def save_failed_ids(self, path):
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -128,6 +144,7 @@ class GlobalMetrics:
         print(f"Time Taken     : {duration:.2f} seconds")
         print("\n=================================================\n")
 
+
 class ReportFileLocks:
     def __init__(self):
         self._locks = defaultdict(asyncio.Lock)
@@ -136,6 +153,7 @@ class ReportFileLocks:
     async def get_lock(self, status_code):
         async with self._meta_lock:
             return self._locks[status_code]
+
 
 class ApiWorker:
 
@@ -159,6 +177,32 @@ class ApiWorker:
 
             queue.task_done()
 
+    def _get_chunk_path(self, status_code):
+        """
+        Finds the current chunk file for a given status_code.
+
+        Naming pattern: '{status_code}_part{n}.json'
+
+        - If no chunk exists yet, returns part 1.
+        - If the latest existing part is still under MAX_CHUNK_SIZE_BYTES,
+          returns that part (so we append to it).
+        - If the latest existing part has reached/exceeded the limit,
+          returns the next part number (a fresh file).
+        """
+        part = 1
+        while True:
+            candidate = os.path.join(REPORT_DIR, f"{status_code}_part{part}.json")
+
+            if not os.path.exists(candidate):
+                return candidate
+
+            size = os.path.getsize(candidate)
+
+            if size < MAX_CHUNK_SIZE_BYTES:
+                return candidate
+
+            part += 1
+
     async def _store_by_status(
         self,
         status_code,
@@ -167,7 +211,6 @@ class ApiWorker:
         response,
         timestamp
     ):
-        file_path = os.path.join(REPORT_DIR, f"{status_code}.json")
         os.makedirs(REPORT_DIR, exist_ok=True)
 
         record = {
@@ -180,6 +223,8 @@ class ApiWorker:
         lock = await self.report_locks.get_lock(status_code)
 
         async with lock:
+            file_path = self._get_chunk_path(status_code)
+
             data = []
 
             if os.path.exists(file_path):
@@ -193,6 +238,12 @@ class ApiWorker:
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
+
+            new_size = os.path.getsize(file_path)
+            Logger.info(
+                f"[Worker-{self.worker_id}] STORED | {question_id} -> "
+                f"{os.path.basename(file_path)} ({new_size / (1024 * 1024):.2f} MB)"
+            )
 
     async def _post(self, file_path, payload):
 
@@ -218,7 +269,8 @@ class ApiWorker:
                 f"[Worker-{self.worker_id}] SUCCESS | {question_id} | {status_code}"
             )
 
-            await self.metrics.add_success()
+            total, success, failed = await self.metrics.add_success()
+            Logger.info(f"[COUNT] posted={total} | success={success} | failed={failed}")
 
             await self._store_by_status(
                 status_code,
@@ -234,7 +286,8 @@ class ApiWorker:
                 f"[Worker-{self.worker_id}] FAIL | {question_id} | {str(e)}"
             )
 
-            await self.metrics.add_failure(question_id)
+            total, success, failed = await self.metrics.add_failure(question_id)
+            Logger.info(f"[COUNT] posted={total} | success={success} | failed={failed}")
 
             await self._store_by_status(
                 500,
@@ -246,6 +299,7 @@ class ApiWorker:
 
     async def close(self):
         await self.client.close()
+
 
 def split_files(files, workers):
     chunks = [[] for _ in range(workers)]
@@ -287,6 +341,7 @@ async def worker_runner(worker_id, files, concurrency_limiter, metrics, report_l
     Logger.success(
         f"Worker {worker_id} completed | skipped={skipped}"
     )
+
 
 def run_pipeline():
 
@@ -337,6 +392,7 @@ def run_pipeline():
 
     Logger.success(f"FAILED IDS SAVED -> {failed_file}")
     Logger.success("PIPELINE COMPLETE")
+
 
 if __name__ == "__main__":
     run_pipeline()

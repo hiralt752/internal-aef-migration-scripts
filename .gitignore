@@ -5,7 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
-
+core_seperated_data_input/
+api_reports/
+transformation_output/
 # Distribution / packaging
 .Python
 build/
