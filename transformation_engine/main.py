@@ -208,13 +208,13 @@ def process_file(task):
 
         seen.add(qid)
 
-        if contains_img(q):
-            logger.log(qid, lesson, q.get("type"), "IMAGE SKIPPED", None)
-            continue
+        # if contains_img(q):
+        #     logger.log(qid, lesson, q.get("type"), "IMAGE SKIPPED", None)
+        #     continue
 
-        if not is_question_id_present(qid):
-            logger.log(qid, lesson, q.get("type"), "FILTERED", None)
-            continue
+        # if not is_question_id_present(qid):
+        #     logger.log(qid, lesson, q.get("type"), "FILTERED", None)
+        #     continue
 
 
         t = q.get("type")
