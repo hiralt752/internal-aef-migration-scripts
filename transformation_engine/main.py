@@ -15,15 +15,15 @@ from transformers.matching_transformer import MatchingTransformer
 from transformers.fib_transformer import FIBTransformer
 from transformers.fib_dnd_transformer import FIBDNDTransformer
 from helpers.debug_logger import DebugLogger
-from helpers.csv import load_question_ids_from_csv, is_question_id_present
+from helpers.json_reader import load_question_ids_from_json, is_question_id_present
 
 logger = DebugLogger()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-INPUT_ROOT = os.path.join(PROJECT_ROOT, "core_seperated_data_input")
-OUTPUT_ROOT = os.path.join(BASE_DIR, "transformation_output")
+INPUT_ROOT = os.path.join(PROJECT_ROOT, "core_data")
+OUTPUT_ROOT = os.path.join(BASE_DIR, "transformation_output_core_data")
 
 FILTER_DIR = os.path.join(PROJECT_ROOT, "filter")
 TERM1_FILTER_DIR = os.path.join(FILTER_DIR, "Term1_json_filtering")
@@ -33,7 +33,8 @@ BY_QUESTION_CODE_FILE = os.path.join(TERM1_FILTER_DIR, "byQuestionCode.json")
 
 MATCHED_CSV = os.path.join(FILTER_DIR, "matched_question_ids.csv")
 UNMATCHED_CSV = os.path.join(FILTER_DIR, "unmatched_question_ids.csv")
-CSV_PATH = os.path.join(PROJECT_ROOT, "matched_question_ids.csv")
+MATCHED_QIDs_PATH = os.path.join(PROJECT_ROOT, "final_text_only_question_ids.json")
+
 print_lock = threading.Lock()
 
 def log(msg):
@@ -242,7 +243,7 @@ def run():
     log("START")
 
     init_csv()
-    load_question_ids_from_csv(CSV_PATH)
+    # load_question_ids_from_json(MATCHED_QIDs_PATH)
     tasks = build_tasks(INPUT_ROOT)
     if not tasks:
         log("NO FILES FOUND")

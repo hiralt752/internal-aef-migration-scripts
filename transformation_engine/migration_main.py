@@ -1,10 +1,9 @@
 import os
+import re
 import json
 import asyncio
 import time
-import re
 from datetime import datetime
-from collections import defaultdict
 
 from base_api_client import BaseApiClient
 
@@ -14,48 +13,74 @@ ENDPOINT = "https://shared.alefed.com/question-bank-service/api/v1/questions"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-INPUT_DIR = os.path.join(PROJECT_ROOT, "transformation_engine", "transformation_output")
+TRANSFORM_DIR = os.path.join(PROJECT_ROOT, "transformation_engine")
+INPUT_DIRS = [
+    os.path.join(TRANSFORM_DIR, "transformation_output"),
+    os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
+]
+
 REPORT_DIR = os.path.join(BASE_DIR, "api_reports")
 
-MAX_CONCURRENT_REQUESTS = 10
-WORKERS = min(32, os.cpu_count() or 4)
+CONCURRENCY = 10
+QUEUE_MAXSIZE = 2000
+MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024
 
-MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024 
+STATUS_RE = re.compile(r"Status:\s*(\d{3})")
+PART_RE = re.compile(r"^(\d+)_part\d+\.json$")   # e.g. 201_part39.json
+
+
+def parse_status_from_error(err_text):
+    if not err_text:
+        return None
+    m = STATUS_RE.search(str(err_text))
+    return int(m.group(1)) if m else None
+
+
+def is_settled(code):
+    """A finished outcome that must NOT be re-run."""
+    if code is None:
+        return False
+    if 200 <= code < 300:      # created (200/201)
+        return True
+    if code in (409, 400):     # already-exists / bad-request
+        return True
+    return False
+
+
+def classify(status_code):
+    if status_code is None:
+        return "failed"
+    if 200 <= status_code < 300:
+        return "created"
+    if status_code == 409:
+        return "exists"
+    return "failed"
 
 
 class Logger:
     @staticmethod
     def info(msg): print(f"[INFO] {msg}")
-
     @staticmethod
     def success(msg): print(f"[SUCCESS] {msg}")
-
     @staticmethod
     def error(msg): print(f"[ERROR] {msg}")
 
 
-class GlobalConcurrencyLimiter:
-    """
-    Allows up to `max_concurrent` API calls to be in-flight
-    at the same time, across all workers.
-    """
-    def __init__(self, max_concurrent: int):
-        self.semaphore = asyncio.Semaphore(max_concurrent)
-
-    async def __aenter__(self):
-        await self.semaphore.acquire()
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        self.semaphore.release()
+def get_qid(payload):
+    return (payload.get("metadata", {}).get("general", {}).get("externalId")
+            or payload.get("question_id"))
 
 
 def discover_files():
     files = []
-    for root, _, filenames in os.walk(INPUT_DIR):
-        for f in filenames:
-            if f.endswith(".json"):
-                files.append(os.path.join(root, f))
+    for d in INPUT_DIRS:
+        if not os.path.isdir(d):
+            Logger.error(f"Input folder missing (skipped): {d}")
+            continue
+        for root, _, filenames in os.walk(d):
+            for f in filenames:
+                if f.endswith(".json"):
+                    files.append(os.path.join(root, f))
     return files
 
 
@@ -69,329 +94,250 @@ def load_payloads(file_path):
         return []
 
 
-def load_processed_question_ids():
-    """
-    Scans all report files (including chunked '*_part*.json' files
-    produced by ApiWorker._store_by_status) and collects every
-    question_id that has already been processed in previous runs.
-    """
-    processed_ids = set()
-
-    if not os.path.exists(REPORT_DIR):
-        return processed_ids
-
-    for file_name in os.listdir(REPORT_DIR):
-        if not file_name.endswith(".json"):
+def list_part_files():
+    """Return {status_code: [file paths]} for top-level NNN_part*.json files."""
+    result = {}
+    if not os.path.isdir(REPORT_DIR):
+        return result
+    for name in os.listdir(REPORT_DIR):
+        m = PART_RE.match(name)
+        if not m:
             continue
+        path = os.path.join(REPORT_DIR, name)
+        if os.path.isfile(path):
+            result.setdefault(int(m.group(1)), []).append(path)
+    return result
 
-        file_path = os.path.join(REPORT_DIR, file_name)
 
-        if not os.path.isfile(file_path):
+def read_records(path):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else [data]
+    except Exception:
+        return []
+
+
+def atomic_write_records(path, records):
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(records, f, ensure_ascii=False)
+    os.replace(tmp, path)
+
+
+def build_settled_and_baseline():
+    """Scan part files. Return (settled_ids, success_base, failed_base)."""
+    settled_ids = set()
+    success_ids = set()
+    failed_ids = set()
+    parts = list_part_files()
+    for code, paths in parts.items():
+        if not is_settled(code):
             continue
+        for p in paths:
+            for rec in read_records(p):
+                if isinstance(rec, dict):
+                    qid = rec.get("question_id")
+                    if not qid:
+                        continue
+                    settled_ids.add(qid)
+                    if code == 400:
+                        failed_ids.add(qid)
+                    else:                 # 2xx or 409
+                        success_ids.add(qid)
+    return settled_ids, len(success_ids), len(failed_ids)
 
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
 
-            if isinstance(data, list):
-                for item in data:
-                    qid = item.get("question_id")
-                    if qid:
-                        processed_ids.add(qid)
-
-        except Exception:
+def clean_nonsettled_files(retry_ids):
+    """Remove to-be-retried ids from non-settled part files (401/500/...),
+    so their re-decided outcome doesn't duplicate the stale entry."""
+    removed = 0
+    parts = list_part_files()
+    for code, paths in parts.items():
+        if is_settled(code):
             continue
-
-    Logger.info(f"Loaded {len(processed_ids)} already processed question IDs")
-    return processed_ids
-
-
-class GlobalMetrics:
-    def __init__(self):
-        self.lock = asyncio.Lock()
-        self.total = 0
-        self.success = 0
-        self.failed = 0
-        self.failed_ids = []
-
-    async def add_success(self):
-        async with self.lock:
-            self.total += 1
-            self.success += 1
-            return self.total, self.success, self.failed
-
-    async def add_failure(self, question_id):
-        async with self.lock:
-            self.total += 1
-            self.failed += 1
-            self.failed_ids.append(question_id)
-            return self.total, self.success, self.failed
-
-    def save_failed_ids(self, path):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(self.failed_ids, f, indent=2)
-
-    def print_summary(self, duration):
-        print("\n================ PIPELINE SUMMARY ================\n")
-        print(f"Total Payloads : {self.total}")
-        print(f"Success        : {self.success}")
-        print(f"Failed         : {self.failed}")
-        if self.total:
-            print(f"Success Rate   : {(self.success/self.total)*100:.2f}%")
-        else:
-            print("Success Rate   : N/A (no payloads processed)")
-        print(f"Time Taken     : {duration:.2f} seconds")
-        print("\n=================================================\n")
+        for p in paths:
+            recs = read_records(p)
+            kept = [r for r in recs
+                    if not (isinstance(r, dict) and r.get("question_id") in retry_ids)]
+            if len(kept) != len(recs):
+                removed += len(recs) - len(kept)
+                atomic_write_records(p, kept)
+    return removed
 
 
-class ReportFileLocks:
-    def __init__(self):
-        self._locks = defaultdict(asyncio.Lock)
-        self._meta_lock = asyncio.Lock()
+class StatusWriter:
+    """Buffer per status; write each chunk ONCE at 5 MB. Continues the latest
+    existing part file for each status. Synchronous => atomic on the loop."""
+    def __init__(self, report_dir, max_chunk):
+        self.dir = report_dir
+        self.max_chunk = max_chunk
+        self.part = {}
+        self.buf = {}
+        self.size = {}
+        os.makedirs(report_dir, exist_ok=True)
 
-    async def get_lock(self, status_code):
-        async with self._meta_lock:
-            return self._locks[status_code]
-
-
-class ApiWorker:
-
-    def __init__(self, worker_id, concurrency_limiter, metrics, report_locks):
-        self.worker_id = worker_id
-        self.concurrency_limiter = concurrency_limiter
-        self.metrics = metrics
-        self.report_locks = report_locks
-        self.client = BaseApiClient()
-
-    async def process_queue(self, queue: asyncio.Queue):
-
-        while True:
-            item = await queue.get()
-
-            if item is None:
-                break
-
-            file_path, payload = item
-            await self._post(file_path, payload)
-
-            queue.task_done()
-
-    def _get_chunk_path(self, status_code):
-        """
-        Finds the current chunk file for a given status_code.
-
-        Naming pattern: '{status_code}_part{n}.json'
-
-        - If no chunk exists yet, returns part 1.
-        - If the latest existing part is still under MAX_CHUNK_SIZE_BYTES,
-          returns that part (so we append to it).
-        - If the latest existing part has reached/exceeded the limit,
-          returns the next part number (a fresh file).
-        """
+    def _init_status(self, status):
         part = 1
         while True:
-            candidate = os.path.join(REPORT_DIR, f"{status_code}_part{part}.json")
-
-            if not os.path.exists(candidate):
-                return candidate
-
-            size = os.path.getsize(candidate)
-
-            if size < MAX_CHUNK_SIZE_BYTES:
-                return candidate
-
+            cand = os.path.join(self.dir, f"{status}_part{part}.json")
+            if not os.path.exists(cand):
+                self.part[status] = part; self.buf[status] = []; self.size[status] = 0
+                return
+            if os.path.getsize(cand) < self.max_chunk:
+                try:
+                    with open(cand, "r", encoding="utf-8") as f:
+                        existing = json.load(f)
+                    if not isinstance(existing, list):
+                        existing = [existing]
+                except Exception:
+                    existing = []
+                strs = [json.dumps(r, ensure_ascii=False) for r in existing]
+                self.part[status] = part; self.buf[status] = strs
+                self.size[status] = sum(len(s) for s in strs) + 2 * len(strs)
+                return
             part += 1
 
-    async def _store_by_status(
-        self,
-        status_code,
-        question_id,
-        question_type,
-        response,
-        timestamp
-    ):
-        os.makedirs(REPORT_DIR, exist_ok=True)
+    def add(self, status, record):
+        if status not in self.part:
+            self._init_status(status)
+        s = json.dumps(record, ensure_ascii=False)
+        self.buf[status].append(s)
+        self.size[status] += len(s) + 2
+        if self.size[status] >= self.max_chunk:
+            self._flush(status, advance=True)
 
-        record = {
-            "question_id": question_id,
-            "question_type": question_type,
-            "response": response,
-            "timestamp": timestamp
-        }
+    def _flush(self, status, advance):
+        path = os.path.join(self.dir, f"{status}_part{self.part[status]}.json")
+        strs = self.buf[status]
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write("[\n" + ",\n".join(strs) + "\n]" if strs else "[]")
+        os.replace(tmp, path)
+        if advance:
+            self.part[status] += 1; self.buf[status] = []; self.size[status] = 0
 
-        lock = await self.report_locks.get_lock(status_code)
+    def flush_all(self):
+        for status in list(self.part.keys()):
+            self._flush(status, advance=False)
 
-        async with lock:
-            file_path = self._get_chunk_path(status_code)
 
-            data = []
+class Counters:
+    def __init__(self, success_base, failed_base):
+        self.success = success_base
+        self.failed = failed_base
+        self.run_calls = 0
 
-            if os.path.exists(file_path):
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                except Exception:
-                    data = []
+    def record(self, outcome):
+        self.run_calls += 1
+        if outcome in ("created", "exists"):
+            self.success += 1
+        else:
+            self.failed += 1
+        return self.success, self.failed, self.success + self.failed
 
-            data.append(record)
 
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-
-            new_size = os.path.getsize(file_path)
-            Logger.info(
-                f"[Worker-{self.worker_id}] STORED | {question_id} -> "
-                f"{os.path.basename(file_path)} ({new_size / (1024 * 1024):.2f} MB)"
-            )
-
-    async def _post(self, file_path, payload):
-
-        question_id = payload.get("metadata", {}).get("general", {}).get("externalId") or payload.get("question_id")
-        question_type = payload.get("type")
-        timestamp = datetime.now().isoformat()
-
-        Logger.info(f"[Worker-{self.worker_id}] START | {question_id}")
-
+async def handle_post(client, payload, writer, counters):
+    qid = get_qid(payload)
+    qtype = payload.get("type")
+    ts = datetime.now().isoformat()
+    try:
+        response = await client.post(ENDPOINT, payload=payload)
+        status = getattr(response, "status_code", 200)
         try:
-            # Acquire one of the 5 concurrency slots before calling the API.
-            async with self.concurrency_limiter:
-                response = await self.client.post(ENDPOINT, payload=payload)
-
-            status_code = getattr(response, "status_code", 200)
-
-            try:
-                response_body = response.json() if hasattr(response, "json") else response
-            except Exception:
-                response_body = str(response)
-
-            Logger.success(
-                f"[Worker-{self.worker_id}] SUCCESS | {question_id} | {status_code}"
-            )
-
-            total, success, failed = await self.metrics.add_success()
-            Logger.info(f"[COUNT] posted={total} | success={success} | failed={failed}")
-
-            await self._store_by_status(
-                status_code,
-                question_id,
-                question_type,
-                response_body,
-                timestamp
-            )
-
-        except Exception as e:
-
-            Logger.error(
-                f"[Worker-{self.worker_id}] FAIL | {question_id} | {str(e)}"
-            )
-
-            total, success, failed = await self.metrics.add_failure(question_id)
-            Logger.info(f"[COUNT] posted={total} | success={success} | failed={failed}")
-
-            await self._store_by_status(
-                500,
-                question_id,
-                question_type,
-                str(e),
-                timestamp
-            )
-
-    async def close(self):
-        await self.client.close()
+            body = response.json() if hasattr(response, "json") else response
+        except Exception:
+            body = str(response)
+        outcome = classify(status)
+        writer.add(status, {"question_id": qid, "question_type": qtype,
+                            "response": body, "timestamp": ts})
+    except Exception as e:
+        err = str(e)
+        status = parse_status_from_error(err)
+        outcome = classify(status)
+        writer.add(status if status is not None else 500,
+                   {"question_id": qid, "question_type": qtype,
+                    "response": err, "timestamp": ts})
+    s, fl, tot = counters.record(outcome)
+    print(f"total={tot} | success={s} | failed={fl} | {qid} -> {status if status is not None else 'ERR'}")
 
 
-def split_files(files, workers):
-    chunks = [[] for _ in range(workers)]
-    for i, f in enumerate(files):
-        chunks[i % workers].append(f)
-    return chunks
-
-
-async def worker_runner(worker_id, files, concurrency_limiter, metrics, report_locks, processed_ids):
-
-    Logger.info(f"Worker {worker_id} started with {len(files)} files")
-
-    worker = ApiWorker(worker_id, concurrency_limiter, metrics, report_locks)
-    queue = asyncio.Queue()
-
-    skipped = 0
-
-    for file_path in files:
-        payloads = load_payloads(file_path)
-
-        for payload in payloads:
-
-            question_id = payload.get("metadata", {}).get("general", {}).get("externalId")
-
-            if question_id in processed_ids:
-                skipped += 1
-                Logger.info(f"[Worker-{worker_id}] SKIP | {question_id}")
+async def producer(queue, files, settled_ids):
+    for fp in files:
+        for payload in await asyncio.to_thread(load_payloads, fp):
+            if get_qid(payload) in settled_ids:
                 continue
+            await queue.put(payload)
+    for _ in range(CONCURRENCY):
+        await queue.put(None)
 
-            queue.put_nowait((file_path, payload))
 
-    queue.put_nowait(None)
+async def consumer(queue, writer, counters):
+    client = BaseApiClient()
+    try:
+        while True:
+            payload = await queue.get()
+            if payload is None:
+                queue.task_done(); break
+            await handle_post(client, payload, writer, counters)
+            queue.task_done()
+    finally:
+        await client.close()
 
-    consumer_task = asyncio.create_task(worker.process_queue(queue))
-    await consumer_task
 
-    await worker.close()
-
-    Logger.success(
-        f"Worker {worker_id} completed | skipped={skipped}"
-    )
+async def run_async(files, settled_ids, writer, counters):
+    queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
+    prod = asyncio.create_task(producer(queue, files, settled_ids))
+    cons = [asyncio.create_task(consumer(queue, writer, counters)) for _ in range(CONCURRENCY)]
+    await prod
+    await asyncio.gather(*cons)
 
 
 def run_pipeline():
-
-    run_id = datetime.now().strftime("run_%Y_%m_%d_%H_%M_%S")
-    start_time = time.time()
+    start = time.time()
 
     files = discover_files()
-
     if not files:
-        Logger.error("No files found")
+        Logger.error("No input files found in either folder.")
         return
+    Logger.info(f"Input files: {len(files)} (across {len(INPUT_DIRS)} folders)")
+    Logger.info(f"Concurrency: {CONCURRENCY}")
 
-    Logger.info(f"Total files: {len(files)}")
-    Logger.info(f"Workers: {WORKERS}")
-    Logger.info(f"Max Concurrent API Calls: {MAX_CONCURRENT_REQUESTS}")
+    # 1) what's already settled (200/201/409/400) + baseline counts
+    settled_ids, success_base, failed_base = build_settled_and_baseline()
+    Logger.info(f"Settled ids (skip): {len(settled_ids):,} | "
+                f"baseline success={success_base:,} failed={failed_base:,}")
 
-    concurrency_limiter = GlobalConcurrencyLimiter(MAX_CONCURRENT_REQUESTS)
-    metrics = GlobalMetrics()
-    report_locks = ReportFileLocks()
+    # 2) which input ids will be retried (not settled) -> for stale cleanup
+    retry_ids = set()
+    for fp in files:
+        for payload in load_payloads(fp):
+            qid = get_qid(payload)
+            if qid and qid not in settled_ids:
+                retry_ids.add(qid)
+    Logger.info(f"To retry: {len(retry_ids):,}")
 
-    processed_ids = load_processed_question_ids()
+    # 3) pull those ids out of the stale non-settled files (401/500/...)
+    removed = clean_nonsettled_files(retry_ids)
+    Logger.info(f"Removed {removed:,} stale records from non-settled files")
 
-    file_chunks = split_files(files, WORKERS)
+    # 4) run, appending into the latest part file per status
+    writer = StatusWriter(REPORT_DIR, MAX_CHUNK_SIZE_BYTES)
+    counters = Counters(success_base, failed_base)
+    try:
+        asyncio.run(run_async(files, settled_ids, writer, counters))
+    finally:
+        writer.flush_all()
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    tasks = [
-        worker_runner(
-            i,
-            file_chunks[i],
-            concurrency_limiter,
-            metrics,
-            report_locks,
-            processed_ids
-        )
-        for i in range(WORKERS)
-    ]
-
-    loop.run_until_complete(asyncio.gather(*tasks))
-
-    duration = time.time() - start_time
-
-    failed_file = os.path.join(REPORT_DIR, run_id, "failed_question_ids.json")
-    metrics.save_failed_ids(failed_file)
-
-    metrics.print_summary(duration)
-
-    Logger.success(f"FAILED IDS SAVED -> {failed_file}")
-    Logger.success("PIPELINE COMPLETE")
+    dur = time.time() - start
+    print("\n================ DONE ================")
+    print(f"New calls this run : {counters.run_calls:,}")
+    print(f"Success (total)    : {counters.success:,}")
+    print(f"Failed  (total)    : {counters.failed:,}")
+    print(f"Grand total        : {counters.success + counters.failed:,}")
+    print(f"Time               : {dur:.2f}s"
+          + (f"  ({counters.run_calls/dur:.1f} req/s)" if dur > 0 else ""))
+    print("======================================")
 
 
 if __name__ == "__main__":
