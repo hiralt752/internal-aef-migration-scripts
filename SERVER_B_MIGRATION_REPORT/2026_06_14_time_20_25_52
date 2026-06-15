@@ -1,0 +1,53 @@
+========================================================================
+API MIGRATION REPORT  (aggregate of all report files - TEXT ONLY)
+========================================================================
+Generated : 2026-06-14 20:25:52
+Distinct question ids : 47,364
+Duplicate entries collapsed : 28 (counted once by best outcome)
+
+
+------------------------------------------------------------------------
+OUTCOME SUMMARY
+------------------------------------------------------------------------
+  Created (201)            : 26,398
+  Already exists (409)     : 16,175 ( From last Migration )
+                             ---------
+  TOTAL SUCCESS            : 42,573   (created + already-exists)
+
+  Bad request (400)        : 4,498 ( Validation error )
+  Other failures (401/500) : 0
+                             ---------
+  TOTAL FAILED             : 4,498   (excludes pending below)
+
+  PENDING - QB not ready   : 293
+    NOTE: MATCHING questions returned 400 because the QB
+          server is not ready for this type yet (per discussion).
+          They are NOT counted as failures.
+
+  Success rate             : 89.88%   (of 47,364 distinct ids)
+
+------------------------------------------------------------------------
+STATUS CODE BREAKDOWN (distinct ids by final status)
+------------------------------------------------------------------------
+200  OK                  : 26,398
+400  Bad request         : 4,791  <- includes pending QB types
+409  Already exists      : 16,175
+
+
+------------------------------------------------------------------------
+PER QUESTION TYPE   (T total | S success | F failure | P pending)
+------------------------------------------------------------------------
+MULTIPLE_CHOICE   : T 27,122  S 27,122  F 0       P 0
+DND               : T 8,915   S 7,204   F 1,711   P 0
+DROPDOWN          : T 8,110   S 5,911   F 2,199   P 0
+FILL_IN_THE_BLANK : T 2,924   S 2,336   F 588     P 0
+MATCHING          : T 293     S 0       F 0       P 293   (P = pending, QB server not ready)
+
+
+------------------------------------------------------------------------
+FAILURE DETAIL (by final status, pending excluded)
+------------------------------------------------------------------------
+400  Bad request         : 4,498  (Validation Error) ---> Analysis to be performed on why these records failed
+                          ---------
+  TOTAL FAILED        : 4,498
+========================================================================
