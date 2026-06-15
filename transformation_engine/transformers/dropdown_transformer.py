@@ -1,106 +1,124 @@
+"""
+Module for transforming legacy Dropdown questions into the new schema.
+Contains parsers for blanks, hints, and the main DropdownTransformer.
+"""
 import re
 from html.parser import HTMLParser
 from typing import Dict, List, Optional, Tuple
 
+from bs4 import BeautifulSoup
+
 from builders.metadata_builder import build_metadata
-from parsers.content_parser import strip_disallowed_tags
+from parsers.content_parser import strip_disallowed_tags, parse_html_content, ALLOWED_TAGS
+
+def dropdown_strict_strip_tags(html_content: str) -> str:
+    """Safely unwraps disallowed tags, properly handling nested structures."""
+    if not html_content:
+        return ""
+    soup = BeautifulSoup(html_content, "html.parser")
+    while True:
+        disallowed_tags = [tag for tag in soup.find_all(True) if tag.name not in ALLOWED_TAGS]
+        if not disallowed_tags:
+            break
+        for tag in disallowed_tags:
+            tag.unwrap()
+    return str(soup)
+
+def sanitize_blocks(blocks: List[Dict]) -> List[Dict]:
+    """Applies strict strip tags to the text fields of parsed blocks and removes empty text blocks."""
+    if not blocks:
+        return blocks
+    sanitized = []
+    for b in blocks:
+        if b.get("type") == "text":
+            cleaned = dropdown_strict_strip_tags(b.get("text", "")).strip()
+            if cleaned:
+                b["text"] = cleaned
+                sanitized.append(b)
+        else:
+            if b.get("type") == "image" and "text" not in b:
+                b["text"] = "Image"  # Target API requires text field even for images in feedback
+            sanitized.append(b)
+    return sanitized
 
 
 class BlankFieldParser(HTMLParser):
+    """
+    Parses HTML to extract blank-field IDs in order of appearance.
+    """
     def __init__(self):
+        """Initializes the BlankFieldParser with an empty list of IDs."""
         super().__init__()
         self.blank_ids: List[int] = []
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]):
+        """
+        Handles start tags, specifically capturing the 'id' of 'blank-field' tags.
+        
+        Args:
+            tag (str): The HTML tag name.
+            attrs (List[Tuple[str, Optional[str]]]): The tag attributes.
+        """
         if tag == "blank-field":
-            attrs_dict = dict(attrs)
-            if "id" in attrs_dict:
-                try:
-                    self.blank_ids.append(int(attrs_dict["id"]))
-                except ValueError:
-                    pass
-
-
-class HintMediaParser(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self._current_text: List[str] = []
-        self.items: List[Dict] = []
-
-    def handle_starttag(self, tag, attrs):
-        attrs_dict = dict(attrs)
-        if tag == "img":
-            self._flush_text()
-            src = attrs_dict.get("src", "")
-            if src.startswith("data:image/svg+xml") and "MathML" in src:
-                return
-            if src:
-                self.items.append({"type": "image", "image": {"url": src}})
-        elif tag == "audio":
-            self._flush_text()
-            src = attrs_dict.get("src", "")
-            if src:
-                self.items.append({"type": "audio", "audio": {"url": src}})
-        elif tag == "video":
-            self._flush_text()
-            src = attrs_dict.get("src", "")
-            if src:
-                self.items.append({"type": "video", "video": {"url": src}})
-
-    def handle_data(self, data):
-        self._current_text.append(data)
-
-    def handle_entityref(self, name):
-        entities = {"nbsp": " ", "amp": "&", "lt": "<", "gt": ">", "quot": '"', "apos": "'"}
-        self._current_text.append(entities.get(name, ""))
-
-    def handle_charref(self, name):
-        try:
-            code = int(name[1:], 16) if name.startswith("x") else int(name)
-            self._current_text.append(chr(code))
-        except (ValueError, OverflowError):
-            pass
-
-    def _flush_text(self):
-        text = "".join(self._current_text).strip()
-        if text:
-            self.items.append({"type": "text", "text": text})
-        self._current_text = []
-
-    def close(self):
-        self._flush_text()
-        super().close()
-
-    def has_media(self) -> bool:
-        return any(item["type"] in ("image", "audio", "video") for item in self.items)
-
-    def text_only_items(self) -> List[Dict]:
-        return [item for item in self.items if item["type"] == "text"]
-
-    def media_only_items(self) -> List[Dict]:
-        return [item for item in self.items if item["type"] != "text"]
-
-
-def parse_hint(hint_html: str) -> HintMediaParser:
-    parser = HintMediaParser()
-    parser.feed(hint_html or "")
-    parser.close()
-    return parser
+            for name, value in attrs:
+                if name == "id" and value:
+                    try:
+                        self.blank_ids.append(int(value))
+                    except ValueError:
+                        pass
 
 
 def extract_blank_ids_in_order(prompt_html: str) -> List[int]:
+    """
+    Extracts ordered blank IDs from prompt HTML.
+    
+    Args:
+        prompt_html (str): The HTML string containing blank fields.
+        
+    Returns:
+        List[int]: An ordered list of blank IDs.
+    """
+    if not prompt_html:
+        return []
     parser = BlankFieldParser()
-    parser.feed(prompt_html or "")
+    parser.feed(prompt_html)
     return parser.blank_ids
 
 
 def extract_prompt_media(prompt_html: str) -> Tuple[Optional[str], Optional[str]]:
-    audio = re.search(r'<audio[^>]+src=["\']([^"\']+)["\']', prompt_html or "", re.IGNORECASE)
-    video = re.search(r'<video[^>]+src=["\']([^"\']+)["\']', prompt_html or "", re.IGNORECASE)
+    """
+    Extracts the first audio and video URLs from the prompt HTML.
+    
+    Args:
+        prompt_html (str): The HTML string.
+        
+    Returns:
+        Tuple[Optional[str], Optional[str]]: The audio URL and video URL, if found.
+    """
+    if not prompt_html:
+        return None, None
+
+    audio = re.search(r'<audio[^>]+src=["\']([^"\']+)["\']', prompt_html, re.IGNORECASE)
+    if not audio:
+        audio = re.search(r'<audio[^>]*>.*?<source[^>]+src=["\']([^"\']+)["\']', prompt_html, flags=re.DOTALL | re.IGNORECASE)
+
+    video = re.search(r'<video[^>]+src=["\']([^"\']+)["\']', prompt_html, re.IGNORECASE)
+    if not video:
+        video = re.search(r'<video[^>]*>.*?<source[^>]+src=["\']([^"\']+)["\']', prompt_html, flags=re.DOTALL | re.IGNORECASE)
+
     return (audio.group(1) if audio else None, video.group(1) if video else None)
 
 
 def replace_blank_fields_with_placeholder(prompt_html: str) -> Optional[str]:
+    """
+    Replaces blank-field tags with '@_@' and removes media tags.
+    
+    Args:
+        prompt_html (str): The original prompt HTML.
+        
+    Returns:
+        Optional[str]: The sanitized string with placeholders, or None if empty.
+    """
     html = re.sub(r'<blank-field[^>]*>.*?</blank-field>', '@_@', prompt_html or "", flags=re.DOTALL | re.IGNORECASE)
     html = re.sub(r'<audio[^>]*>.*?</audio>', '', html, flags=re.DOTALL | re.IGNORECASE)
     html = re.sub(r'<audio[^>]*/>', '', html, flags=re.IGNORECASE)
@@ -110,37 +128,63 @@ def replace_blank_fields_with_placeholder(prompt_html: str) -> Optional[str]:
     return result if result else None
 
 
-def strip_html_tags(html: str) -> str:
-    clean = re.sub(r'<[^>]+>', '', html or '')
-    for entity, char in [('&nbsp;', ' '), ('&amp;', '&'), ('&lt;', '<'), ('&gt;', '>'), ('&quot;', '"'), ('&#39;', "'")]:
-        clean = clean.replace(entity, char)
-    return clean.strip()
-
-
-def parse_choice_content(value_html: str) -> Dict:
+def parse_choice_content(value_html: str, opt_id: int, question_id=None, lesson=None) -> Dict:
+    """
+    Parses choice content into structured text or image objects, with a fallback
+    placeholder to prevent blank text errors.
+    """
     if not value_html:
-        return {"type": "text", "text": ""}
-    img = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', value_html, re.IGNORECASE)
-    if img:
-        return {"type": "image", "image": {"url": img.group(1)}}
-    return {"type": "text", "text": strip_html_tags(value_html)}
+        return {"type": "text", "text": f"Option {opt_id}"}
+        
+    parsed_contents = parse_html_content(value_html, question_id, lesson)
+    
+    if parsed_contents:
+        item = parsed_contents[0]
+        if item.get("type") == "text":
+            clean_text = dropdown_strict_strip_tags(item.get("text", "")).strip()
+            if clean_text:
+                return {"type": "text", "text": clean_text}
+        elif item.get("type") == "image":
+            return {
+                "type": "image", 
+                "text": f"Option {opt_id}",  # Required by target API for DROPDOWN options
+                "image": item.get("image")
+            }
+            
+    return {"type": "text", "text": f"Option {opt_id}"}
+
+
+class _ParsedHint:
+    def __init__(self, items):
+        self.items = items
+    def has_media(self) -> bool:
+        return any(i["type"] in ("image", "audio", "video") for i in self.items)
+    def text_only_items(self) -> List[Dict]:
+        return [i for i in self.items if i["type"] == "text"]
+    def media_only_items(self) -> List[Dict]:
+        return [i for i in self.items if i["type"] != "text"]
 
 
 def run_hint_mapper(wrong_answer_feedback_html: str, hints_html: List[str]) -> Tuple[Optional[List[Dict]], Optional[List[Dict]]]:
-    waf_text = strip_html_tags(wrong_answer_feedback_html or "")
-    has_waf = bool(waf_text)
+    """
+    Maps legacy hints and wrongAnswerFeedback into structured target API JSON blocks.
+    """
+    waf_items = sanitize_blocks(parse_html_content(wrong_answer_feedback_html or "", None, None))
+    has_waf = bool(waf_items)
 
-    parsed_hints = [parse_hint(h) for h in (hints_html or [])]
-    parsed_hints = [hint for hint in parsed_hints if hint.items]
+    parsed_hints = []
+    for h in (hints_html or []):
+        items = sanitize_blocks(parse_html_content(h, None, None)) if h else []
+        if items:
+            parsed_hints.append(_ParsedHint(items))
+            
     n = len(parsed_hints)
 
     if has_waf:
-        waf_parser = parse_hint(wrong_answer_feedback_html)
-        incorrect = waf_parser.items if waf_parser.items else [{"type": "text", "text": waf_text}]
         need_help: List[Dict] = []
         for hint in parsed_hints:
             need_help.extend(hint.items)
-        return incorrect, (need_help if need_help else None)
+        return waf_items, (need_help if need_help else None)
 
     if n == 0:
         return None, None
@@ -163,6 +207,15 @@ def run_hint_mapper(wrong_answer_feedback_html: str, hints_html: List[str]) -> T
 
 
 def build_item_body(body: Dict) -> Dict:
+    """
+    Builds the main itemBody structure for a Dropdown question, handling options and weights.
+    
+    Args:
+        body (Dict): The legacy body payload.
+        
+    Returns:
+        Dict: The transformed itemBody JSON structure.
+    """
     prompt_html = body.get("prompt", "") or ""
     blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
     audio_url, video_url = extract_prompt_media(prompt_html)
@@ -174,17 +227,31 @@ def build_item_body(body: Dict) -> Dict:
     blank_items_by_id = {item.get("id"): item for item in blank_items_list}
 
     items = []
+    total_blanks = len(blank_ids_ordered)
+    running_weight_sum = 0.0
+
     for incremental_id, aat_blank_id in enumerate(blank_ids_ordered, start=1):
         blank_item = blank_items_by_id.get(aat_blank_id, {})
         raw_weight = blank_item.get("weight", 100.0)
-        weight = round(raw_weight / 100.0, 6)
+        
+        if incremental_id == total_blanks and total_blanks > 0:
+            weight = round(max(0.0, 1.0 - running_weight_sum), 6)
+        else:
+            weight = round(raw_weight / 100.0, 6)
+            running_weight_sum += weight
+
         choices = blank_item.get("choices") or []
         options = []
         for opt_id, choice in enumerate(choices, start=1):
+            raw_feedback = choice.get("feedback", "")
+            parsed_fb = parse_html_content(raw_feedback, None, None)
+            fb_text = "".join([b["text"] for b in parsed_fb if b.get("type") == "text"]).strip()
+            fb_final = dropdown_strict_strip_tags(fb_text)
+
             options.append({
                 "id": opt_id,
-                "content": parse_choice_content(choice.get("value", "")),
-                "feedback": choice.get("feedback", ""),
+                "content": parse_choice_content(choice.get("value", ""), opt_id),
+                "feedback": fb_final,
             })
 
         items.append({
@@ -195,6 +262,10 @@ def build_item_body(body: Dict) -> Dict:
             "image": None,
             "options": options,
         })
+
+    parsed_sentence = parse_html_content(sentence_text, None, None)
+    sentence_raw = "".join([b["text"] for b in parsed_sentence if b.get("type") == "text"]).strip()
+    sentence_final = dropdown_strict_strip_tags(sentence_raw)
 
     return {
         "version": "1.0",
@@ -209,12 +280,23 @@ def build_item_body(body: Dict) -> Dict:
         "sideImage": None,
         "shuffled": shuffled,
         "statement": None,
-        "sentence": {"text": strip_disallowed_tags(sentence_text)},
+        "sentence": {"text": sentence_final},
         "items": items,
     }
 
 
 def build_outcome_declaration(body: Dict, validation: Dict, blank_ids_ordered: List[int]) -> Dict:
+    """
+    Builds the outcomeDeclaration mapping for correctness logic and feedback.
+    
+    Args:
+        body (Dict): The legacy body payload.
+        validation (Dict): The legacy validation payload.
+        blank_ids_ordered (List[int]): List of sequential blank IDs.
+        
+    Returns:
+        Dict: The outcomeDeclaration JSON structure.
+    """
     blanks_obj = body.get("blanks") or {}
     blank_items_list = blanks_obj.get("blankItems") or []
     blank_id_to_incremental = {aat_id: idx + 1 for idx, aat_id in enumerate(blank_ids_ordered)}
@@ -239,11 +321,11 @@ def build_outcome_declaration(body: Dict, validation: Dict, blank_ids_ordered: L
 
     see_why = None
     general_fb_html = body.get("generalFeedback") or ""
-    general_fb_text = strip_html_tags(general_fb_html)
-    if general_fb_text:
+    general_items = sanitize_blocks(parse_html_content(general_fb_html, None, None))
+    if general_items:
         see_why = {
             "layout": "TEXT",
-            "content": [{"type": "text", "text": general_fb_text}],
+            "content": general_items,
         }
 
     incorrect_items, _need_help_items = run_hint_mapper(
@@ -252,16 +334,17 @@ def build_outcome_declaration(body: Dict, validation: Dict, blank_ids_ordered: L
     )
 
     feedback: Dict = {}
-    correct_fb_text = strip_html_tags(body.get("correctAnswerFeedback") or "")
-    if correct_fb_text:
-        feedback["correct"] = {"content": [{"type": "text", "text": correct_fb_text}]}
+    correct_html = body.get("correctAnswerFeedback") or ""
+    correct_text = dropdown_strict_strip_tags(correct_html).strip()
+    if correct_text:
+        feedback["correct"] = {"content": [{"type": "text", "text": correct_text}]}
 
     if incorrect_items:
         feedback["incorrect"] = {"content": incorrect_items}
 
-    partial_fb_text = strip_html_tags(body.get("partialAnswerFeedback") or "")
-    if partial_fb_text:
-        feedback["partial"] = {"content": [{"type": "text", "text": partial_fb_text}]}
+    partial_items = sanitize_blocks(parse_html_content(body.get("partialAnswerFeedback") or "", None, None))
+    if partial_items:
+        feedback["partial"] = {"content": partial_items}
 
     outcome: Dict = {
         "scoringType": scoring_type,
@@ -287,6 +370,15 @@ def build_outcome_declaration(body: Dict, validation: Dict, blank_ids_ordered: L
 
 
 def build_modal_feedback(body: Dict) -> Optional[Dict]:
+    """
+    Builds the modalFeedback mapping for need-help sections and passages.
+    
+    Args:
+        body (Dict): The legacy body payload.
+        
+    Returns:
+        Optional[Dict]: The modalFeedback structure or None if not applicable.
+    """
     _incorrect_items, need_help_items = run_hint_mapper(
         wrong_answer_feedback_html=body.get("wrongAnswerFeedback") or "",
         hints_html=body.get("hints") or [],
@@ -319,10 +411,26 @@ def build_modal_feedback(body: Dict) -> Optional[Dict]:
 
 
 class DropdownTransformer:
+    """
+    Orchestrates the complete transformation of a legacy DROPDOWN question 
+    into the new strict JSON schema.
+    """
     def __init__(self, raw: Dict):
+        """
+        Initializes the DropdownTransformer with raw legacy payload.
+        
+        Args:
+            raw (Dict): The original legacy question JSON.
+        """
         self.raw = raw
 
     def transform(self) -> Dict:
+        """
+        Executes the transformation process.
+        
+        Returns:
+            Dict: The fully transformed new schema JSON payload.
+        """
         q = self.raw.get("response", self.raw)
         body = q.get("body") or {}
         validation = q.get("validation") or {}

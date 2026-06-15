@@ -8,15 +8,16 @@ from datetime import datetime
 from base_api_client import BaseApiClient
 
 
-ENDPOINT = "https://shared.alefed.com/question-bank-service/api/v1/questions"
+ENDPOINT = "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
 TRANSFORM_DIR = os.path.join(PROJECT_ROOT, "transformation_engine")
 INPUT_DIRS = [
-    os.path.join(TRANSFORM_DIR, "transformation_output"),
-    os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
+    #os.path.join(TRANSFORM_DIR, "transformation_output"),
+    #os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
+    os.path.join(TRANSFORM_DIR, "transformation_output_core_data")
 ]
 
 REPORT_DIR = os.path.join(BASE_DIR, "api_reports")
