@@ -130,28 +130,33 @@ def replace_blank_fields_with_placeholder(prompt_html: str) -> Optional[str]:
 
 def parse_choice_content(value_html: str, opt_id: int, question_id=None, lesson=None) -> Dict:
     """
-    Parses choice content into structured text or image objects, with a fallback
-    placeholder to prevent blank text errors.
+    Parses choice content into structured text or image objects.
+    WIRIS math formulas are cleanly extracted as LaTeX text strings by parse_html_content.
+    If a legacy option is genuinely empty, this will intentionally return an empty string
+    so that downstream API validation throws a visible error to flag the bad data.
     """
     if not value_html:
-        return {"type": "text", "text": f"Option {opt_id}"}
+        return {"type": "text", "text": ""}
         
     parsed_contents = parse_html_content(value_html, question_id, lesson)
     
     if parsed_contents:
         item = parsed_contents[0]
         if item.get("type") == "text":
-            clean_text = dropdown_strict_strip_tags(item.get("text", "")).strip()
-            if clean_text:
-                return {"type": "text", "text": clean_text}
+            # Target API completely rejects HTML tags in Dropdown options.
+            # We use BeautifulSoup get_text() to strip all tags (like <p>, <span>)
+            # but this correctly preserves LaTeX strings like "\( ... \)" which have no tags.
+            from bs4 import BeautifulSoup
+            clean_text = BeautifulSoup(item.get("text", ""), "html.parser").get_text().strip()
+            return {"type": "text", "text": clean_text}
         elif item.get("type") == "image":
             return {
                 "type": "image", 
-                "text": f"Option {opt_id}",  # Required by target API for DROPDOWN options
+                "text": "",  # Intentionally blank to flag missing alt-text or data loss in QA
                 "image": item.get("image")
             }
             
-    return {"type": "text", "text": f"Option {opt_id}"}
+    return {"type": "text", "text": ""}
 
 
 class _ParsedHint:
