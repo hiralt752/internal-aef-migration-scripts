@@ -3,3 +3,4 @@ httpx==0.28.1
 lxml==6.1.1
 orjson==3.11.9
 pydantic_settings==2.14.1
+Pillow==11.2.1
