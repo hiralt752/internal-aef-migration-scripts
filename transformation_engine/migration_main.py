@@ -8,26 +8,85 @@ from datetime import datetime
 from base_api_client import BaseApiClient
 
 
-ENDPOINT = "https://shared.alefed.com/question-bank-service/api/v1/questions"
+CREATE_ENDPOINT = (
+    "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions"
+)
 
+PUT_DRAFT_ENDPOINT = (
+    "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions/{questionId}:putDraft"
+)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
 TRANSFORM_DIR = os.path.join(PROJECT_ROOT, "transformation_engine")
 INPUT_DIRS = [
-    os.path.join(TRANSFORM_DIR, "transformation_output"),
-    os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
+    # os.path.join(TRANSFORM_DIR, "validation_error_fix_DND"),
+    # os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
+    # os.path.join(TRANSFORM_DIR, "test"),
 ]
-
-REPORT_DIR = os.path.join(BASE_DIR, "api_reports")
+MAPPING_FILE = os.path.join(
+    PROJECT_ROOT,
+    "migration_id_mapping",
+    "question_id_mapping.json"
+)
+REPORT_DIR = os.path.join(BASE_DIR, "api_reports_01")
 
 CONCURRENCY = 10
 QUEUE_MAXSIZE = 2000
 MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024
 
 STATUS_RE = re.compile(r"Status:\s*(\d{3})")
-PART_RE = re.compile(r"^(\d+)_part\d+\.json$")   # e.g. 201_part39.json
+PART_RE = re.compile(r"^(\d+)_part\d+\.json$")
 
+def load_question_mapping():
+    mapping = {}
+
+    if not os.path.exists(MAPPING_FILE):
+        Logger.error(f"Mapping file not found: {MAPPING_FILE}")
+        return mapping
+
+    try:
+        with open(MAPPING_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        for row in data:
+            old_id = row.get("old_id")
+            new_id = row.get("new_id")
+
+            if old_id:
+                mapping[old_id] = new_id
+
+        Logger.info(
+            f"Loaded {len(mapping):,} question ID mappings"
+        )
+
+    except Exception as e:
+        Logger.error(f"Failed loading mapping file: {e}")
+
+    return mapping
+
+def resolve_endpoint(old_question_id, question_mapping):
+    """
+    Returns:
+        endpoint
+        operation_type
+        mapped_question_id
+    """
+
+    new_id = question_mapping.get(old_question_id)
+
+    if new_id:
+        return (
+            PUT_DRAFT_ENDPOINT.format(questionId=new_id),
+            "putDraft",
+            new_id
+        )
+
+    return (
+        CREATE_ENDPOINT,
+        "create",
+        None
+    )
 
 def parse_status_from_error(err_text):
     if not err_text:
@@ -237,19 +296,28 @@ class Counters:
         return self.success, self.failed, self.success + self.failed
 
 
-async def handle_post(client, payload, writer, counters):
+async def handle_post(client, payload, writer, counters,question_mapping):
+    ''' 
+        operation = create ( it will create a new record in Server B no need to pass question id )
+        operation = putDraft ( it will update an existing record in Server B and need to pass question id )
+    '''
+    mode = "create"
     qid = get_qid(payload)
     qtype = payload.get("type")
+    endpoint, operation, mapped_id = resolve_endpoint(
+        qid,
+        question_mapping
+    )
     ts = datetime.now().isoformat()
     try:
-        response = await client.post(ENDPOINT, payload=payload)
+        response = await client.post(endpoint, payload=payload)
         status = getattr(response, "status_code", 200)
         try:
             body = response.json() if hasattr(response, "json") else response
         except Exception:
             body = str(response)
         outcome = classify(status)
-        writer.add(status, {"question_id": qid, "question_type": qtype,
+        writer.add(status, {"question_id": qid, "question_type": qtype,"operation": operation,"mapped_question_id": mapped_id,
                             "response": body, "timestamp": ts})
     except Exception as e:
         err = str(e)
@@ -272,30 +340,30 @@ async def producer(queue, files, settled_ids):
         await queue.put(None)
 
 
-async def consumer(queue, writer, counters):
+async def consumer(queue, writer, counters,question_mapping):
     client = BaseApiClient()
     try:
         while True:
             payload = await queue.get()
             if payload is None:
                 queue.task_done(); break
-            await handle_post(client, payload, writer, counters)
+            await handle_post(client, payload, writer, counters,question_mapping)
             queue.task_done()
     finally:
         await client.close()
 
 
-async def run_async(files, settled_ids, writer, counters):
+async def run_async(files, settled_ids, writer, counters,question_mapping):
     queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
     prod = asyncio.create_task(producer(queue, files, settled_ids))
-    cons = [asyncio.create_task(consumer(queue, writer, counters)) for _ in range(CONCURRENCY)]
+    cons = [asyncio.create_task(consumer(queue, writer, counters,question_mapping)) for _ in range(CONCURRENCY)]
     await prod
     await asyncio.gather(*cons)
 
 
 def run_pipeline():
     start = time.time()
-
+    question_mapping = load_question_mapping()
     files = discover_files()
     if not files:
         Logger.error("No input files found in either folder.")
@@ -325,7 +393,7 @@ def run_pipeline():
     writer = StatusWriter(REPORT_DIR, MAX_CHUNK_SIZE_BYTES)
     counters = Counters(success_base, failed_base)
     try:
-        asyncio.run(run_async(files, settled_ids, writer, counters))
+        asyncio.run(run_async(files, settled_ids, writer, counters,question_mapping))
     finally:
         writer.flush_all()
 
