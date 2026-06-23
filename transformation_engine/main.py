@@ -22,7 +22,7 @@ logger = DebugLogger()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-INPUT_ROOT = os.path.join(PROJECT_ROOT, "core_data")
+INPUT_ROOT = os.path.join(PROJECT_ROOT, "test_data")
 OUTPUT_ROOT = os.path.join(BASE_DIR, "transformation_output_core_data")
 
 FILTER_DIR = os.path.join(PROJECT_ROOT, "filter")
@@ -141,11 +141,11 @@ def filter_question(question, question_id):
     return False
 
 
-def get_transformer(t, raw, qid, lesson):
+def get_transformer(t, raw, qid, lesson, file_path=None):
     if t == "MULTIPLE_CHOICE":
-        return MCQTransformer(raw, qid, lesson)
+        return MCQTransformer(raw, qid, lesson, file_path)
     if t == "MULTIPLE_SELECTION":
-        return MSQTransformer(raw, qid, lesson)
+        return MSQTransformer(raw, qid, lesson, file_path)
     if t == "IMAGE_LABELLING_DRAG_DROP":
         return ImageLabellingDNDTransformer(raw, qid, lesson)
     if t == "SELECT_A_BLANK":
@@ -220,7 +220,7 @@ def process_file(task):
 
         t = q.get("type")
 
-        transformer = get_transformer(t, q, qid, lesson)
+        transformer = get_transformer(t, q, qid, lesson, file_path=path)
         if not transformer:
             continue
 
