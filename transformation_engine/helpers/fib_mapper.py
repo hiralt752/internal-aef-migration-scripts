@@ -98,7 +98,7 @@ def map_fib_structure(raw):
             "periodNotation": blank_data.get(
                 "periodNotation"
             ),
-            "answerType": None,
+            "answerType": answer_type,
             "inputType": blank_data.get(
                 "type",
                 "TEXT_BLANK"
@@ -171,6 +171,6 @@ def detect_answer_type(answer):
 
     for token in formula_indicators:
         if token in answer:
-            return "formula"
+            return "calculated"
 
     return "text"
