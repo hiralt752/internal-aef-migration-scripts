@@ -233,24 +233,26 @@ def build_fib_options(choice_items, question_id, lesson):
 
     options = []
 
-    for index, choice in enumerate(
-        choice_items,
-        start=1
-    ):
+    for index, choice in enumerate(choice_items, start=1):
+
+        parsed_content = parse_html_content(
+            choice.get("value", ""),
+            question_id,
+            lesson
+        )
+
+        text = ""
+
+        for item in parsed_content:
+
+            if item.get("type") == "text":
+                text += item.get("text", "")
 
         options.append({
-
             "id": index,
             "content": {
-                
                 "type": "text",
-                "text":
-                    html_to_text(
-                        choice.get(
-                            "value",
-                            ""
-                        )
-                    )
+                "text": text
             }
         })
 
