@@ -47,22 +47,53 @@ def normalize_weight(weight):
     )
 
 
+def _is_math_image(img):
+    """Return True if the <img> represents a MathML / WIRIS / SVG equation."""
+    import urllib.parse
+
+    # Class-based detection (Wirisformula)
+    classes = img.get("class") or []
+    if "Wirisformula" in classes:
+        return True
+
+ 
+
+    # Has explicit MathML data attribute
+    if img.get("data-mathml"):
+        return True
+
+    src = img.get("src", "")
+
+    # Any data:image/ URI is an inline-rendered equation, not a content image
+    if src.startswith("data:image/"):
+        return True
+
+    # SVG content markers (check decoded src for MathML / WIRIS indicators)
+    if src.startswith("data:image/svg+xml"):
+        decoded = urllib.parse.unquote(src).lower()
+        if any(marker in decoded for marker in ("mathml", "wiris", "wrs:", "<math")):
+            return True
+
+    return False
+
+
 def _extract_side_image_from_prompt(html):
-    """Detect first image in HTML or plain URL and return cleaned HTML + sideImage dict."""
+    """Detect first non-math image in HTML or plain URL and return cleaned HTML + sideImage dict."""
     if not html:
         return html, None
 
-    # Parse HTML to find <img> tags first
+    # Parse HTML — find the first <img> that is NOT a math equation
     soup = BeautifulSoup(html, "html.parser")
-    img = soup.find("img")
-    if img:
+    for img in soup.find_all("img"):
+        if _is_math_image(img):
+            continue  # leave math images for parse_html_content() → LaTeX conversion
         src = img.get("src")
         if src:
             img.decompose()
             cleaned = str(soup).strip()
             return cleaned, {"url": src}
 
-    # No <img> tag found — look for bare image URLs (absolute or relative paths)
+    # No non-math <img> tag found — look for bare image URLs (absolute or relative paths)
     # Match common image file extensions
     m = re.search(r"(https?:\\/\\/[^\"'\s>]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)", html, re.IGNORECASE)
     if not m:
