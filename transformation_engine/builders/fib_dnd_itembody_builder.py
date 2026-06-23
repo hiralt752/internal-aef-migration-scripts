@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from parsers.content_parser import parse_html_content
+import re
 
 
 def replace_blank_fields(html):
@@ -12,20 +13,6 @@ def replace_blank_fields(html):
         html,
         "html.parser"
     )
-
-    # Clean up disallowed tags in a single pass
-    for tag in soup.find_all(["div", "colgroup", "col", "audio", "video", "a", "pre"]):
-        if not tag.parent:
-            continue
-        if tag.name in ["colgroup", "col", "audio", "video"]:
-            tag.decompose()
-        elif tag.get("id") == "gtx-trans" or "gtx-trans-icon" in tag.get("class", []):
-            tag.decompose()
-        else:
-            tag.unwrap()
-
-    for tag in soup.find_all(["sup", "sub"]):
-        tag.unwrap()
 
     for blank in soup.find_all(
         "blank-field"
@@ -60,11 +47,58 @@ def normalize_weight(weight):
     )
 
 
+def _extract_side_image_from_prompt(html):
+    """Detect first image in HTML or plain URL and return cleaned HTML + sideImage dict."""
+    if not html:
+        return html, None
+
+    # Parse HTML to find <img> tags first
+    soup = BeautifulSoup(html, "html.parser")
+    img = soup.find("img")
+    if img:
+        src = img.get("src")
+        if src:
+            img.decompose()
+            cleaned = str(soup).strip()
+            return cleaned, {"url": src}
+
+    # No <img> tag found — look for bare image URLs (absolute or relative paths)
+    # Match common image file extensions
+    m = re.search(r"(https?:\\/\\/[^\"'\s>]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)", html, re.IGNORECASE)
+    if not m:
+        # also match relative paths like ../path/foo.png or ./images/foo.jpg
+        m = re.search(r"([\w\.\-\/_]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)", html, re.IGNORECASE)
+
+    if m:
+        url = m.group(1)
+        # remove the first occurrence of this url from html
+        cleaned = html.replace(url, "").strip()
+        return cleaned, {"url": url}
+
+    return html, None
+
+
 def build_fib_dnd_item_body(raw, question_id, lesson):
 
     body = raw.get("body", {})
 
     choices = body.get("choices", {})
+
+    prompt = body.get("prompt")
+    replaced = replace_blank_fields(prompt)
+    cleaned_prompt, side_image = _extract_side_image_from_prompt(replaced)
+
+    parsed_content = parse_html_content(
+        cleaned_prompt,
+        question_id,
+        lesson
+    )
+
+    # keep first content item as sentence (fallback to text if parser returned empty)
+    if parsed_content:
+        sentence_val = parsed_content[0]
+    else:
+        sentence_val = {"type": "text", "text": html_to_text(cleaned_prompt)}
 
     return {
 
@@ -88,7 +122,7 @@ def build_fib_dnd_item_body(raw, question_id, lesson):
 
         "splitContent": None,
 
-        "sideImage": None,
+        "sideImage": side_image,
 
         "showDragHandle":
             choices.get(
@@ -110,12 +144,7 @@ def build_fib_dnd_item_body(raw, question_id, lesson):
 
         "statement": None,
 
-        "sentence": {
-            "text":
-                replace_blank_fields(
-                    body.get("prompt")
-                )
-        },
+        "sentence": sentence_val,
 
         "targets":
             build_fib_targets(
