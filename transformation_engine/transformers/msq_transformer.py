@@ -11,10 +11,11 @@ from helpers.feedback_mapper import map_hints_and_feedback
 
 class MSQTransformer:
 
-    def __init__(self, raw,question_id,lesson):
+    def __init__(self, raw,question_id,lesson, file_path=None):
         self.raw = raw
         self.question_id = question_id
         self.lesson = lesson
+        self.file_path = file_path
     def transform(self):
 
         body = self.raw.get("body", {})
@@ -43,7 +44,7 @@ class MSQTransformer:
                 build_metadata(self.raw),
 
             "itemBody":
-                build_item_body(self.raw,self.question_id,self.lesson),
+                build_item_body(self.raw, question_id=self.question_id, lesson=self.lesson, file_path=self.file_path),
 
             "responseDeclaration":
                 build_response_declaration(
