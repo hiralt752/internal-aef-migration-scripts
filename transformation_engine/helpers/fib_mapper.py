@@ -1,6 +1,13 @@
 import re
-
+from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
+
+
+def get_text_value(value) :
+    return value[0].get("text")
+
+def get_list_of_text(value):
+    return [v.get("text") for v in value]
 
 def map_fib_structure(raw):
     body = raw.get("body", {})
@@ -104,18 +111,14 @@ def map_fib_structure(raw):
             "decimals": None,
             "itemId": None,
             "position": None,
-            "wirisXml": blank_data.get(
-                "wirisXml"
-            ),
-            "wirisSvg": blank_data.get(
-                "wirisSvg"
-            )
+            "wirisXml": None,
+            "wirisSvg": None
         }
 
         items.append(item)
         correct_answers.append({
             "blankId": sequential_id,
-            "correctAnswer": correct_answer,
+            "correctAnswer": get_text_value(parse_html_content(correct_answer,None,None)),
             "alternateAnswers": alternate_answers,
             "answerInWidgetFormat": None
         })
@@ -168,6 +171,6 @@ def detect_answer_type(answer):
 
     for token in formula_indicators:
         if token in answer:
-            return "formula"
+            return "calculated"
 
     return "text"
