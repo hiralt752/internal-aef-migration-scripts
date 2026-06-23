@@ -22,7 +22,7 @@ def _extract_side_image_from_sentence(sentence_html):
 
 def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None,file_path=None):
     if question_type == "FIB":
-        return build_fib_item_body(raw, fib_data ,question_id)
+        return build_fib_item_body(raw, fib_data)
 
     return build_item_body_mcq(raw,question_id,lesson,file_path)
 

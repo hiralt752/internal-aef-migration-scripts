@@ -9,10 +9,11 @@ from helpers.fib_mapper import map_fib_structure
 
 class FIBTransformer:
 
-    def __init__(self, raw,question_id,lesson):
+    def __init__(self, raw, question_id, lesson, file_path):
         self.raw = raw
         self.question_id = question_id
         self.lesson = lesson
+        self.file_path = file_path
 
     def transform(self):
         body = self.raw.get(
@@ -20,7 +21,7 @@ class FIBTransformer:
             {}
         )
 
-        fib_data = map_fib_structure(self.raw)
+        fib_data = map_fib_structure(self.raw, self.question_id, self.lesson, self.file_path)
 
         feedback_mapping = (
             map_hints_and_feedback(

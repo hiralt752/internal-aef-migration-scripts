@@ -1,6 +1,7 @@
 import re
 from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
+from helpers.span_remover import remove_span_texts_from_html
 
 
 def get_text_value(value) :
@@ -9,9 +10,11 @@ def get_text_value(value) :
 def get_list_of_text(value):
     return [v.get("text") for v in value]
 
-def map_fib_structure(raw):
+def map_fib_structure(raw, qid, lesson, file_path):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
+
+    prompt = remove_span_texts_from_html(prompt, qid, lesson, file_path)
 
     soup = BeautifulSoup(
         prompt,
