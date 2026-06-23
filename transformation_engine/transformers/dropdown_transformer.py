@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple
 
 from builders.metadata_builder import build_metadata
 from parsers.content_parser import strip_disallowed_tags
+from helpers.span_remover import remove_span_texts_from_html
 
 
 class BlankFieldParser(HTMLParser):
@@ -319,14 +320,18 @@ def build_modal_feedback(body: Dict) -> Optional[Dict]:
 
 
 class DropdownTransformer:
-    def __init__(self, raw: Dict):
+    def __init__(self, raw: Dict, qid, lesson, file_path):
         self.raw = raw
+        self.qid = qid
+        self.lesson = lesson
+        self.file_path = file_path
 
     def transform(self) -> Dict:
         q = self.raw.get("response", self.raw)
         body = q.get("body") or {}
         validation = q.get("validation") or {}
         prompt_html = body.get("prompt") or ""
+        prompt_html = remove_span_texts_from_html(prompt_html, self.qid, self.lesson, self.file_path)
         blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
 
         payload = {

@@ -149,7 +149,7 @@ def get_transformer(t, raw, qid, lesson, file_path=None):
     if t == "IMAGE_LABELLING_DRAG_DROP":
         return ImageLabellingDNDTransformer(raw, qid, lesson)
     if t == "SELECT_A_BLANK":
-        return DropdownTransformer(raw)
+        return DropdownTransformer(raw, qid, lesson, file_path)
     if t == "MATCHING":
         return MatchingTransformer(raw)
     if t == "FILL_IN_THE_BLANK":
