@@ -26,11 +26,12 @@ from builders.fib_dnd_outcome_builder import (
 
 class FIBDNDTransformer:
 
-    def __init__(self, raw, question_id, lesson):
+    def __init__(self, raw, question_id, lesson, file_path=None):
 
         self.raw = raw
         self.question_id = question_id
         self.lesson = lesson
+        self.file_path = file_path
 
     def transform(self):
 
@@ -56,7 +57,8 @@ class FIBDNDTransformer:
                 build_fib_dnd_item_body(
                     self.raw,
                     self.question_id,
-                    self.lesson
+                    self.lesson,
+                    self.file_path
                 ),
 
             "responseDeclaration": {

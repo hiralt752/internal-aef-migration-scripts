@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from parsers.content_parser import parse_html_content
-
+from helpers.span_remover import remove_span_texts_from_html
 
 def replace_blank_fields(html):
     """Replace <blank-field> tags with @_@ placeholder."""
@@ -49,11 +49,15 @@ def normalize_weight(weight):
     )
 
 
-def build_fib_dnd_item_body(raw, question_id, lesson):
+def build_fib_dnd_item_body(raw, question_id, lesson, file_path=None):
 
     body = raw.get("body", {})
 
     choices = body.get("choices", {})
+
+    prompt = body.get("prompt", "")
+
+    prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
 
     return {
 
@@ -102,7 +106,7 @@ def build_fib_dnd_item_body(raw, question_id, lesson):
         "sentence": {
             "text":
                 replace_blank_fields(
-                    body.get("prompt")
+                    prompt
                 )
         },
 
@@ -116,7 +120,7 @@ def build_fib_dnd_item_body(raw, question_id, lesson):
                 choices.get(
                     "choiceItems",
                     []
-                ), question_id, lesson
+                ), question_id, lesson, file_path
             )
     }
 
@@ -158,7 +162,7 @@ def build_fib_targets(blanks):
     return targets
 
 
-def build_fib_options(choice_items, question_id, lesson):
+def build_fib_options(choice_items, question_id, lesson, file_path=None):
 
     options = []
 
