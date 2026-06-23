@@ -18,11 +18,11 @@ class DebugLogger:
 
         # initialize files if not exist
         if not os.path.exists(self.json_log_file):
-            with open(self.json_log_file, "w") as f:
-                json.dump([], f)
+            with open(self.json_log_file, "w", encoding="utf-8") as f:
+                json.dump([], f, ensure_ascii=False)
 
         if not os.path.exists(self.csv_log_file):
-            with open(self.csv_log_file, "w", newline="") as f:
+            with open(self.csv_log_file, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow([
                     "timestamp",
@@ -51,7 +51,7 @@ class DebugLogger:
 
         with self.lock:
 
-            with open(self.json_log_file, "r+") as f:
+            with open(self.json_log_file, "r+", encoding="utf-8") as f:
 
                 try:
                     data = json.load(f)
@@ -65,11 +65,12 @@ class DebugLogger:
                 data.append(entry)
 
                 f.seek(0)
-                json.dump(data, f, indent=2)
+                f.truncate()
+                json.dump(data, f, indent=2, ensure_ascii=False)
              
 
         # -------- CSV LOG --------
-        with open(self.csv_log_file, "a", newline="") as f:
+        with open(self.csv_log_file, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([
                 entry["timestamp"],

@@ -6,6 +6,8 @@ from parsers.media_parser import (
 )
 from bs4 import BeautifulSoup
 from parsers.content_parser import strip_disallowed_tags
+from helpers.span_remover import remove_span_texts_from_html
+
 def _extract_side_image_from_sentence(sentence_html):
     soup = BeautifulSoup(sentence_html or "", "html.parser")
     img = soup.find("img")
@@ -18,19 +20,21 @@ def _extract_side_image_from_sentence(sentence_html):
     return strip_disallowed_tags(cleaned), {"url": url} if url else None
 
 
-def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None):
+def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None,file_path=None):
     if question_type == "FIB":
-        return build_fib_item_body(raw, fib_data)
+        return build_fib_item_body(raw, fib_data ,question_id)
 
-    return build_item_body_mcq(raw,question_id,lesson)
+    return build_item_body_mcq(raw,question_id,lesson,file_path)
 
-def build_item_body_mcq(raw,question_id,lesson):
+def build_item_body_mcq(raw,question_id,lesson,file_path=None):
 
     body = raw.get("body", {})
 
     choices = body.get("choices", {})
 
     prompt = body.get("prompt", "")
+
+    prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
 
     parsed_prompt = parse_html_content(
         prompt,question_id,lesson
