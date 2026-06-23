@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from parsers.content_parser import parse_html_content
 import re
+from helpers.span_remover import remove_span_texts_from_html
 
 
 def replace_blank_fields(html):
@@ -109,7 +110,7 @@ def _extract_side_image_from_prompt(html):
     return html, None
 
 
-def build_fib_dnd_item_body(raw, question_id, lesson):
+def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
 
     body = raw.get("body", {})
 
@@ -118,6 +119,8 @@ def build_fib_dnd_item_body(raw, question_id, lesson):
     prompt = body.get("prompt")
     replaced = replace_blank_fields(prompt)
     cleaned_prompt, side_image = _extract_side_image_from_prompt(replaced)
+
+    prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
 
     parsed_content = parse_html_content(
         cleaned_prompt,
