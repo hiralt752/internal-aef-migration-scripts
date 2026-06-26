@@ -9,7 +9,8 @@ class BaseApiClient:
         self.client = httpx.AsyncClient(
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {settings.BEARER_TOKEN}"
+                "Authorization": f"Bearer {settings.BEARER_TOKEN}",
+                "X-Tenantid":"shared"
             },
             timeout=httpx.Timeout(30.0),
             limits=httpx.Limits(

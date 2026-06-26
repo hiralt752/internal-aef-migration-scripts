@@ -1,5 +1,5 @@
 import re
-
+from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
 from helpers.span_remover import remove_span_texts_from_html
 
@@ -114,35 +114,20 @@ def map_fib_structure(raw, qid, lesson, file_path):
             "decimals": None,
             "itemId": None,
             "position": None,
-            "wirisXml": blank_data.get(
-                "wirisXml"
-            ),
-            "wirisSvg": blank_data.get(
-                "wirisSvg"
-            )
+            "wirisXml": None,
+            "wirisSvg": None
         }
 
         items.append(item)
         correct_answers.append({
             "blankId": sequential_id,
-            "correctAnswer": correct_answer,
+            "correctAnswer": get_text_value(parse_html_content(correct_answer,None,None)),
             "alternateAnswers": alternate_answers,
             "answerInWidgetFormat": None
         })
 
         blank.replace_with("@_@")
         sequential_id += 1
-
-    # Clean up disallowed tags in a single pass
-    for tag in soup.find_all(["div", "colgroup", "col", "audio", "video", "a", "pre"]):
-        if not tag.parent:
-            continue
-        if tag.name in ["colgroup", "col", "audio", "video"]:
-            tag.decompose()
-        elif tag.get("id") == "gtx-trans" or "gtx-trans-icon" in tag.get("class", []):
-            tag.decompose()
-        else:
-            tag.unwrap()
 
     transformed_html = str(soup)
 
@@ -169,17 +154,13 @@ def detect_answer_type(answer):
     if not answer:
         return "text"
 
-    # Strip HTML tags to avoid false positives (e.g. '=' in style attributes)
-    from bs4 import BeautifulSoup
-    clean_answer = BeautifulSoup(answer, "html.parser").get_text()
-
     number_pattern = (
         r"^-?\d+(\.\d+)?$"
     )
 
     if re.fullmatch(
         number_pattern,
-        clean_answer.strip()
+        answer
     ):
         return "number"
 
@@ -192,7 +173,7 @@ def detect_answer_type(answer):
     ]
 
     for token in formula_indicators:
-        if token in clean_answer:
+        if token in answer:
             return "calculated"
 
     return "text"

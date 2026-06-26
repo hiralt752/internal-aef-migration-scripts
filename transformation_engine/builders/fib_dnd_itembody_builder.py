@@ -190,7 +190,7 @@ def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
                 choices.get(
                     "choiceItems",
                     []
-                ), question_id, lesson
+                ), question_id, lesson, file_path
             )
     }
 
@@ -232,7 +232,7 @@ def build_fib_targets(blanks):
     return targets
 
 
-def build_fib_options(choice_items, question_id, lesson):
+def build_fib_options(choice_items, question_id, lesson, file_path=None):
 
     options = []
 
