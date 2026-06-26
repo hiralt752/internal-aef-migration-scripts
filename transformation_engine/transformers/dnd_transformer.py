@@ -99,9 +99,7 @@ def _build_metadata(resp, legacy_status=LIFECYCLE_STATUS):
     if meta.get("subSkill"):
         keywords.append(str(meta["subSkill"]))
 
-    source = meta.get("author") or None
-    if not source and resp.get("createdByUser"):
-        source = resp["createdByUser"].get("email")
+    source = "AAT"
 
     sub_domain = []
     if meta.get("domains"):
