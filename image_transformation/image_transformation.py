@@ -61,9 +61,3 @@ def transform_image(
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         canvas.save(output_path, quality=95)
-
-        log_info(
-            f"{os.path.basename(image_path)} "
-            f"({original_width}x{original_height}) "
-            f"-> {target_width}x{target_height}"
-        )

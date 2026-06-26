@@ -3,23 +3,74 @@ Locate and transform images using image_resolution_engine output.
 """
 
 import fnmatch
+import json
 import os
+import urllib.error
 import urllib.request
 from typing import Any
 
 from image_transformation.image_transformation import (
     log_error,
-    log_info,
     log_warning,
     transform_image,
 )
 
 SCRIPTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_ROOT = os.path.normpath(os.path.join(SCRIPTS_DIR, "..", "..", "media"))
+MEDIA_ROOT = r"C:\Users\trupa\OneDrive\Desktop\Trupal\media"
 TRANSFORMATION_DIR = os.path.join(SCRIPTS_DIR, "image_transformation")
 TRANSFORMATION_OUTPUT_ROOT = os.path.join(
     TRANSFORMATION_DIR, "image_transformation_output"
 )
+IGNORE_QUESTION_FILE = os.path.join(SCRIPTS_DIR, "ignore_question.json")
+MEDIA_FAILED_FILE = os.path.join(TRANSFORMATION_DIR, "media_failed.json")
+
+
+class MediaDownloadFailed(Exception):
+    """Raised when an image cannot be found locally or downloaded remotely."""
+
+
+# =============================================================================
+# FAILURE TRACKING
+# =============================================================================
+
+def _append_ignore_question(question_id: str) -> None:
+    existing: list[str] = []
+    if os.path.isfile(IGNORE_QUESTION_FILE):
+        try:
+            with open(IGNORE_QUESTION_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                existing = data
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    if question_id not in existing:
+        existing.append(question_id)
+
+    with open(IGNORE_QUESTION_FILE, "w", encoding="utf-8") as f:
+        json.dump(existing, f, ensure_ascii=False, indent=2)
+
+
+def _append_media_failed(question_id: str, media_url: str, status_code: Any) -> None:
+    existing: dict[str, Any] = {}
+    if os.path.isfile(MEDIA_FAILED_FILE):
+        try:
+            with open(MEDIA_FAILED_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                existing = data
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    entries = existing.get(question_id)
+    if not isinstance(entries, list):
+        entries = []
+
+    entries.append({"media_url": media_url, "status_code": status_code})
+    existing[question_id] = entries
+
+    with open(MEDIA_FAILED_FILE, "w", encoding="utf-8") as f:
+        json.dump(existing, f, ensure_ascii=False, indent=2)
 
 
 def extract_image_name(src: str) -> str:
@@ -31,7 +82,7 @@ def extract_image_name(src: str) -> str:
     return os.path.basename(normalized)
 
 
-def find_image_file(question_id: str, image_name: str, category: str) -> str | None:
+def find_image_file(question_id: str, image_name: str) -> str | None:
     """Find an image in the media repository using {question_id}*{image_name}."""
     search_dir = MEDIA_ROOT
 
@@ -62,14 +113,9 @@ def transform_and_save(
     src: str,
     target_width: int,
     target_height: int,
-    processed_sources: set[str],
 ) -> bool:
     """Locate one image, transform it, and save the result."""
     if not src:
-        return False
-
-    if src in processed_sources:
-        log_info(f"Skipping already processed image: {src}")
         return False
 
     image_name = extract_image_name(src)
@@ -77,12 +123,8 @@ def transform_and_save(
         log_warning(f"Could not extract image name from src: {src}")
         return False
 
-    search_pattern = f"{question_id}*{image_name}"
-    log_info(f"Searching image: {search_pattern}")
-
-    image_path = find_image_file(question_id, image_name, category)
+    image_path = find_image_file(question_id, image_name)
     if not image_path:
-        log_warning(f"Image not found locally for pattern: {search_pattern}. Attempting download...")
         
         clean_src = src.replace('../', '')
         if clean_src.startswith('./'):
@@ -111,14 +153,22 @@ def transform_and_save(
             with urllib.request.urlopen(req) as response:
                 with open(download_path, "wb") as out_file:
                     out_file.write(response.read())
-            log_info(f"Downloaded image successfully from {url}")
             image_path = download_path
+        except urllib.error.HTTPError as e:
+            log_error(f"Failed to download image {url}: HTTP {e.code} {e.reason}")
+            _append_media_failed(question_id, url, e.code)
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
+        except urllib.error.URLError as e:
+            log_error(f"Failed to download image {url}: {e.reason}")
+            _append_media_failed(question_id, url, "URL_ERROR")
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
         except Exception as e:
             log_error(f"Failed to download image {url}: {e}")
-            return False
-
-    log_info("Image ready for transformation.")
-    log_info(f"Applying resolution {target_width}x{target_height}")
+            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
 
     output_path = build_output_path(category, os.path.basename(image_path))
 
@@ -128,9 +178,6 @@ def transform_and_save(
         log_error(f"Image transformation failed: {error}")
         return False
 
-    processed_sources.add(src)
-    log_info("Image transformation completed.")
-    log_info(f"Saved transformed image: {output_path}")
     return True
 
 
@@ -150,47 +197,30 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
         log_error("Resolution result is missing question_id or category.")
         return
 
-    log_info(f"Processing question: {question_id}")
-    log_info(f"Category: {category}")
-
     resolution = resolution_result.get("resolution") or {}
-    processed_sources: set[str] = set()
 
-    image_audit = resolution_result.get("image_audit") or []
-    if image_audit:
-        log_info(f"Processing {len(image_audit)} image(s) from image_audit.")
+    for audit_entry in (resolution_result.get("image_audit") or []):
+        src = audit_entry.get("src")
+        target_width = audit_entry.get("max_width")
+        target_height = audit_entry.get("max_height")
 
-        for audit_entry in image_audit:
-            src = audit_entry.get("src")
-            target_width = audit_entry.get("max_width")
-            target_height = audit_entry.get("max_height")
+        if not src:
+            continue
 
-            if not src:
-                continue
+        if target_width is None or target_height is None:
+            log_warning(f"Skipping audit image with missing dimensions: {src}")
+            continue
 
-            if target_width is None or target_height is None:
-                log_warning(
-                    f"Skipping audit image with missing dimensions: {src}"
-                )
-                continue
-
-            transform_and_save(
-                question_id=question_id,
-                category=category,
-                src=src,
-                target_width=int(target_width),
-                target_height=int(target_height),
-                processed_sources=processed_sources,
-            )
+        transform_and_save(
+            question_id=question_id,
+            category=category,
+            src=src,
+            target_width=int(target_width),
+            target_height=int(target_height),
+        )
 
     question_images = resolution_result.get("question_images") or []
     option_images = resolution_result.get("option_images") or []
-
-    if question_images:
-        log_info(f"Processing {len(question_images)} question image(s).")
-
-    if option_images:
-        log_info(f"Processing {len(option_images)} option image(s).")
 
     has_question_images = bool(question_images)
     has_option_images = bool(option_images)
@@ -213,7 +243,6 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
                 src=src,
                 target_width=int(question_width),
                 target_height=int(question_height),
-                processed_sources=processed_sources,
             )
 
         for image_entry in option_images:
@@ -228,7 +257,6 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
                 src=src,
                 target_width=int(option_width),
                 target_height=int(option_height),
-                processed_sources=processed_sources,
             )
 
     elif has_question_images or has_option_images:
@@ -245,7 +273,4 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
                     src=image_entry.get("src"),
                     target_width=int(target_width),
                     target_height=int(target_height),
-                    processed_sources=processed_sources,
                 )
-
-    log_info("Question completed.")

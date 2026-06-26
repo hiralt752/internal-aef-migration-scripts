@@ -219,3 +219,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Upload outputs
+image_upload/step_1.json
+image_upload/step_2.json
+image_upload/step_3.json
+image_upload/image_mapping.json
+
+# Migration outputs
+image_resolution_engine/image_resolution_output/
+image_transformation/image_transformation_output/
+image_migration_output/
+image_transformation/media_failed.json
+downloaded_images/
+debug_logs/
+ignore_question.json
