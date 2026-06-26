@@ -155,7 +155,7 @@ def get_transformer(t, raw, qid, lesson, file_path=None):
     if t == "FILL_IN_THE_BLANK":
         return FIBTransformer(raw, qid, lesson, file_path)
     if t == "FILL_IN_THE_BLANK_DRAG_DROP":
-        return FIBDNDTransformer(raw, qid, lesson)
+        return FIBDNDTransformer(raw, qid, lesson, file_path)
     return None
 
 
