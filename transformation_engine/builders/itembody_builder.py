@@ -7,14 +7,28 @@ from parsers.media_parser import (
 from bs4 import BeautifulSoup
 from parsers.content_parser import strip_disallowed_tags
 from helpers.span_remover import remove_span_texts_from_html
+from urllib.parse import unquote
 
 def _extract_side_image_from_sentence(sentence_html):
     soup = BeautifulSoup(sentence_html or "", "html.parser")
     img = soup.find("img")
+
     if not img:
         return sentence_html, None
 
     url = img.get("src")
+
+    # Ignore WIRIS MathML SVG images
+    if url and url.startswith("data:image/svg+xml"):
+        decoded_svg = unquote(url)
+
+        if "MathML:" in decoded_svg or (
+            "<math" in decoded_svg and "MathML" in decoded_svg
+        ):
+            img.decompose()
+            cleaned = str(soup).strip()
+            return strip_disallowed_tags(cleaned), None
+
     img.decompose()
     cleaned = str(soup).strip()
     return strip_disallowed_tags(cleaned), {"url": url} if url else None
@@ -22,7 +36,7 @@ def _extract_side_image_from_sentence(sentence_html):
 
 def build_item_body(raw, question_type=None, fib_data=None,question_id=None,lesson=None,file_path=None):
     if question_type == "FIB":
-        return build_fib_item_body(raw, fib_data)
+        return build_fib_item_body(raw, fib_data, question_id, lesson)
 
     return build_item_body_mcq(raw,question_id,lesson,file_path)
 
@@ -182,10 +196,14 @@ def _sort_option_content(contents):
 
     return image_items + other_items
 
-def build_fib_item_body(raw,fib_data):
+def build_fib_item_body(raw,fib_data, question_id, lesson):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
-    sentence_text, side_image = _extract_side_image_from_sentence(fib_data.get("sentence_text", ""))
+    sentence_text = parse_html_content(prompt, question_id, lesson)
+
+    _, image = _extract_side_image_from_sentence(prompt)
+
+    sideImage = image["url"] if image else None
 
     return {
         "version": "1.0",
@@ -197,8 +215,8 @@ def build_fib_item_body(raw,fib_data):
         "backgroundLayout": None,
         "timeSpentConfig": None,
         "splitContent": None,
-        "sideImage": side_image,
-        "fibImage": extract_image(prompt),
+        "sideImage": sideImage,
+        "fibImage": sideImage,
         "optionsStyle": "option-style-1",
         "wordBankLayout": "none",
         "wordBankDistractor": [],
