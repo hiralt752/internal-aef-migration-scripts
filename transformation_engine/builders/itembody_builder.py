@@ -203,7 +203,9 @@ def build_fib_item_body(raw,fib_data, question_id, lesson):
 
     _, image = _extract_side_image_from_sentence(prompt)
 
-    sideImage = image["url"] if image else None
+    sideImage = {
+        "url" : image["url"] if image else ""
+    }
 
     return {
         "version": "1.0",
@@ -230,7 +232,8 @@ def build_fib_item_body(raw,fib_data, question_id, lesson):
             }
         },
         "sentence": {
-            "text": sentence_text
+            "type": sentence_text[0]["type"],
+            "text": sentence_text[0]["text"]
         },
         "items": fib_data["items"],
         "variables": []
