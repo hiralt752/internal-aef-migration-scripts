@@ -6,20 +6,21 @@ from threading import Lock
 
 
 class DebugLogger:
+    _lock = Lock()
 
     def __init__(self, log_dir="logs"):
         self.log_dir = log_dir
-        self.lock = Lock()
 
         os.makedirs(self.log_dir, exist_ok=True)
 
-        self.json_log_file = os.path.join(self.log_dir, "debug_log.json")
+        # Use JSONL so each write is append-only instead of rewriting a growing array.
+        self.json_log_file = os.path.join(self.log_dir, "debug_log.jsonl")
         self.csv_log_file = os.path.join(self.log_dir, "debug_log.csv")
 
         # initialize files if not exist
         if not os.path.exists(self.json_log_file):
             with open(self.json_log_file, "w", encoding="utf-8") as f:
-                json.dump([], f, ensure_ascii=False)
+                f.write("")
 
         if not os.path.exists(self.csv_log_file):
             with open(self.csv_log_file, "w", newline="", encoding="utf-8") as f:
@@ -49,37 +50,20 @@ class DebugLogger:
             "file_path": file_path
         }
 
-        with self.lock:
+        with self._lock:
+            with open(self.json_log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-            with open(self.json_log_file, "r+", encoding="utf-8") as f:
-
-                try:
-                    data = json.load(f)
-
-                    if not isinstance(data, list):
-                        data = []
-
-                except Exception:
-                    data = []
-
-                data.append(entry)
-
-                f.seek(0)
-                f.truncate()
-                json.dump(data, f, indent=2, ensure_ascii=False)
-             
-
-        # -------- CSV LOG --------
-        with open(self.csv_log_file, "a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                entry["timestamp"],
-                question_id,
-                lesson,
-                question_type,
-                reason,
-                file_path
-            ])
+            with open(self.csv_log_file, "a", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    entry["timestamp"],
+                    question_id,
+                    lesson,
+                    question_type,
+                    reason,
+                    file_path
+                ])
 
     def log_exception(self, wrapper, lesson, file_path, error):
         self.log(
