@@ -955,6 +955,15 @@ PROCESS_LIMIT = read_int_env(
     0
 )
 
+SKIP_SUBJECTS = tuple(
+    str(item).strip().upper()
+    for item in read_list_env(
+        "AI_ENGINE_SKIP_SUBJECTS",
+        []
+    )
+    if str(item).strip()
+)
+
 MAX_WORKERS = read_int_env(
     
     "AI_ENGINE_MAX_WORKERS",
@@ -2660,8 +2669,6 @@ def should_start_with_fallback_model(
 
     return (
         normalized_subject in {
-            "MATH",
-            "MATH_EN",
             "SCIENCE",
             "SCIENCE_EN",
             "BIOLOGY",
@@ -4716,13 +4723,31 @@ def iter_prompt_preview_records(
 
 def select_records(
     process_limit=None,
-    prompt_preview_root=None
+    prompt_preview_root=None,
+    excluded_subjects=()
 ):
     selected_records = []
+    skipped_subject_counts = {}
+    excluded_subjects = {
+        str(subject or "").strip().upper()
+        for subject in (excluded_subjects or ())
+        if str(subject or "").strip()
+    }
 
     for record in iter_prompt_preview_records(
         prompt_preview_root=prompt_preview_root
     ):
+        subject = str(
+            get_record_subject(record) or ""
+        ).strip().upper()
+
+        if subject in excluded_subjects:
+            skipped_subject_counts[subject] = skipped_subject_counts.get(
+                subject,
+                0
+            ) + 1
+            continue
+
         selected_records.append(
             record
         )
@@ -4735,7 +4760,7 @@ def select_records(
         ):
             break
 
-    return selected_records
+    return selected_records, skipped_subject_counts
 
 
 def main():
@@ -4780,6 +4805,7 @@ def main():
         "prompt_preview_candidates": prompt_preview_diagnostics,
         "uploaded_files_path": str(UPLOADED_FILES_PATH),
         "process_limit": PROCESS_LIMIT,
+        "skip_subjects": list(SKIP_SUBJECTS),
         "max_workers": MAX_WORKERS,
         "primary_model": PRIMARY_MODEL,
         "fallback_models": FALLBACK_MODELS,
@@ -4802,11 +4828,8 @@ def main():
         },
         "curriculum_rule": {
             "enabled_subjects": [
-                "MATH",
                 "SCIENCE",
-                "BIOLOGY",
-                "CHEMISTRY",
-                "PHYSICS"
+                "SCIENCE_EN"
             ],
             "grade_window": [
                 "grade - 1",
@@ -4838,14 +4861,16 @@ def main():
         run_config
     )
 
-    records = select_records(
+    records, skipped_subject_counts = select_records(
         process_limit=PROCESS_LIMIT,
-        prompt_preview_root=prompt_preview_root
+        prompt_preview_root=prompt_preview_root,
+        excluded_subjects=SKIP_SUBJECTS
     )
 
     reporter.summary["total_selected"] = len(
         records
     )
+    reporter.summary["skipped_subjects"] = skipped_subject_counts
 
     content_manifest_rows = [
         build_content_manifest(record)

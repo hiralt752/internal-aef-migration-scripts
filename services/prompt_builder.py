@@ -18,16 +18,8 @@ from prompts.templates.generic import build_generic_prompt
 
 
 CURRICULUM_SUBJECTS = {
-    "MATH",
-    "MATH_EN",
     "SCIENCE",
-    "SCIENCE_EN",
-    "BIOLOGY",
-    "BIOLOGY_EN",
-    "CHEMISTRY",
-    "CHEMISTRY_EN",
-    "PHYSICS",
-    "PHYSICS_EN"
+    "SCIENCE_EN"
 }
 
 

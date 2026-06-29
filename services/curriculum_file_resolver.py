@@ -2,7 +2,6 @@ import re
 
 
 CURRICULUM_SUBJECTS = {
-    "math",
     "science"
 }
 
@@ -12,18 +11,9 @@ def normalize_subject_for_curriculum(subject):
         subject or ""
     ).strip().upper()
 
-    if subject in ["MATH", "MATH_EN"]:
-        return "math"
-
     if subject in [
         "SCIENCE",
-        "SCIENCE_EN",
-        "BIOLOGY",
-        "BIOLOGY_EN",
-        "CHEMISTRY",
-        "CHEMISTRY_EN",
-        "PHYSICS",
-        "PHYSICS_EN"
+        "SCIENCE_EN"
     ]:
         return "science"
 

@@ -18,17 +18,6 @@ SCIENCE_SUBJECTS = {
     "SCIENCE_EN"
 }
 
-SCIENCE_FAMILY_SUBJECTS = {
-    "BIOLOGY",
-    "BIOLOGY_EN",
-    "CHEMISTRY",
-    "CHEMISTRY_EN",
-    "PHYSICS",
-    "PHYSICS_EN",
-    *SCIENCE_SUBJECTS
-}
-
-
 FIXED_DOK1_SUBJECTS = {
     "ARABIC",
     "SOCIAL",
@@ -174,12 +163,12 @@ def display_subject(subject):
         "MATH_EN": "Math",
         "SCIENCE": "Science",
         "SCIENCE_EN": "Science",
-        "BIOLOGY": "Science",
-        "BIOLOGY_EN": "Science",
-        "CHEMISTRY": "Science",
-        "CHEMISTRY_EN": "Science",
-        "PHYSICS": "Science",
-        "PHYSICS_EN": "Science"
+        "BIOLOGY": "Biology",
+        "BIOLOGY_EN": "Biology",
+        "CHEMISTRY": "Chemistry",
+        "CHEMISTRY_EN": "Chemistry",
+        "PHYSICS": "Physics",
+        "PHYSICS_EN": "Physics"
     }
 
     return subject_map.get(
@@ -191,10 +180,7 @@ def display_subject(subject):
 def curriculum_name_for_subject(subject):
     subject = normalize_subject(subject)
 
-    if subject in MATH_SUBJECTS:
-        return "CCSS"
-
-    if subject in SCIENCE_FAMILY_SUBJECTS:
+    if subject in SCIENCE_SUBJECTS:
         return "NGSS"
 
     return None

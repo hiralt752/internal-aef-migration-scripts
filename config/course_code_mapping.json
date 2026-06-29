@@ -56,7 +56,7 @@
   "MOE_GEN_PH_11_F_101_EN": { "subject": "PHYSICS_EN", "grade": 11 },
   "MOE_GEN_PH_12_F_102_EN": { "subject": "PHYSICS_EN", "grade": 12 },
 
-  "NCE_PH_12": { "subject": "SCIENCE", "grade": 12 },
+  "NCE_PH_12": { "subject": "PHYSICS_EN", "grade": 12 },
   "NCE_SC_11": { "subject": "SCIENCE", "grade": 11 },
   "NCE_SC_5": { "subject": "SCIENCE", "grade": 5 },
   "NCE_SC_6": { "subject": "SCIENCE", "grade": 6 },
@@ -69,8 +69,8 @@
   "MOE_ADV_SC_7_EN": { "subject": "SCIENCE_EN", "grade": 7 },
   "MOE_ADV_SC_8_EN": { "subject": "SCIENCE_EN", "grade": 8 },
 
-  "NCE_BI_12": { "subject": "SCIENCE_EN", "grade": 12 },
-  "NCE_CH_12": { "subject": "SCIENCE_EN", "grade": 12 },
+  "NCE_BI_12": { "subject": "BIOLOGY_EN", "grade": 12 },
+  "NCE_CH_12": { "subject": "CHEMISTRY_EN", "grade": 12 },
 
   "MOE_GEN_SC_10_EN": { "subject": "SCIENCE_EN", "grade": 10 },
   "MOE_GEN_SC_5_EN": { "subject": "SCIENCE_EN", "grade": 5 },
