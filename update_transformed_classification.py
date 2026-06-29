@@ -56,6 +56,31 @@ VALID_DIFFICULTY = {
 }
 
 
+RESOURCE_TYPE_REPLACEMENT_MAP = {
+    "DOK1": "TEQ1",
+    "DOK2": "TEQ2",
+    "DOK3": "TEQ3"
+}
+
+
+DIFFICULTY_LEVEL_REPLACEMENT_MAP = {
+    "ACCESS": "EASY",
+    "EXPECTATION": "MEDIUM",
+    "EXTENSION": "DIFFICULT"
+}
+
+
+# Replace these values when you provide the source->target mapping.
+CONGNITIVE_DIMENSION = {
+    "REMEMBER": "REMEMBERING",
+    "UNDERSTAND": "UNDERSTANDING",
+    "APPLY": "APPLYING",
+    "ANALYZE": "ANALYZING",
+    "EVALUATE": "EVALUATING",
+    "CREATE": "CREATING"
+}
+
+
 REPORT_LIMIT = 100
 INPUT_DIR_NAME = "input"
 
@@ -240,6 +265,33 @@ def normalize_difficulty_level(value):
     ).strip().upper()
 
     return VALID_DIFFICULTY.get(normalized)
+
+
+def map_value_for_output(value, replacement_map):
+    if isinstance(value, list):
+        mapped = [
+            map_value_for_output(item, replacement_map)
+            for item in value
+        ]
+        return [
+            item
+            for item in mapped
+            if item not in {None, ""}
+        ]
+
+    normalized = str(value or "").strip()
+    if not normalized:
+        return None
+
+    normalized_upper = normalized.upper()
+
+    return replacement_map.get(
+        normalized_upper,
+        replacement_map.get(
+            normalized,
+            normalized
+        )
+    )
 
 
 def get_record_subject(record, response=None, file_path=None, lookup_meta=None):
@@ -583,15 +635,22 @@ def build_classification(
     )
 
     if bloom:
-        educational["cognitiveDimensions"] = [
-            bloom
-        ]
+        educational["cognitiveDimensions"] = map_value_for_output(
+            [bloom],
+            CONGNITIVE_DIMENSION
+        )
 
     if dok:
-        educational["resourceType"] = dok
+        educational["resourceType"] = map_value_for_output(
+            dok,
+            RESOURCE_TYPE_REPLACEMENT_MAP
+        )
 
     if difficulty_level:
-        educational["difficultyLevel"] = difficulty_level
+        educational["difficultyLevel"] = map_value_for_output(
+            difficulty_level,
+            DIFFICULTY_LEVEL_REPLACEMENT_MAP
+        )
 
     outcome_key = selected_outcome_key(
         parsed_response
