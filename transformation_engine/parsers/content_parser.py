@@ -451,7 +451,7 @@ def extract_mathml_from_svg(src):
     return ""
 
 
-def  parse_html_content(html_content,question_id,lesson):
+def parse_html_content(html_content,question_id,lesson):
     soup = BeautifulSoup(
         html_content or "",
         "html.parser"

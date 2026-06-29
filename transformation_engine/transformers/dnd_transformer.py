@@ -99,9 +99,7 @@ def _build_metadata(resp, legacy_status=LIFECYCLE_STATUS):
     if meta.get("subSkill"):
         keywords.append(str(meta["subSkill"]))
 
-    source = meta.get("author") or None
-    if not source and resp.get("createdByUser"):
-        source = resp["createdByUser"].get("email")
+    source = "AAT"
 
     sub_domain = []
     if meta.get("domains"):
@@ -165,6 +163,18 @@ def _process_dnd_prompt(prompt):
         flags=re.IGNORECASE | re.DOTALL,
     )
     soup = BeautifulSoup(cleaned, "html.parser")
+    
+    # Clean up disallowed tags in a single pass
+    for tag in soup.find_all(["div", "colgroup", "col", "audio", "video", "a", "pre"]):
+        if not tag.parent:
+            continue
+        if tag.name in ["colgroup", "col", "audio", "video"]:
+            tag.decompose()
+        elif tag.get("id") == "gtx-trans" or "gtx-trans-icon" in tag.get("class", []):
+            tag.decompose()
+        else:
+            tag.unwrap()
+        
     img = soup.find("img")
     side_image = None
     if img:

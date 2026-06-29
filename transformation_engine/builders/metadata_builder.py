@@ -30,12 +30,7 @@ def build_metadata(raw):
 
             "parentReference": None,
 
-            "source":
-                metadata.get("author")
-                or raw.get(
-                    "createdByUser",
-                    {}
-                ).get("email")
+            "source":"AAT"
         },
 
         "lifecycle": {
