@@ -197,6 +197,12 @@ def build_item_body(body: Dict) -> Dict:
             "options": options,
         })
 
+    if items:
+        total_weight = sum(item["weight"] for item in items)
+        if total_weight > 0 and round(total_weight, 4) != 1.0:
+            diff = 1.0 - total_weight
+            items[0]["weight"] = round(items[0]["weight"] + diff, 4)
+
     return {
         "version": "1.0",
         "title": None,
