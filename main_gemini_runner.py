@@ -955,6 +955,11 @@ PROCESS_LIMIT = read_int_env(
     0
 )
 
+SKIP_PREVIOUS_SUCCESSES = read_bool_env(
+    "AI_ENGINE_SKIP_PREVIOUS_SUCCESSES",
+    True
+)
+
 SKIP_SUBJECTS = tuple(
     str(item).strip().upper()
     for item in read_list_env(
@@ -1951,8 +1956,15 @@ def resolve_prompt_preview_root():
 def summarize_selected_records(
     records,
     prompt_preview_root,
-    prompt_preview_diagnostics
+    prompt_preview_diagnostics,
+    selection_metadata=None,
+    previous_success_lookup_summary=None
 ):
+    selection_metadata = selection_metadata or {}
+    previous_success_lookup_summary = (
+        previous_success_lookup_summary
+        or {}
+    )
     by_subject = {}
     by_question_type = {}
     image_statuses = {}
@@ -2034,6 +2046,34 @@ def summarize_selected_records(
         "prompt_preview_root": str(prompt_preview_root),
         "prompt_preview_diagnostics": prompt_preview_diagnostics,
         "total_records": len(records),
+        "skip_previous_successes_enabled": bool(
+            previous_success_lookup_summary.get(
+                "enabled"
+            )
+        ),
+        "previous_success_lookup_runs_scanned": previous_success_lookup_summary.get(
+            "run_ids_scanned",
+            []
+        ),
+        "previous_success_lookup_subject_counts": previous_success_lookup_summary.get(
+            "subject_counts",
+            {}
+        ),
+        "skipped_excluded_subjects": selection_metadata.get(
+            "excluded_subject_counts",
+            {}
+        ),
+        "skipped_previously_successful": sum(
+            int(value or 0)
+            for value in selection_metadata.get(
+                "previous_success_counts",
+                {}
+            ).values()
+        ),
+        "skipped_previously_successful_by_subject": selection_metadata.get(
+            "previous_success_counts",
+            {}
+        ),
         "missing_lo_id_mapping": missing_lo_id_mapping,
         "prompt_missing": prompt_missing,
         "records_with_images": image_records,
@@ -2342,6 +2382,12 @@ def print_input_manifest(
     )
 
     print(
+        f"Prev Successes : {manifest.get('skipped_previously_successful')} "
+        f"(enabled={manifest.get('skip_previous_successes_enabled')})",
+        flush=True
+    )
+
+    print(
         f"Missing Prompts: {manifest.get('prompt_missing')}",
         flush=True
     )
@@ -2360,6 +2406,11 @@ def print_input_manifest(
 
     print(
         f"By Subject     : {manifest.get('by_subject')}",
+        flush=True
+    )
+
+    print(
+        f"Skipped Prev   : {manifest.get('skipped_previously_successful_by_subject')}",
         flush=True
     )
 
@@ -2488,6 +2539,27 @@ def get_record_subject(
         record.get("folder_subject")
         or record.get("subject")
         or "UNKNOWN"
+    )
+
+
+def normalize_subject_name(
+    subject
+):
+    subject = str(
+        subject or "UNKNOWN"
+    ).strip().upper()
+
+    subject_map = {
+        "MATH_EN": "MATH",
+        "SCIENCE_EN": "SCIENCE",
+        "BIOLOGY_EN": "BIOLOGY",
+        "CHEMISTRY_EN": "CHEMISTRY",
+        "PHYSICS_EN": "PHYSICS"
+    }
+
+    return subject_map.get(
+        subject,
+        subject
     )
 
 
@@ -4721,31 +4793,189 @@ def iter_prompt_preview_records(
             yield record
 
 
+def load_previous_success_lookup(
+    reports_root,
+    exclude_run_id=None,
+    enabled=True
+):
+    reports_root = Path(
+        reports_root
+    )
+
+    summary = {
+        "enabled": bool(enabled),
+        "reports_root": str(reports_root),
+        "excluded_run_id": exclude_run_id,
+        "run_ids_scanned": [],
+        "files_scanned": 0,
+        "subject_counts": {},
+        "total_success_question_ids": 0,
+        "errors": []
+    }
+
+    if not enabled or not reports_root.exists():
+        return {}, summary
+
+    lookup = {}
+
+    for run_dir in sorted(
+        path for path in reports_root.iterdir()
+        if path.is_dir()
+    ):
+        if exclude_run_id and run_dir.name == exclude_run_id:
+            continue
+
+        responses_root = (
+            run_dir
+            /
+            "responses_by_subject"
+        )
+
+        if not responses_root.exists():
+            continue
+
+        summary["run_ids_scanned"].append(
+            run_dir.name
+        )
+
+        for subject_dir in sorted(
+            path for path in responses_root.iterdir()
+            if path.is_dir()
+        ):
+            subject = normalize_subject_name(
+                subject_dir.name
+            )
+            success_dir = (
+                subject_dir
+                /
+                "success"
+            )
+
+            if not success_dir.exists():
+                continue
+
+            for success_file in sorted(
+                success_dir.glob(
+                    "*_success.json"
+                )
+            ):
+                summary["files_scanned"] += 1
+
+                try:
+                    rows = load_json_file(
+                        success_file,
+                        default=[]
+                    )
+                except Exception as e:
+                    summary["errors"].append(
+                        {
+                            "file": str(success_file),
+                            "error": str(e)
+                        }
+                    )
+                    continue
+
+                if not isinstance(
+                    rows,
+                    list
+                ):
+                    summary["errors"].append(
+                        {
+                            "file": str(success_file),
+                            "error": "Success report payload is not a JSON array."
+                        }
+                    )
+                    continue
+
+                subject_lookup = lookup.setdefault(
+                    subject,
+                    set()
+                )
+
+                for row in rows:
+                    if not isinstance(
+                        row,
+                        dict
+                    ):
+                        continue
+
+                    question_id = str(
+                        row.get("question_id")
+                        or ""
+                    ).strip()
+
+                    if not question_id:
+                        continue
+
+                    subject_lookup.add(
+                        question_id
+                    )
+
+    summary["subject_counts"] = {
+        subject: len(question_ids)
+        for subject, question_ids in sorted(
+            lookup.items()
+        )
+    }
+    summary["total_success_question_ids"] = sum(
+        summary["subject_counts"].values()
+    )
+
+    return lookup, summary
+
+
 def select_records(
     process_limit=None,
     prompt_preview_root=None,
-    excluded_subjects=()
+    excluded_subjects=(),
+    previous_success_lookup=None
 ):
     selected_records = []
     skipped_subject_counts = {}
+    skipped_previously_successful_counts = {}
+    skipped_previously_successful_ids = {}
     excluded_subjects = {
-        str(subject or "").strip().upper()
+        normalize_subject_name(
+            subject
+        )
         for subject in (excluded_subjects or ())
         if str(subject or "").strip()
     }
+    previous_success_lookup = previous_success_lookup or {}
 
     for record in iter_prompt_preview_records(
         prompt_preview_root=prompt_preview_root
     ):
-        subject = str(
-            get_record_subject(record) or ""
-        ).strip().upper()
+        subject = normalize_subject_name(
+            get_record_subject(record)
+        )
+        question_id = get_record_question_id(
+            record
+        )
 
         if subject in excluded_subjects:
             skipped_subject_counts[subject] = skipped_subject_counts.get(
                 subject,
                 0
             ) + 1
+            continue
+
+        if question_id in previous_success_lookup.get(
+            subject,
+            set()
+        ):
+            skipped_previously_successful_counts[subject] = (
+                skipped_previously_successful_counts.get(
+                    subject,
+                    0
+                ) + 1
+            )
+            skipped_previously_successful_ids.setdefault(
+                subject,
+                []
+            ).append(
+                question_id
+            )
             continue
 
         selected_records.append(
@@ -4760,7 +4990,11 @@ def select_records(
         ):
             break
 
-    return selected_records, skipped_subject_counts
+    return selected_records, {
+        "excluded_subject_counts": skipped_subject_counts,
+        "previous_success_counts": skipped_previously_successful_counts,
+        "previous_success_question_ids": skipped_previously_successful_ids
+    }
 
 
 def main():
@@ -4799,6 +5033,14 @@ def main():
         chunk_size=1000
     )
 
+    previous_success_lookup, previous_success_lookup_summary = (
+        load_previous_success_lookup(
+            PROJECT_ROOT / "reports" / "gemini_runs",
+            exclude_run_id=reporter.run_id,
+            enabled=SKIP_PREVIOUS_SUCCESSES
+        )
+    )
+
     run_config = {
         "project_root": str(PROJECT_ROOT),
         "prompt_preview_root": str(prompt_preview_root),
@@ -4806,6 +5048,10 @@ def main():
         "uploaded_files_path": str(UPLOADED_FILES_PATH),
         "process_limit": PROCESS_LIMIT,
         "skip_subjects": list(SKIP_SUBJECTS),
+        "skip_previous_successes": SKIP_PREVIOUS_SUCCESSES,
+        "previous_success_lookup_reports_root": str(
+            PROJECT_ROOT / "reports" / "gemini_runs"
+        ),
         "max_workers": MAX_WORKERS,
         "primary_model": PRIMARY_MODEL,
         "fallback_models": FALLBACK_MODELS,
@@ -4829,7 +5075,13 @@ def main():
         "curriculum_rule": {
             "enabled_subjects": [
                 "SCIENCE",
-                "SCIENCE_EN"
+                "SCIENCE_EN",
+                "BIOLOGY",
+                "BIOLOGY_EN",
+                "CHEMISTRY",
+                "CHEMISTRY_EN",
+                "PHYSICS",
+                "PHYSICS_EN"
             ],
             "grade_window": [
                 "grade - 1",
@@ -4861,16 +5113,46 @@ def main():
         run_config
     )
 
-    records, skipped_subject_counts = select_records(
+    reporter.write_json(
+        reporter.report_root / "previous_success_lookup_summary.json",
+        previous_success_lookup_summary
+    )
+
+    records, selection_metadata = select_records(
         process_limit=PROCESS_LIMIT,
         prompt_preview_root=prompt_preview_root,
-        excluded_subjects=SKIP_SUBJECTS
+        excluded_subjects=SKIP_SUBJECTS,
+        previous_success_lookup=previous_success_lookup
+    )
+
+    reporter.write_json(
+        reporter.report_root / "skipped_previously_successful_question_ids.json",
+        selection_metadata.get(
+            "previous_success_question_ids",
+            {}
+        )
     )
 
     reporter.summary["total_selected"] = len(
         records
     )
-    reporter.summary["skipped_subjects"] = skipped_subject_counts
+    reporter.summary["skipped_subjects"] = selection_metadata.get(
+        "excluded_subject_counts",
+        {}
+    )
+    reporter.summary["skipped_previously_successful"] = sum(
+        int(value or 0)
+        for value in selection_metadata.get(
+            "previous_success_counts",
+            {}
+        ).values()
+    )
+    reporter.summary["skipped_previously_successful_by_subject"] = (
+        selection_metadata.get(
+            "previous_success_counts",
+            {}
+        )
+    )
 
     content_manifest_rows = [
         build_content_manifest(record)
@@ -4948,7 +5230,9 @@ def main():
     input_manifest = summarize_selected_records(
         records=records,
         prompt_preview_root=prompt_preview_root,
-        prompt_preview_diagnostics=prompt_preview_diagnostics
+        prompt_preview_diagnostics=prompt_preview_diagnostics,
+        selection_metadata=selection_metadata,
+        previous_success_lookup_summary=previous_success_lookup_summary
     )
 
     reporter.write_json(

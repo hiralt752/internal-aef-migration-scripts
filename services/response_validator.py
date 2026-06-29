@@ -24,7 +24,13 @@ VALID_DIFFICULTY = {
 
 CURRICULUM_SUBJECTS = {
     "SCIENCE",
-    "SCIENCE_EN"
+    "SCIENCE_EN",
+    "BIOLOGY",
+    "BIOLOGY_EN",
+    "CHEMISTRY",
+    "CHEMISTRY_EN",
+    "PHYSICS",
+    "PHYSICS_EN"
 }
 
 
