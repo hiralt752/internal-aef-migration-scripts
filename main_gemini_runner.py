@@ -29,6 +29,7 @@ from services.response_validator import (
     assess_gemini_response
 )
 from services.batch_classification import (
+    _record_estimated_text_tokens as estimate_batch_record_text_tokens,
     add_usage,
     build_batch_instruction,
     build_batches,
@@ -540,6 +541,32 @@ def estimate_batch_prompt_tokens_locally(
         "curriculum_file_count": curriculum_file_count,
         "lesson_context_attached": bool(lesson_context_text),
         "lesson_context_char_count": len(lesson_context_text)
+    }
+
+
+def build_batch_metadata_for_records(
+    records,
+    curriculum_file_keys=(),
+    missing_curriculum_file_keys=()
+):
+    return {
+        "records": records,
+        "estimated_text_tokens": sum(
+            estimate_batch_record_text_tokens(record)
+            for record in records
+        ),
+        "image_count": sum(
+            count_resolved_images_for_estimate(record)
+            for record in records
+        ),
+        "group_key": (
+            None,
+            None,
+            None,
+            None,
+            tuple(curriculum_file_keys or ()),
+            tuple(missing_curriculum_file_keys or ())
+        )
     }
 
 
@@ -1083,9 +1110,15 @@ class ApiRateLimiter:
             1,
             int(limit_per_minute or 1)
         )
-        self.limit_per_day = (
+        normalized_day_limit = (
             int(limit_per_day)
             if limit_per_day is not None
+            else None
+        )
+        self.limit_per_day = (
+            normalized_day_limit
+            if normalized_day_limit is not None
+            and normalized_day_limit > 0
             else None
         )
         self.lock = threading.Lock()
@@ -3027,17 +3060,6 @@ def call_gemini_with_model_switch(
         ):
             total_attempts_used += 1
 
-            progress.api_call_started(
-                question_id=question_id,
-                subject=subject,
-                model_name=model_name,
-                attempt=attempt,
-                total_attempt=total_attempts_used,
-                token_count=estimated_prompt_tokens,
-                image_count=len(image_report),
-                curriculum_file_count=len(curriculum_files)
-            )
-
             reporter.log_preflight_token_usage(
                 {
                     "timestamp": datetime.now().isoformat(),
@@ -3086,6 +3108,17 @@ def call_gemini_with_model_switch(
                     question_id=question_id,
                     model_name=model_name,
                     estimated_token_count=estimated_prompt_tokens
+                )
+
+                progress.api_call_started(
+                    question_id=question_id,
+                    subject=subject,
+                    model_name=model_name,
+                    attempt=attempt,
+                    total_attempt=total_attempts_used,
+                    token_count=estimated_prompt_tokens,
+                    image_count=len(image_report),
+                    curriculum_file_count=len(curriculum_files)
                 )
 
                 response = client.models.generate_content(
@@ -3672,7 +3705,8 @@ def call_gemini_batch_with_model_switch(
     records,
     uploaded_files,
     progress,
-    batch_id
+    batch_id,
+    batch_metadata=None
 ):
     first_record = records[0]
     subject = get_batch_subject(
@@ -3737,6 +3771,9 @@ def call_gemini_batch_with_model_switch(
     last_error_payload = None
     last_model_name = None
     last_image_reports = {}
+    batch_metadata = batch_metadata or build_batch_metadata_for_records(
+        records=records
+    )
 
     for model_index, model_name in enumerate(
         models_to_try
@@ -3744,7 +3781,7 @@ def call_gemini_batch_with_model_switch(
         last_model_name = model_name
 
         local_detail = estimate_batch_prompt_tokens_locally(
-            batch=batch,
+            batch=batch_metadata,
             subject=subject
         )
         contents, image_reports = build_batch_contents(
@@ -3808,17 +3845,6 @@ def call_gemini_batch_with_model_switch(
         ):
             total_attempts_used += 1
 
-            progress.api_call_started(
-                question_id=batch_id,
-                subject=subject,
-                model_name=model_name,
-                attempt=attempt,
-                total_attempt=total_attempts_used,
-                token_count=estimated_prompt_tokens,
-                image_count=sum(len(items) for items in image_reports.values()),
-                curriculum_file_count=len(curriculum_files)
-            )
-
             reporter.log_preflight_token_usage(
                 {
                     "timestamp": datetime.now().isoformat(),
@@ -3873,6 +3899,17 @@ def call_gemini_batch_with_model_switch(
                     question_id=batch_id,
                     model_name=model_name,
                     estimated_token_count=estimated_prompt_tokens
+                )
+
+                progress.api_call_started(
+                    question_id=batch_id,
+                    subject=subject,
+                    model_name=model_name,
+                    attempt=attempt,
+                    total_attempt=total_attempts_used,
+                    token_count=estimated_prompt_tokens,
+                    image_count=sum(len(items) for items in image_reports.values()),
+                    curriculum_file_count=len(curriculum_files)
                 )
 
                 response = client.models.generate_content(
@@ -4328,6 +4365,7 @@ def process_batch_records(
     progress,
     batch_id,
     content_manifests,
+    batch_metadata=None,
     usage_totals=None,
     invalid_retry_count=0
 ):
@@ -4338,6 +4376,18 @@ def process_batch_records(
         get_batch_question_id(record): empty_usage()
         for record in records
     }
+    curriculum_file_keys = ()
+    missing_curriculum_file_keys = ()
+
+    if batch_metadata:
+        group_key = batch_metadata.get(
+            "group_key",
+            ()
+        )
+        if len(group_key) > 4:
+            curriculum_file_keys = group_key[4]
+        if len(group_key) > 5:
+            missing_curriculum_file_keys = group_key[5]
 
     batch_call = call_gemini_batch_with_model_switch(
         client=client,
@@ -4345,7 +4395,8 @@ def process_batch_records(
         records=records,
         uploaded_files=uploaded_files,
         progress=progress,
-        batch_id=batch_id
+        batch_id=batch_id,
+        batch_metadata=batch_metadata
     )
 
     question_ids = [
@@ -4398,6 +4449,11 @@ def process_batch_records(
                     progress=progress,
                     batch_id=f"{batch_id}.token_split{split_index}",
                     content_manifests=content_manifests,
+                    batch_metadata=build_batch_metadata_for_records(
+                        records=split_records,
+                        curriculum_file_keys=curriculum_file_keys,
+                        missing_curriculum_file_keys=missing_curriculum_file_keys
+                    ),
                     usage_totals={
                         question_id: usage_totals[question_id]
                         for question_id in split_ids
@@ -4471,6 +4527,11 @@ def process_batch_records(
                 progress=progress,
                 batch_id=f"{batch_id}.retry{invalid_retry_count + 1}",
                 content_manifests=content_manifests,
+                batch_metadata=build_batch_metadata_for_records(
+                    records=pending_records,
+                    curriculum_file_keys=curriculum_file_keys,
+                    missing_curriculum_file_keys=missing_curriculum_file_keys
+                ),
                 usage_totals=pending_usage,
                 invalid_retry_count=invalid_retry_count + 1
             )
@@ -4485,6 +4546,11 @@ def process_batch_records(
                     progress=progress,
                     batch_id=f"{batch_id}.single_retry",
                     content_manifests=content_manifests,
+                    batch_metadata=build_batch_metadata_for_records(
+                        records=pending_records,
+                        curriculum_file_keys=curriculum_file_keys,
+                        missing_curriculum_file_keys=missing_curriculum_file_keys
+                    ),
                     usage_totals=pending_usage,
                     invalid_retry_count=invalid_retry_count + 1
                 )
@@ -4527,6 +4593,11 @@ def process_batch_records(
                     progress=progress,
                     batch_id=f"{batch_id}.split{split_index}",
                     content_manifests=content_manifests,
+                    batch_metadata=build_batch_metadata_for_records(
+                        records=split_records,
+                        curriculum_file_keys=curriculum_file_keys,
+                        missing_curriculum_file_keys=missing_curriculum_file_keys
+                    ),
                     usage_totals=split_usage,
                     invalid_retry_count=0
                 )
@@ -4546,6 +4617,7 @@ def process_batch_records(
             progress=progress,
             batch_id=f"{batch_id}.retry{invalid_retry_count + 1}",
             content_manifests=content_manifests,
+            batch_metadata=batch_metadata,
             usage_totals=usage_totals,
             invalid_retry_count=invalid_retry_count + 1
         )
@@ -4575,6 +4647,11 @@ def process_batch_records(
                     progress=progress,
                     batch_id=f"{batch_id}.split{split_index}",
                     content_manifests=content_manifests,
+                    batch_metadata=build_batch_metadata_for_records(
+                        records=split_records,
+                        curriculum_file_keys=curriculum_file_keys,
+                        missing_curriculum_file_keys=missing_curriculum_file_keys
+                    ),
                     usage_totals={
                         question_id: usage_totals[question_id]
                         for question_id in split_ids
@@ -5126,7 +5203,8 @@ def main():
                         uploaded_files,
                         progress,
                         batch_id,
-                        content_manifests
+                        content_manifests,
+                        batch
                     )
 
                     for result in results:
@@ -5163,7 +5241,8 @@ def main():
                         uploaded_files,
                         progress,
                         batch_id,
-                        content_manifests
+                        content_manifests,
+                        batch
                     )
                     futures[future] = batch
 
