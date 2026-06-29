@@ -12,6 +12,10 @@ def map_hints_and_feedback(
         wrong_feedback,question_id,lesson
     )
 
+    for item in parsed_wrong:
+        if item.get("type") == "image":
+            item["text"] = ""
+
     wrong_has_text = any(
         x["type"] == "text"
         for x in parsed_wrong
