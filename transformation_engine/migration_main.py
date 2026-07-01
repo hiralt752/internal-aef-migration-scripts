@@ -22,7 +22,7 @@ TRANSFORM_DIR = os.path.join(PROJECT_ROOT, "transformation_engine")
 INPUT_DIRS = [
     # os.path.join(TRANSFORM_DIR, "validation_error_fix_DND"),
     # os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
-    # os.path.join(TRANSFORM_DIR, "test"),
+    os.path.join(TRANSFORM_DIR, "test")
 ]
 MAPPING_FILE = os.path.join(
     PROJECT_ROOT,
@@ -123,6 +123,12 @@ class Logger:
     def success(msg): print(f"[SUCCESS] {msg}")
     @staticmethod
     def error(msg): print(f"[ERROR] {msg}")
+
+
+def format_log_fields(**fields):
+    return " | ".join(
+        f"{key}={value}" for key, value in fields.items() if value is not None
+    )
 
 
 def get_qid(payload):
@@ -301,15 +307,25 @@ async def handle_post(client, payload, writer, counters,question_mapping):
         operation = create ( it will create a new record in Server B no need to pass question id )
         operation = putDraft ( it will update an existing record in Server B and need to pass question id )
     '''
-    mode = "create"
     qid = get_qid(payload)
     qtype = payload.get("type")
     endpoint, operation, mapped_id = resolve_endpoint(
         qid,
         question_mapping
     )
+    api_name = "putDraft" if operation == "putDraft" else "post"
     ts = datetime.now().isoformat()
     try:
+        Logger.info(
+            "API request started | "
+            + format_log_fields(
+                api=api_name,
+                operation=operation,
+                question_id=qid,
+                mapped_question_id=mapped_id,
+                question_type=qtype
+            )
+        )
         response = await client.post(endpoint, payload=payload)
         status = getattr(response, "status_code", 200)
         try:
@@ -327,7 +343,24 @@ async def handle_post(client, payload, writer, counters,question_mapping):
                    {"question_id": qid, "question_type": qtype,
                     "response": err, "timestamp": ts})
     s, fl, tot = counters.record(outcome)
-    print(f"total={tot} | success={s} | failed={fl} | {qid} -> {status if status is not None else 'ERR'}")
+    log_message = (
+        "API request completed | "
+        + format_log_fields(
+            api=api_name,
+            operation=operation,
+            question_id=qid,
+            mapped_question_id=mapped_id,
+            status=status if status is not None else "ERR",
+            outcome=outcome,
+            total=tot,
+            success=s,
+            failed=fl
+        )
+    )
+    if outcome in ("created", "exists"):
+        Logger.success(log_message)
+    else:
+        Logger.error(log_message)
 
 
 async def producer(queue, files, settled_ids):

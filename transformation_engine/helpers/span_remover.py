@@ -7,7 +7,7 @@ from helpers.debug_logger import DebugLogger
 FILTER_JSON_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "filter",
-    "dummy_span_texts.json" #add filter file here
+    "instructions.json" #add filter file here
 )
 
 def clean_text(text: str) -> str:

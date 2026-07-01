@@ -5,7 +5,31 @@ from helpers.span_remover import remove_span_texts_from_html
 
 
 def get_text_value(value) :
+    if not value:
+        return ""
+
     return value[0].get("text")
+
+
+def extract_correct_answer_text(answer_html, question_id, lesson):
+    parsed_answer = parse_html_content(
+        answer_html,
+        question_id,
+        lesson
+    )
+
+    text_value = get_text_value(parsed_answer)
+    if text_value:
+        return text_value
+
+    fallback_text = BeautifulSoup(
+        answer_html or "",
+        "html.parser"
+    ).get_text(" ", strip=True)
+    if fallback_text:
+        return fallback_text
+
+    return answer_html or ""
 
 def get_list_of_text(value):
     return [v.get("text") for v in value]
@@ -121,7 +145,11 @@ def map_fib_structure(raw, qid, lesson, file_path):
         items.append(item)
         correct_answers.append({
             "blankId": sequential_id,
-            "correctAnswer": get_text_value(parse_html_content(correct_answer,None,None)),
+            "correctAnswer": extract_correct_answer_text(
+                correct_answer,
+                qid,
+                lesson
+            ),
             "alternateAnswers": alternate_answers,
             "answerInWidgetFormat": None
         })
