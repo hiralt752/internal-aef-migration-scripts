@@ -29,9 +29,10 @@ MAPPING_FILE = os.path.join(
     "migration_id_mapping",
     "question_id_mapping.json"
 )
-REPORT_DIR = os.path.join(BASE_DIR, "api_reports_01")
+REPORT_DIR = os.path.join(BASE_DIR, "api_report_01_07_2026")
 
 CONCURRENCY = 10
+REQUESTS_PER_SECOND = 10
 QUEUE_MAXSIZE = 2000
 MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024
 
@@ -129,6 +130,24 @@ def format_log_fields(**fields):
     return " | ".join(
         f"{key}={value}" for key, value in fields.items() if value is not None
     )
+
+
+class AsyncRateLimiter:
+    """Serialize request starts to stay under the external API rate cap."""
+    def __init__(self, requests_per_second):
+        self.min_interval = 1.0 / requests_per_second
+        self._lock = asyncio.Lock()
+        self._next_allowed = 0.0
+
+    async def acquire(self):
+        async with self._lock:
+            loop = asyncio.get_running_loop()
+            now = loop.time()
+            wait_time = self._next_allowed - now
+            if wait_time > 0:
+                await asyncio.sleep(wait_time)
+                now = loop.time()
+            self._next_allowed = now + self.min_interval
 
 
 def get_qid(payload):
@@ -302,7 +321,7 @@ class Counters:
         return self.success, self.failed, self.success + self.failed
 
 
-async def handle_post(client, payload, writer, counters,question_mapping):
+async def handle_post(client, payload, writer, counters, question_mapping, rate_limiter):
     ''' 
         operation = create ( it will create a new record in Server B no need to pass question id )
         operation = putDraft ( it will update an existing record in Server B and need to pass question id )
@@ -326,7 +345,11 @@ async def handle_post(client, payload, writer, counters,question_mapping):
                 question_type=qtype
             )
         )
-        response = await client.post(endpoint, payload=payload)
+        response = await client.post(
+            endpoint,
+            payload=payload,
+            rate_limiter=rate_limiter
+        )
         status = getattr(response, "status_code", 200)
         try:
             body = response.json() if hasattr(response, "json") else response
@@ -373,23 +396,36 @@ async def producer(queue, files, settled_ids):
         await queue.put(None)
 
 
-async def consumer(queue, writer, counters,question_mapping):
+async def consumer(queue, writer, counters, question_mapping, rate_limiter):
     client = BaseApiClient()
     try:
         while True:
             payload = await queue.get()
             if payload is None:
                 queue.task_done(); break
-            await handle_post(client, payload, writer, counters,question_mapping)
+            await handle_post(
+                client,
+                payload,
+                writer,
+                counters,
+                question_mapping,
+                rate_limiter
+            )
             queue.task_done()
     finally:
         await client.close()
 
 
-async def run_async(files, settled_ids, writer, counters,question_mapping):
+async def run_async(files, settled_ids, writer, counters, question_mapping):
     queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
+    rate_limiter = AsyncRateLimiter(REQUESTS_PER_SECOND)
     prod = asyncio.create_task(producer(queue, files, settled_ids))
-    cons = [asyncio.create_task(consumer(queue, writer, counters,question_mapping)) for _ in range(CONCURRENCY)]
+    cons = [
+        asyncio.create_task(
+            consumer(queue, writer, counters, question_mapping, rate_limiter)
+        )
+        for _ in range(CONCURRENCY)
+    ]
     await prod
     await asyncio.gather(*cons)
 
@@ -403,6 +439,7 @@ def run_pipeline():
         return
     Logger.info(f"Input files: {len(files)} (across {len(INPUT_DIRS)} folders)")
     Logger.info(f"Concurrency: {CONCURRENCY}")
+    Logger.info(f"Rate limit: {REQUESTS_PER_SECOND} req/s")
 
     # 1) what's already settled (200/201/409/400) + baseline counts
     settled_ids, success_base, failed_base = build_settled_and_baseline()

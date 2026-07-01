@@ -19,12 +19,14 @@ class BaseApiClient:
             )
         )
 
-    async def post(self, endpoint: str, payload: dict):
+    async def post(self, endpoint: str, payload: dict, rate_limiter=None):
         for attempt in range(3):
             try:
+                if rate_limiter is not None:
+                    await rate_limiter.acquire()
                 response = await self.client.post(endpoint, json=payload)
                 response.raise_for_status()
-                return response.json()
+                return response
 
             except (httpx.TimeoutException, httpx.RequestError) as e:
                 if attempt < 2:
