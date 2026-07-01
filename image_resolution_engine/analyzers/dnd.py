@@ -1,6 +1,6 @@
-from helpers.image_scanner import scan_json
-from helpers.generic import get_see_why_widget_type
-from WIDGET_LAYOUT_MAP import get_widget_resolution
+from image_resolution_engine.helpers.image_scanner import scan_json
+from image_resolution_engine.helpers.generic import get_see_why_widget_type
+from image_resolution_engine.WIDGET_LAYOUT_MAP import get_widget_resolution
 import re
 
 
@@ -80,7 +80,8 @@ def _get_html_audit_entries(html_content, image_role, section=None, content_inde
 def analyze_dnd(data, q_type, category):
 
     question_id = data.get("question_id") or data.get("id")
-
+    body = data.get("response", {}).get("body", {})
+    back_ground_image  = body.get("backgroundImage")
     images = scan_json(data)
     if not images:
         return None
@@ -127,11 +128,10 @@ def analyze_dnd(data, q_type, category):
     # BACKGROUND IMAGE
     # --------------------------------------------------
 
-    back_ground = data.get("backgroundImage")
-    if isinstance(back_ground, dict) and back_ground.get("src"):
+    if isinstance(back_ground_image, dict) and back_ground_image.get("src"):
         question_images.append({
             "key": "backgroundImage",
-            "src": back_ground.get("src")
+            "src": back_ground_image.get("src")
         })
 
     # --------------------------------------------------
@@ -161,7 +161,7 @@ def analyze_dnd(data, q_type, category):
 
     image_audit = []
 
-    body = data.get("response", {}).get("body", {})
+    
     general_feedback = body.get("generalFeedback", "")
 
     image_audit.extend(

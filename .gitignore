@@ -5,7 +5,10 @@ __pycache__/
 
 # C extensions
 *.so
-
+core_seperated_data_input/
+test_data/
+api_reports/
+transformation_output/
 # Distribution / packaging
 .Python
 build/
@@ -208,6 +211,7 @@ tempCodeRunnerFile.py
 
 # PyPI configuration file
 .pypirc
+clean.py
 
 # Marimo
 marimo/_static/
@@ -217,5 +221,15 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-core_data/
-transformation_output_core_data/
+# Upload outputs
+image_upload/
+
+# Migration outputs
+image_resolution_engine/image_resolution_output/
+image_transformation/image_transformation_output/
+image_migration_output/
+image_transformation/media_failed.json
+downloaded_images/
+debug_logs/
+ignore_question.json
+

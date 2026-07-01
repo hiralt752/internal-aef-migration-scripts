@@ -1,6 +1,6 @@
-from helpers.image_scanner import scan_json
-from constants.qtype_map import normalize_qtype
-from WIDGET_LAYOUT_MAP import get_widget_resolution
+from image_resolution_engine.helpers.image_scanner import scan_json
+from image_resolution_engine.constants.qtype_map import normalize_qtype
+from image_resolution_engine.WIDGET_LAYOUT_MAP import get_widget_resolution
 
 
 # --------------------------------------------------

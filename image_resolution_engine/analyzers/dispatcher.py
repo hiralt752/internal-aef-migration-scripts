@@ -1,8 +1,8 @@
-from analyzers.mcq import analyze_mcq
-from analyzers.fib import analyze_fib
-from analyzers.dropdown import analyze_dropdown
-from analyzers.dnd import analyze_dnd
-from analyzers.matching import analyze_matching
+from image_resolution_engine.analyzers.mcq import analyze_mcq
+from image_resolution_engine.analyzers.fib import analyze_fib
+from image_resolution_engine.analyzers.dropdown import analyze_dropdown
+from image_resolution_engine.analyzers.dnd import analyze_dnd
+from image_resolution_engine.analyzers.matching import analyze_matching
 # Fast dict lookup instead of if-elif chain
 _ROUTER = {
     "MULTIPLE_CHOICE": analyze_mcq,

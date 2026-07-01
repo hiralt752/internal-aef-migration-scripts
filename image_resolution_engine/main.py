@@ -4,16 +4,16 @@ import time
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from helpers.common_filter import should_skip_question
-from analyzers.dispatcher import analyze_question
-from helpers.file_loader import load_json
-from helpers.resolution_debugger import log_skip, log_success
+from image_resolution_engine.helpers.common_filter import should_skip_question
+from image_resolution_engine.analyzers.dispatcher import analyze_question
+from image_resolution_engine.helpers.file_loader import load_json
+from image_resolution_engine.helpers.resolution_debugger import log_skip, log_success
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-INPUT_ROOT = os.path.join(PROJECT_ROOT, "core_seperated_data_input")
+INPUT_ROOT = os.path.join(PROJECT_ROOT, "test_data")
 OUTPUT_ROOT = os.path.join(BASE_DIR, "image_resolution_output")
 
 TARGET_FILES = frozenset()

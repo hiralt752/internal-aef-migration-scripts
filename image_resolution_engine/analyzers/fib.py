@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
-from helpers.image_scanner import scan_json
-from helpers.generic import get_see_why_widget_type
-from WIDGET_LAYOUT_MAP import get_widget_resolution
+from image_resolution_engine.helpers.image_scanner import scan_json
+from image_resolution_engine.helpers.generic import get_see_why_widget_type
+from image_resolution_engine.WIDGET_LAYOUT_MAP import get_widget_resolution
 import re
 
 
