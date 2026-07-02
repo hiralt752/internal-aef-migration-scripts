@@ -104,6 +104,9 @@ def map_fib_structure(raw, qid, lesson, file_path):
             correct_answer
         )
 
+        feedback = blank_data.get("feedback") or ""
+        parsed_feedback = parse_html_content(feedback, qid, lesson)[0]['text']
+
         item = {
             "id": sequential_id,
             "weight": normalize_weight(
@@ -112,9 +115,7 @@ def map_fib_structure(raw, qid, lesson, file_path):
                     100.0
                 )
             ),
-            "feedback": blank_data.get(
-                "feedback"
-            ) or "",
+            "feedback": parsed_feedback,
             "rules": blank_data.get(
                 "rules",
                 []
