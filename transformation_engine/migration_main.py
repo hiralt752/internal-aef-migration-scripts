@@ -9,11 +9,11 @@ from base_api_client import BaseApiClient
 
 
 CREATE_ENDPOINT = (
-    "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions"
+    "https://shared.alefed.com/question-bank-service/api/v1/questions"
 )
 
 PUT_DRAFT_ENDPOINT = (
-    "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions/{questionId}:putDraft"
+    "https://shared.alefed.com/question-bank-service/api/v1/questions/{questionId}:putDraft"
 )
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
@@ -29,10 +29,14 @@ MAPPING_FILE = os.path.join(
     "migration_id_mapping",
     "question_id_mapping.json"
 )
-REPORT_DIR = os.path.join(BASE_DIR, "api_report_01_07_2026")
+REPORT_DIR = os.path.join(BASE_DIR, "api_report_02_07_2026_PROD")
 
 CONCURRENCY = 10
 REQUESTS_PER_SECOND = 10
+ALLOW_CREATE_WHEN_UNMAPPED = (
+    os.environ.get("MIGRATION_ALLOW_CREATE_WHEN_UNMAPPED", "true").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
 QUEUE_MAXSIZE = 2000
 MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024
 
@@ -81,6 +85,13 @@ def resolve_endpoint(old_question_id, question_mapping):
             PUT_DRAFT_ENDPOINT.format(questionId=new_id),
             "putDraft",
             new_id
+        )
+
+    if not ALLOW_CREATE_WHEN_UNMAPPED:
+        return (
+            None,
+            "skip_unmapped",
+            None
         )
 
     return (
@@ -311,6 +322,7 @@ class Counters:
         self.success = success_base
         self.failed = failed_base
         self.run_calls = 0
+        self.skipped_unmapped = 0
 
     def record(self, outcome):
         self.run_calls += 1
@@ -319,6 +331,9 @@ class Counters:
         else:
             self.failed += 1
         return self.success, self.failed, self.success + self.failed
+
+    def mark_skipped_unmapped(self):
+        self.skipped_unmapped += 1
 
 
 async def handle_post(client, payload, writer, counters, question_mapping, rate_limiter):
@@ -332,6 +347,19 @@ async def handle_post(client, payload, writer, counters, question_mapping, rate_
         qid,
         question_mapping
     )
+
+    if operation == "skip_unmapped":
+        counters.mark_skipped_unmapped()
+        Logger.info(
+            "API request skipped | "
+            + format_log_fields(
+                operation=operation,
+                question_id=qid,
+                question_type=qtype
+            )
+        )
+        return
+
     api_name = "putDraft" if operation == "putDraft" else "post"
     ts = datetime.now().isoformat()
     try:
@@ -440,6 +468,7 @@ def run_pipeline():
     Logger.info(f"Input files: {len(files)} (across {len(INPUT_DIRS)} folders)")
     Logger.info(f"Concurrency: {CONCURRENCY}")
     Logger.info(f"Rate limit: {REQUESTS_PER_SECOND} req/s")
+    Logger.info(f"Allow create when unmapped: {ALLOW_CREATE_WHEN_UNMAPPED}")
 
     # 1) what's already settled (200/201/409/400) + baseline counts
     settled_ids, success_base, failed_base = build_settled_and_baseline()
@@ -472,6 +501,7 @@ def run_pipeline():
     print(f"New calls this run : {counters.run_calls:,}")
     print(f"Success (total)    : {counters.success:,}")
     print(f"Failed  (total)    : {counters.failed:,}")
+    print(f"Skipped unmapped   : {counters.skipped_unmapped:,}")
     print(f"Grand total        : {counters.success + counters.failed:,}")
     print(f"Time               : {dur:.2f}s"
           + (f"  ({counters.run_calls/dur:.1f} req/s)" if dur > 0 else ""))
