@@ -12,12 +12,7 @@ class MatchingTransformer:
         validation = q.get("validation") or {}
         metadata_source = q.get("metadata") or {}
 
-        created_user = q.get("createdByUser") or {}
-        source_val = (
-            created_user.get("name")
-            or created_user.get("email")
-            or metadata_source.get("author")
-        )
+        source_val = "AAT"
 
         outcomes = metadata_source.get("curriculumOutcomes", [])
         first_outcome = outcomes[0] if outcomes else {}

@@ -92,5 +92,19 @@ class ImageLabellingDNDTransformer:
             payload["modalFeedback"] = (
                 modal_feedback
             )
+            
+        def inject_text_field(obj):
+            if isinstance(obj, dict):
+                # Only add 'text' for specific content types to avoid polluting the root payload or other nodes
+                if obj.get('type') in ['audio', 'video', 'image', 'text'] and 'text' not in obj:
+                    obj['text'] = ""
+                for k, v in obj.items():
+                    inject_text_field(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    inject_text_field(item)
+
+        # Inject text: "" into the payload to satisfy schema validation
+        inject_text_field(payload)
 
         return payload

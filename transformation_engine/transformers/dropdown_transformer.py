@@ -332,6 +332,12 @@ def build_item_body(body: Dict) -> Dict:
             "options": options,
         })
 
+    if items:
+        total_weight = sum(item["weight"] for item in items)
+        if total_weight > 0 and round(total_weight, 4) != 1.0:
+            diff = 1.0 - total_weight
+            items[0]["weight"] = round(items[0]["weight"] + diff, 4)
+
     parsed_sentence = parse_html_content(sentence_text, None, None)
     sentence_raw = "".join([b["text"] for b in parsed_sentence if b.get("type") == "text"]).strip()
     sentence_final = dropdown_strict_strip_tags(sentence_raw)
