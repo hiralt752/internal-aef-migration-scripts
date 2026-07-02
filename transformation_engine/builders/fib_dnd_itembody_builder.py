@@ -57,8 +57,6 @@ def _is_math_image(img):
     if "Wirisformula" in classes:
         return True
 
- 
-
     # Has explicit MathML data attribute
     if img.get("data-mathml"):
         return True
@@ -95,22 +93,28 @@ def _extract_side_image_from_prompt(html):
             return cleaned, {"url": src}
 
     # No non-math <img> tag found — look for bare image URLs (absolute or relative paths)
-    # Match common image file extensions
-    m = re.search(r"(https?:\\/\\/[^\"'\s>]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)", html, re.IGNORECASE)
+    m = re.search(
+        r"(https?:\\/\\/[^\"'\s>]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)",
+        html,
+        re.IGNORECASE
+    )
     if not m:
         # also match relative paths like ../path/foo.png or ./images/foo.jpg
-        m = re.search(r"([\w\.\-\/_]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)", html, re.IGNORECASE)
+        m = re.search(
+            r"([\w\.\-\/_]+\\.(?:png|jpe?g|gif|svg)(?:\?[^\s\"'>]+)?)",
+            html,
+            re.IGNORECASE
+        )
 
     if m:
         url = m.group(1)
-        # remove the first occurrence of this url from html
         cleaned = html.replace(url, "").strip()
         return cleaned, {"url": url}
 
     return html, None
 
 
-def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
+def build_fib_dnd_item_body(raw, question_id, lesson, file_path=None):
 
     body = raw.get("body", {})
 
@@ -190,7 +194,10 @@ def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
                 choices.get(
                     "choiceItems",
                     []
-                ), question_id, lesson, file_path
+                ),
+                question_id,
+                lesson,
+                file_path
             )
     }
 
@@ -233,31 +240,37 @@ def build_fib_targets(blanks):
 
 
 def build_fib_options(choice_items, question_id, lesson, file_path=None):
+    """
+    Maps body.choices.choiceItems[].value → itemBody.options[].content
+
+    Uses .value (not .answer — that's MCQ's field).
+    Each value is parsed into typed content blocks via parse_html_content():
+      - Text  → { "type": "text",  "text": "..." }
+      - Image → { "type": "image", "image": { "url": "..." } }
+    """
 
     options = []
 
     for index, choice in enumerate(choice_items, start=1):
 
+        # Use .value — NOT .answer (MCQ uses .answer)
+        raw_value = choice.get("value", "")
+
+        # parse_html_content returns a list of typed content blocks:
+        # e.g. [{"type": "text", "text": "..."}, {"type": "image", "image": {"url": "..."}}]
         parsed_content = parse_html_content(
-            choice.get("value", ""),
+            raw_value,
             question_id,
             lesson
         )
 
-        text = ""
-
-        for item in parsed_content:
-
-            if item.get("type") == "text":
-                text += item.get("text", "")
+        # Normalise: guarantee at least one block so content is never empty
+        if not parsed_content:
+            parsed_content = [{"type": "text", "text": ""}]
 
         options.append({
             "id": index,
-            "content": {
-                "type": "text",
-                "text": text
-            }
+            "content": parsed_content   # list of { type, text } or { type, image: { url } }
         })
 
     return options
- 
