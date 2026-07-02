@@ -9,11 +9,11 @@ from base_api_client import BaseApiClient
 
 
 CREATE_ENDPOINT = (
-    "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions"
+    "https://shared.alefed.com/question-bank-service/api/v1/questions"
 )
 
 PUT_DRAFT_ENDPOINT = (
-    "https://ccl-rc-az.nprd.alefed.com/question-bank-service/api/v1/questions/{questionId}:putDraft"
+    "https://shared.alefed.com/question-bank-service/api/v1/questions/{questionId}:putDraft"
 )
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
@@ -22,16 +22,21 @@ TRANSFORM_DIR = os.path.join(PROJECT_ROOT, "transformation_engine")
 INPUT_DIRS = [
     # os.path.join(TRANSFORM_DIR, "validation_error_fix_DND"),
     # os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
-    # os.path.join(TRANSFORM_DIR, "test"),
+    os.path.join(TRANSFORM_DIR, "test")
 ]
 MAPPING_FILE = os.path.join(
     PROJECT_ROOT,
     "migration_id_mapping",
     "question_id_mapping.json"
 )
-REPORT_DIR = os.path.join(BASE_DIR, "api_reports_01")
+REPORT_DIR = os.path.join(BASE_DIR, "api_report_02_07_2026_PROD")
 
 CONCURRENCY = 10
+REQUESTS_PER_SECOND = 10
+ALLOW_CREATE_WHEN_UNMAPPED = (
+    os.environ.get("MIGRATION_ALLOW_CREATE_WHEN_UNMAPPED", "true").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
 QUEUE_MAXSIZE = 2000
 MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024
 
@@ -82,6 +87,13 @@ def resolve_endpoint(old_question_id, question_mapping):
             new_id
         )
 
+    if not ALLOW_CREATE_WHEN_UNMAPPED:
+        return (
+            None,
+            "skip_unmapped",
+            None
+        )
+
     return (
         CREATE_ENDPOINT,
         "create",
@@ -123,6 +135,30 @@ class Logger:
     def success(msg): print(f"[SUCCESS] {msg}")
     @staticmethod
     def error(msg): print(f"[ERROR] {msg}")
+
+
+def format_log_fields(**fields):
+    return " | ".join(
+        f"{key}={value}" for key, value in fields.items() if value is not None
+    )
+
+
+class AsyncRateLimiter:
+    """Serialize request starts to stay under the external API rate cap."""
+    def __init__(self, requests_per_second):
+        self.min_interval = 1.0 / requests_per_second
+        self._lock = asyncio.Lock()
+        self._next_allowed = 0.0
+
+    async def acquire(self):
+        async with self._lock:
+            loop = asyncio.get_running_loop()
+            now = loop.time()
+            wait_time = self._next_allowed - now
+            if wait_time > 0:
+                await asyncio.sleep(wait_time)
+                now = loop.time()
+            self._next_allowed = now + self.min_interval
 
 
 def get_qid(payload):
@@ -286,6 +322,7 @@ class Counters:
         self.success = success_base
         self.failed = failed_base
         self.run_calls = 0
+        self.skipped_unmapped = 0
 
     def record(self, outcome):
         self.run_calls += 1
@@ -295,22 +332,52 @@ class Counters:
             self.failed += 1
         return self.success, self.failed, self.success + self.failed
 
+    def mark_skipped_unmapped(self):
+        self.skipped_unmapped += 1
 
-async def handle_post(client, payload, writer, counters,question_mapping):
+
+async def handle_post(client, payload, writer, counters, question_mapping, rate_limiter):
     ''' 
         operation = create ( it will create a new record in Server B no need to pass question id )
         operation = putDraft ( it will update an existing record in Server B and need to pass question id )
     '''
-    mode = "create"
     qid = get_qid(payload)
     qtype = payload.get("type")
     endpoint, operation, mapped_id = resolve_endpoint(
         qid,
         question_mapping
     )
+
+    if operation == "skip_unmapped":
+        counters.mark_skipped_unmapped()
+        Logger.info(
+            "API request skipped | "
+            + format_log_fields(
+                operation=operation,
+                question_id=qid,
+                question_type=qtype
+            )
+        )
+        return
+
+    api_name = "putDraft" if operation == "putDraft" else "post"
     ts = datetime.now().isoformat()
     try:
-        response = await client.post(endpoint, payload=payload)
+        Logger.info(
+            "API request started | "
+            + format_log_fields(
+                api=api_name,
+                operation=operation,
+                question_id=qid,
+                mapped_question_id=mapped_id,
+                question_type=qtype
+            )
+        )
+        response = await client.post(
+            endpoint,
+            payload=payload,
+            rate_limiter=rate_limiter
+        )
         status = getattr(response, "status_code", 200)
         try:
             body = response.json() if hasattr(response, "json") else response
@@ -327,7 +394,24 @@ async def handle_post(client, payload, writer, counters,question_mapping):
                    {"question_id": qid, "question_type": qtype,
                     "response": err, "timestamp": ts})
     s, fl, tot = counters.record(outcome)
-    print(f"total={tot} | success={s} | failed={fl} | {qid} -> {status if status is not None else 'ERR'}")
+    log_message = (
+        "API request completed | "
+        + format_log_fields(
+            api=api_name,
+            operation=operation,
+            question_id=qid,
+            mapped_question_id=mapped_id,
+            status=status if status is not None else "ERR",
+            outcome=outcome,
+            total=tot,
+            success=s,
+            failed=fl
+        )
+    )
+    if outcome in ("created", "exists"):
+        Logger.success(log_message)
+    else:
+        Logger.error(log_message)
 
 
 async def producer(queue, files, settled_ids):
@@ -340,23 +424,36 @@ async def producer(queue, files, settled_ids):
         await queue.put(None)
 
 
-async def consumer(queue, writer, counters,question_mapping):
+async def consumer(queue, writer, counters, question_mapping, rate_limiter):
     client = BaseApiClient()
     try:
         while True:
             payload = await queue.get()
             if payload is None:
                 queue.task_done(); break
-            await handle_post(client, payload, writer, counters,question_mapping)
+            await handle_post(
+                client,
+                payload,
+                writer,
+                counters,
+                question_mapping,
+                rate_limiter
+            )
             queue.task_done()
     finally:
         await client.close()
 
 
-async def run_async(files, settled_ids, writer, counters,question_mapping):
+async def run_async(files, settled_ids, writer, counters, question_mapping):
     queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
+    rate_limiter = AsyncRateLimiter(REQUESTS_PER_SECOND)
     prod = asyncio.create_task(producer(queue, files, settled_ids))
-    cons = [asyncio.create_task(consumer(queue, writer, counters,question_mapping)) for _ in range(CONCURRENCY)]
+    cons = [
+        asyncio.create_task(
+            consumer(queue, writer, counters, question_mapping, rate_limiter)
+        )
+        for _ in range(CONCURRENCY)
+    ]
     await prod
     await asyncio.gather(*cons)
 
@@ -370,6 +467,8 @@ def run_pipeline():
         return
     Logger.info(f"Input files: {len(files)} (across {len(INPUT_DIRS)} folders)")
     Logger.info(f"Concurrency: {CONCURRENCY}")
+    Logger.info(f"Rate limit: {REQUESTS_PER_SECOND} req/s")
+    Logger.info(f"Allow create when unmapped: {ALLOW_CREATE_WHEN_UNMAPPED}")
 
     # 1) what's already settled (200/201/409/400) + baseline counts
     settled_ids, success_base, failed_base = build_settled_and_baseline()
@@ -402,6 +501,7 @@ def run_pipeline():
     print(f"New calls this run : {counters.run_calls:,}")
     print(f"Success (total)    : {counters.success:,}")
     print(f"Failed  (total)    : {counters.failed:,}")
+    print(f"Skipped unmapped   : {counters.skipped_unmapped:,}")
     print(f"Grand total        : {counters.success + counters.failed:,}")
     print(f"Time               : {dur:.2f}s"
           + (f"  ({counters.run_calls/dur:.1f} req/s)" if dur > 0 else ""))
