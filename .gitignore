@@ -232,4 +232,6 @@ image_transformation/media_failed.json
 downloaded_images/
 debug_logs/
 ignore_question.json
+final_output/
+question_processed.json
 

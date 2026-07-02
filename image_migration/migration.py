@@ -11,9 +11,20 @@ load_dotenv()
 
 key_list=["question_images", "option_images", "image_audit"]
 
-media_path=r"C:\Users\PC\Documents\project_migration\media"
+media_path=r"C:\Users\PC\Desktop\alef_new\internal_repo\media_migration\image_transformation\image_transformation_output"
 BASE_DIR = Path(__file__).resolve().parent.parent
 upload_path=os.path.join(BASE_DIR,"image_upload")
+
+def search_and_replace(question, new_url, old_url):
+    # pprint(question)
+    for key, value in question.items():
+        if isinstance(value, dict):
+            search_and_replace(value, new_url, old_url)
+        else:
+            if old_url in str(value):
+                question[key] = str(value).replace(old_url, new_url)
+                # pprint(question)
+    return question
 
 def check_json_exists(upload_path, file_name, data):
     if os.path.exists(os.path.join(upload_path,file_name)):
@@ -26,7 +37,7 @@ def check_json_exists(upload_path, file_name, data):
 
 def create_json(file_path, data=[]):
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 def write_in_json(file_path, list_data):
     with open(file_path, "r", encoding='utf-8') as f:
@@ -35,7 +46,7 @@ def write_in_json(file_path, list_data):
     data.append(list_data)
     
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 def migration_step_1(URL, image_data, question_id):
 
@@ -66,8 +77,9 @@ def migration_step_1(URL, image_data, question_id):
     # Making a custom response
     result={}
     temp_dict = {
-    "status_code": response.status_code,
-    "response": response.json()
+        "api_status":"success" if response.status_code==200 else "failed",
+        "status_code": response.status_code,
+        "response": response.json()
     }
     result[file_name]=temp_dict
 
@@ -76,95 +88,138 @@ def migration_step_1(URL, image_data, question_id):
 
     return result
 
-def migration_step_2(response, image_data, URL, question_id):
-
-    image_path=glob(
-        os.path.join(media_path,"**",f"{question_id}_*_{os.path.basename(image_data.get('src'))}"),
-        recursive=True
-        )
-    file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
-
-    # Getting resignedUrl from response of step 1 migration
-    key=next(iter(response))
-    presigned_url=response[key].get("response").get("presignedUrl").get("url")
-
-    headers = {
-        "Origin":URL,
-        "Referer":f"{URL}/",
-        "x-ms-blob-type": "BlockBlob",
-        "Content-Type": f"image/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}"
-    }
-
-    with open(image_path[0], "rb") as f:
-        response = requests.put(presigned_url, headers=headers, data=f)
-
-    result={}
-    temp_dict = {
-    "status_code": response.status_code,
-    "response": response.text
-    }
-    result[file_name]=temp_dict
-    check_json_exists(upload_path,"step_2_response.json",result)
+def migration_step_2(step_1_response, image_data, URL, question_id):
     
-def migration_step_3(URL, response, question_code, media_count, question_id, image_data):
-
-    key=next(iter(response))
-    file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
-
-    final_url = f"{URL}/authoring-content-service/api/assets/create-and-publish"
-
-    headers = {
-        "X-tenantId": "shared",
-        "Authorization": os.getenv("BEARER_TOKEN"),
-        "Content-Type": "application/json"
-    }
+    key=next(iter(step_1_response))
     
-    payload={
-        "fileName":key,
-        "fileId": response[key].get("response").get("fileId"),
-        "uploadId": response[key].get("response").get("uploadId"),
-        "title": f"{question_code}_img_{media_count}",
-        "description": f"{question_code}_img_{media_count}",
-        "type": "IMAGE",
-        "metadata": [],
-        "systemMetadata": [],
-        "tagIds": [],
-    }
+    if step_1_response[key].get("status_code") == 200 :
+        
+        image_path=glob(
+            os.path.join(media_path,"**",f"{question_id}_*_{os.path.basename(image_data.get('src'))}"),
+            recursive=True
+            )
+        file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
 
-    response = requests.post(final_url, headers=headers, json=payload)
+        # Getting resignedUrl from response of step 1 migration
+        presigned_url=step_1_response[key].get("response").get("presignedUrl").get("url")
 
-    result={}
-    temp_dict = {
-    "status_code": response.status_code,
-    "response": response.json()
-    }
-    result[file_name]=temp_dict
-    check_json_exists(upload_path,"step_3_response.json",result)
+        headers = {
+            "Origin":URL,
+            "Referer":f"{URL}/",
+            "x-ms-blob-type": "BlockBlob",
+            "Content-Type": f"image/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}"
+        }
 
+        with open(image_path[0], "rb") as f:
+            response = requests.put(presigned_url, headers=headers, data=f)
 
-def image_migration(URL, resolution_list, question_code):
+        result={}
+        temp_dict = {
+            "api_status":"success" if response.status_code==201 else "failed",
+            "status_code": response.status_code,
+            "response": response.text
+        }
+        result[file_name]=temp_dict
+        check_json_exists(upload_path,"step_2_response.json",result)
+        
+        return result
+        
+    else :
+        print("step 2 skipped")
+        value={}
+        temp_response= {
+            "status_code":"404"
+        }
+        value[key]=temp_response
+        
+        return value
+    
+def migration_step_3(URL, step_1_response, question_code, media_count, question_id, image_data, step_2_response):
+    
+    # step_1_key=next(iter(step_1_response))
+    key=next(iter(step_2_response))
+    
+    if step_2_response[key].get("status_code") == 201:
 
-    img_count=1
+        # key=next(iter(response))
+        file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
 
-    # Loop through key_list ("question_images", "option_images", "image_audit")
+        final_url = f"{URL}/authoring-content-service/api/assets/create-and-publish"
+
+        headers = {
+            "X-tenantId": "shared",
+            "Authorization": os.getenv("BEARER_TOKEN"),
+            "Content-Type": "application/json"
+        }
+        
+        payload={
+            "fileName":key,
+            "fileId": step_1_response[key].get("response").get("fileId"),
+            "uploadId": step_1_response[key].get("response").get("uploadId"),
+            "title": f"{question_code}_img_{media_count}",
+            "description": f"{question_code}_img_{media_count}",
+            "type": "IMAGE",
+            "metadata": [],
+            "systemMetadata": [],
+            "tagIds": [],
+        }
+
+        response = requests.post(final_url, headers=headers, json=payload)
+
+        result={}
+        temp_dict = {
+            "api_status":"success" if response.status_code==201 else "failed",
+            "status_code": response.status_code,
+            "response": response.json()
+        }
+        result[file_name]=temp_dict
+        check_json_exists(upload_path,"step_3_response.json",result)
+        
+        return result
+        
+    else :
+        print("step 3 skipped")
+        value={}
+        temp_response= {
+            "status_code":"404"
+        }
+        value[key]=temp_response
+        
+        return value
+
+def url_replacement(step_3_response, step_1_response, question_data, image):
+    """Only does the in-memory replacement now. No file I/O."""
+    key = next(iter(step_3_response))
+    old_url = image.get("src")
+
+    if step_3_response[key].get("status_code") == 201:
+        new_url = step_1_response[key].get("response").get("fileId")
+        question_data = search_and_replace(question_data, new_url, old_url)
+    else:
+        print(f"skip - upload failed for {old_url}")
+
+    return question_data
+    
+
+def image_migration(URL, resolution_list, question_code, question_data, file_name, folder):
+    img_count = 1
+
     for key in key_list:
-
-        # if True means the list is not empty there are image to process
-        if resolution_list.get(key) :
-
-            # Loop inside key for each image
+        if resolution_list.get(key):
             for image in resolution_list.get(key):
-                # pprint(image)
-                iamge_url = image.get("src")
-                # print(iamge_url)
-                question_id=resolution_list.get("question_id")
+                question_id = resolution_list.get("question_id")
 
-                step_1_response=migration_step_1(URL, image, question_id)
-                    
-                migration_step_2(step_1_response, image, URL, question_id)
-                    
-                migration_step_3(URL, step_1_response, question_code, img_count, question_id, image)
+                step_1_response = migration_step_1(URL, image, question_id)
+                
+                step_2_response = migration_step_2(step_1_response, image, URL, question_id)
+                
+                step_3_response = migration_step_3(URL, step_1_response, question_code, img_count, question_id, image, step_2_response)
+
+                question_data = url_replacement(step_3_response, step_1_response, question_data, image)
 
                 print(f"\t{img_count} image migrated")
+                img_count += 1
 
-                img_count=img_count+1
+    # write ONCE, after ALL images (question_images, option_images, image_audit) are done
+    path = os.path.join(BASE_DIR, "final_output", folder)
+    check_json_exists(path, file_name, question_data)
