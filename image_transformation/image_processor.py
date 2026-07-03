@@ -181,6 +181,76 @@ def transform_and_save(
     return True
 
 
+def process_media_only(
+    question_id: str,
+    category: str,
+    src: str,
+) -> bool:
+    """Locate one audio/video file, download if missing, and save to transformation output directory."""
+    import shutil
+    if not src:
+        return False
+
+    media_name = extract_image_name(src)
+    if not media_name:
+        log_warning(f"Could not extract media name from src: {src}")
+        return False
+
+    media_path = find_image_file(question_id, media_name)
+    if not media_path:
+        clean_src = src.replace('../', '')
+        if clean_src.startswith('./'):
+            clean_src = clean_src[2:]
+        url = f"https://shared.alefed.com/{clean_src}"
+        
+        env_file = os.path.join(SCRIPTS_DIR, ".env")
+        cookie_val = ""
+        if os.path.isfile(env_file):
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("YOUR_ASSETS_COOKIE="):
+                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
+        
+        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_images", category)
+        os.makedirs(download_dir, exist_ok=True)
+        download_path = os.path.join(download_dir, f"{question_id}_{media_name}")
+        
+        req = urllib.request.Request(url)
+        if cookie_val:
+            req.add_header('cookie', cookie_val)
+        
+        try:
+            with urllib.request.urlopen(req) as response:
+                with open(download_path, "wb") as out_file:
+                    out_file.write(response.read())
+            media_path = download_path
+        except urllib.error.HTTPError as e:
+            log_error(f"Failed to download media {url}: HTTP {e.code} {e.reason}")
+            _append_media_failed(question_id, url, e.code)
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
+        except urllib.error.URLError as e:
+            log_error(f"Failed to download media {url}: {e.reason}")
+            _append_media_failed(question_id, url, "URL_ERROR")
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
+        except Exception as e:
+            log_error(f"Failed to download media {url}: {e}")
+            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
+
+    output_path = build_output_path(category, os.path.basename(media_path))
+    
+    try:
+        shutil.copy2(media_path, output_path)
+    except Exception as error:
+        log_error(f"Media copy failed: {error}")
+        return False
+
+    return True
+
+
 def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     """
     Process all images described in one image_resolution_engine result.
@@ -190,6 +260,9 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     2. question_images
     3. option_images
     """
+    if not resolution_result:
+        return
+
     question_id = resolution_result.get("question_id")
     category = resolution_result.get("category")
 
@@ -199,6 +272,13 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
 
     resolution = resolution_result.get("resolution") or {}
 
+    # Process all audio/video assets immediately
+    audios = resolution_result.get("question_audios") or []
+    videos = resolution_result.get("question_videos") or []
+    for entry in audios + videos:
+        process_media_only(question_id, category, entry.get("src"))
+
+    # Process audits (strictly images now)
     for audit_entry in (resolution_result.get("image_audit") or []):
         src = audit_entry.get("src")
         target_width = audit_entry.get("max_width")
@@ -219,6 +299,7 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
             target_height=int(target_height),
         )
 
+    # Process question and option images (strictly images now)
     question_images = resolution_result.get("question_images") or []
     option_images = resolution_result.get("option_images") or []
 

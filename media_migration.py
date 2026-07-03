@@ -92,15 +92,15 @@ for folder in folder_list:
 
                 print(f"\t[{question_count}/{len(data)}]Processing question :- {question_id}")
                 
-                # getting resolution for image
+                # getting resolution for media
                 image_resolution=analyze_question(data[file_len], question_type, folder)
                 write_in_json(os.path.join(IMAGE_RESOLUTION_OUTPUT,folder,file),image_resolution)
-                print(f"\tgot the image resolution output")
+                print(f"\tgot the media resolution output")
                 
-                # Applying image transfoemation
+                # Applying media transformation
                 process_resolution_output(image_resolution)
 
-                # Image migration
+                # Media migration
                 image_migration(URL, image_resolution, question_code, data[file_len], file, folder)
                 # terminal_choice()
                 
