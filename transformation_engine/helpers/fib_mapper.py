@@ -34,6 +34,20 @@ def extract_correct_answer_text(answer_html, question_id, lesson):
 def get_list_of_text(value):
     return [v.get("text") for v in value]
 
+
+def extract_feedback_text(feedback_html, question_id, lesson):
+    parsed_feedback = parse_html_content(
+        feedback_html or "",
+        question_id,
+        lesson
+    )
+
+    for item in parsed_feedback:
+        if item.get("type") == "text" and item.get("text"):
+            return item["text"]
+
+    return ""
+
 def map_fib_structure(raw, qid, lesson, file_path):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
@@ -104,6 +118,13 @@ def map_fib_structure(raw, qid, lesson, file_path):
             correct_answer
         )
 
+        feedback = blank_data.get("feedback") or ""
+        parsed_feedback = extract_feedback_text(
+            feedback,
+            qid,
+            lesson
+        )
+
         item = {
             "id": sequential_id,
             "weight": normalize_weight(
@@ -112,9 +133,7 @@ def map_fib_structure(raw, qid, lesson, file_path):
                     100.0
                 )
             ),
-            "feedback": blank_data.get(
-                "feedback"
-            ) or "",
+            "feedback": parsed_feedback,
             "rules": blank_data.get(
                 "rules",
                 []
