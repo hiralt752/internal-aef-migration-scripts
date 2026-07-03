@@ -114,6 +114,50 @@ def _extract_side_image_from_prompt(html):
     return html, None
 
 
+def _extract_audio_from_prompt(html):
+    """Detect first <audio> tag in HTML, return cleaned HTML + audio dict."""
+    if not html:
+        return html, None
+
+    soup = BeautifulSoup(html, "html.parser")
+    audio_tag = soup.find("audio")
+    if audio_tag:
+        src = audio_tag.get("src")
+        if not src:
+            source_tag = audio_tag.find("source")
+            if source_tag:
+                src = source_tag.get("src")
+        audio_tag.decompose()
+        cleaned = str(soup).strip()
+        if src:
+            return cleaned, {"url": src}
+        return cleaned, None
+
+    return html, None
+
+
+def _extract_video_from_prompt(html):
+    """Detect first <video> tag in HTML, return cleaned HTML + video dict."""
+    if not html:
+        return html, None
+
+    soup = BeautifulSoup(html, "html.parser")
+    video_tag = soup.find("video")
+    if video_tag:
+        src = video_tag.get("src")
+        if not src:
+            source_tag = video_tag.find("source")
+            if source_tag:
+                src = source_tag.get("src")
+        video_tag.decompose()
+        cleaned = str(soup).strip()
+        if src:
+            return cleaned, {"url": src}
+        return cleaned, None
+
+    return html, None
+
+
 def build_fib_dnd_item_body(raw, question_id, lesson, file_path=None):
 
     body = raw.get("body", {})
@@ -122,7 +166,9 @@ def build_fib_dnd_item_body(raw, question_id, lesson, file_path=None):
 
     prompt = body.get("prompt")
     replaced = replace_blank_fields(prompt)
-    cleaned_prompt, side_image = _extract_side_image_from_prompt(replaced)
+    cleaned_prompt, audio = _extract_audio_from_prompt(replaced)
+    cleaned_prompt, video = _extract_video_from_prompt(cleaned_prompt)
+    cleaned_prompt, side_image = _extract_side_image_from_prompt(cleaned_prompt)
 
     prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
 
@@ -148,9 +194,10 @@ def build_fib_dnd_item_body(raw, question_id, lesson, file_path=None):
 
         "instruction": None,
 
-        "audio": None,
+        "audio": audio,
 
-        "video": None,
+        "video": video,
+
 
         "image": None,
 
@@ -247,6 +294,8 @@ def build_fib_options(choice_items, question_id, lesson, file_path=None):
     Each value is parsed into typed content blocks via parse_html_content():
       - Text  → { "type": "text",  "text": "..." }
       - Image → { "type": "image", "image": { "url": "..." } }
+      - Audio → { "type": "audio", "audio": { "url": "..." } }
+      - Video → { "type": "video", "video": { "url": "..." } }
     """
 
     options = []
@@ -256,21 +305,50 @@ def build_fib_options(choice_items, question_id, lesson, file_path=None):
         # Use .value — NOT .answer (MCQ uses .answer)
         raw_value = choice.get("value", "")
 
-        # parse_html_content returns a list of typed content blocks:
-        # e.g. [{"type": "text", "text": "..."}, {"type": "image", "image": {"url": "..."}}]
-        parsed_content = parse_html_content(
-            raw_value,
-            question_id,
-            lesson
-        )
+        content_obj = None
+        if raw_value:
+            soup = BeautifulSoup(raw_value, "html.parser")
+            audio_tag = soup.find("audio")
+            if audio_tag:
+                src = audio_tag.get("src")
+                if not src:
+                    source_tag = audio_tag.find("source")
+                    if source_tag:
+                        src = source_tag.get("src")
+                audio_tag.decompose()
+                if src:
+                    content_obj = {"type": "audio", "audio": {"url": src}}
 
-        # Normalise: guarantee at least one block so content is never empty
-        if not parsed_content:
-            parsed_content = [{"type": "text", "text": ""}]
+            if not content_obj:
+                video_tag = soup.find("video")
+                if video_tag:
+                    src = video_tag.get("src")
+                    if not src:
+                        source_tag = video_tag.find("source")
+                        if source_tag:
+                            src = source_tag.get("src")
+                    video_tag.decompose()
+                    if src:
+                        content_obj = {"type": "video", "video": {"url": src}}
+
+            if content_obj:
+                raw_value = str(soup).strip()
+
+        if not content_obj:
+            # parse_html_content returns a list of typed content blocks:
+            # e.g. [{"type": "text", "text": "..."}, {"type": "image", "image": {"url": "..."}}]
+            parsed_content = parse_html_content(
+                raw_value,
+                question_id,
+                lesson
+            )
+
+            # Normalise: guarantee at least one block so content is never empty
+            content_obj = parsed_content[0] if parsed_content else {"type": "text", "text": ""}
 
         options.append({
             "id": index,
-            "content": parsed_content   # list of { type, text } or { type, image: { url } }
+            "content": content_obj
         })
 
     return options
