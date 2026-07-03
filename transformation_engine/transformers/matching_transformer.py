@@ -1,6 +1,8 @@
 from helpers.mathml_converter import process_html_and_convert_math
 
-
+from helpers.language_mapper import (
+    languageMapper
+)
 class MatchingTransformer:
 
     def __init__(self, raw):
@@ -29,7 +31,7 @@ class MatchingTransformer:
                     "code": q.get("code"),
                     "externalId": q.get("id"),
                     "title": None,
-                    "language": q.get("language", "EN_US"),
+                    "language": languageMapper(q.get("language")),
                     "keywords": metadata_source.get("keywords", []),
                     "parentReference": None,
                     "source": source_val,

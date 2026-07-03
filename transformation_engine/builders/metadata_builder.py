@@ -1,7 +1,9 @@
 from helpers.annotation_mapper import (
     build_annotation_tags
 )
-
+from helpers.language_mapper import (
+    languageMapper
+)
 def build_metadata(raw):
 
     metadata = raw.get("metadata", {})
@@ -23,7 +25,7 @@ def build_metadata(raw):
 
             "title": None,
 
-            "language": raw.get("language"),
+            "language": languageMapper(raw.get("language")),
 
             "keywords":
                 build_keywords(metadata),
