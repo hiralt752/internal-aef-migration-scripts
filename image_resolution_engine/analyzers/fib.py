@@ -46,6 +46,7 @@ def _build_audit_entry(img, image_role, widget_type, resolution, section=None, c
         "section": section,
         "content_index": content_index,
         "src": img.get("src"),
+        "content_type": img.get("content_type", "IMAGE"),
         "width": img.get("width"),
         "height": img.get("height"),
         "key": img.get("key"),

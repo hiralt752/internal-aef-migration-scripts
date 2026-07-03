@@ -100,9 +100,9 @@ for folder in folder_list:
                 # Applying image transfoemation
                 process_resolution_output(image_resolution)
 
-                # Image migration
+                # # Image migration
                 image_migration(URL, image_resolution, question_code, data[file_len], file, folder)
-                # terminal_choice()
+                # # terminal_choice()
                 
                 print("\tNext question ...\n")
                 question_count += 1

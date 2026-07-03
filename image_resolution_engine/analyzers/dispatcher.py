@@ -17,4 +17,41 @@ _ROUTER = {
 
 def analyze_question(data, q_type, category):
     fn = _ROUTER.get(q_type)
-    return fn(data, q_type, category) if fn else None   
+    if not fn:
+        return None
+        
+    res = fn(data, q_type, category)
+    if not res:
+        return None
+        
+    audios = []
+    videos = []
+    
+    seen_audios = set()
+    seen_videos = set()
+    
+    for list_key in ("question_images", "option_images", "image_audit"):
+        items = res.get(list_key) or []
+        filtered_items = []
+        for item in items:
+            content_type = item.get("content_type", "IMAGE")
+            if content_type == "AUDIO":
+                item.pop("width", None)
+                item.pop("height", None)
+                src = item.get("src")
+                if src and src not in seen_audios:
+                    seen_audios.add(src)
+                    audios.append(item)
+            elif content_type == "VIDEO":
+                src = item.get("src")
+                if src and src not in seen_videos:
+                    seen_videos.add(src)
+                    videos.append(item)
+            else:
+                filtered_items.append(item)
+        res[list_key] = filtered_items
+        
+    res["question_audios"] = audios
+    res["question_videos"] = videos
+    
+    return res

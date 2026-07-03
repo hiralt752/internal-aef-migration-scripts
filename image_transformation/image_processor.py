@@ -14,7 +14,7 @@ from image_transformation.image_transformation import (
     log_warning,
     transform_image,
 )
-
+import shutil  # For copying audio/video files without transformation
 SCRIPTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_ROOT = r"C:\Users\PC\Documents\project_migration\media"
 TRANSFORMATION_DIR = os.path.join(SCRIPTS_DIR, "image_transformation")
@@ -155,20 +155,21 @@ def transform_and_save(
                     out_file.write(response.read())
             image_path = download_path
         except urllib.error.HTTPError as e:
-            log_error(f"Failed to download image {url}: HTTP {e.code} {e.reason}")
+            log_warning(f"Image not found at {url}: HTTP {e.code} {e.reason}")
+            # Record failure but continue without raising
             _append_media_failed(question_id, url, e.code)
             _append_ignore_question(question_id)
-            raise MediaDownloadFailed(url)
+            return False
         except urllib.error.URLError as e:
-            log_error(f"Failed to download image {url}: {e.reason}")
+            log_warning(f"Failed to download image {url}: {e.reason}")
             _append_media_failed(question_id, url, "URL_ERROR")
             _append_ignore_question(question_id)
-            raise MediaDownloadFailed(url)
+            return False
         except Exception as e:
-            log_error(f"Failed to download image {url}: {e}")
+            log_warning(f"Unexpected error downloading image {url}: {e}")
             _append_media_failed(question_id, url, "UNKNOWN_ERROR")
             _append_ignore_question(question_id)
-            raise MediaDownloadFailed(url)
+            return False
 
     output_path = build_output_path(category, os.path.basename(image_path))
 
@@ -178,6 +179,140 @@ def transform_and_save(
         log_error(f"Image transformation failed: {error}")
         return False
 
+    return True
+
+def copy_media_and_save(question_id: str, category: str, src: str) -> bool:
+    """Locate an audio or video file, download if necessary, and copy it to the output directory.
+    Returns True on success, False otherwise.
+    """
+    if not src:
+        return False
+
+    media_name = extract_image_name(src)
+    if not media_name:
+        log_warning(f"Could not extract media name from src: {src}")
+        return False
+
+    # Try to find the media file locally using the same pattern as images.
+    media_path = find_image_file(question_id, media_name)
+    if not media_path:
+        # Attempt to download from the shared assets server.
+        clean_src = src.replace('../', '')
+        if clean_src.startswith('./'):
+            clean_src = clean_src[2:]
+        url = f"https://shared.alefed.com/{clean_src}"
+
+        env_file = os.path.join(SCRIPTS_DIR, ".env")
+        cookie_val = ""
+        if os.path.isfile(env_file):
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("YOUR_ASSETS_COOKIE="):
+                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
+
+        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_media", category)
+        os.makedirs(download_dir, exist_ok=True)
+        download_path = os.path.join(download_dir, f"{question_id}_{media_name}")
+
+        req = urllib.request.Request(url)
+        req.add_header('accept', '*/*')
+        req.add_header('cache-control', 'no-cache')
+        if cookie_val:
+            req.add_header('cookie', cookie_val)
+        try:
+            with urllib.request.urlopen(req) as response:
+                with open(download_path, "wb") as out_file:
+                    out_file.write(response.read())
+            media_path = download_path
+        except urllib.error.HTTPError as e:
+            log_warning(f"Media not found at {url}: HTTP {e.code} {e.reason}")
+            _append_media_failed(question_id, url, e.code)
+            _append_ignore_question(question_id)
+            return False
+        except urllib.error.URLError as e:
+            log_warning(f"Failed to download media {url}: {e.reason}")
+            _append_media_failed(question_id, url, "URL_ERROR")
+            _append_ignore_question(question_id)
+            return False
+        except Exception as e:
+            log_warning(f"Unexpected error downloading media {url}: {e}")
+            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
+            _append_ignore_question(question_id)
+            return False
+
+    output_path = build_output_path(category, os.path.basename(media_path))
+    try:
+        shutil.copy2(media_path, output_path)
+    except Exception as error:
+        log_error(f"Failed to copy media {media_path} to {output_path}: {error}")
+        return False
+    return True
+
+def copy_media_and_save(question_id: str, category: str, src: str) -> bool:
+    """Locate an audio or video file, download if necessary, and copy it to the output directory.
+    Returns True on success, False otherwise.
+    """
+    if not src:
+        return False
+
+    media_name = extract_image_name(src)
+    if not media_name:
+        log_warning(f"Could not extract media name from src: {src}")
+        return False
+
+    # Try to find the media file locally using the same pattern as images.
+    media_path = find_image_file(question_id, media_name)
+    if not media_path:
+        # Attempt to download from the shared assets server.
+        clean_src = src.replace('../', '')
+        if clean_src.startswith('./'):
+            clean_src = clean_src[2:]
+        url = f"https://shared.alefed.com/{clean_src}"
+
+        env_file = os.path.join(SCRIPTS_DIR, ".env")
+        cookie_val = ""
+        if os.path.isfile(env_file):
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("YOUR_ASSETS_COOKIE="):
+                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
+
+        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_media", category)
+        os.makedirs(download_dir, exist_ok=True)
+        download_path = os.path.join(download_dir, f"{question_id}_{media_name}")
+
+        req = urllib.request.Request(url)
+        req.add_header('accept', '*/*')
+        req.add_header('cache-control', 'no-cache')
+        if cookie_val:
+            req.add_header('cookie', cookie_val)
+        try:
+            with urllib.request.urlopen(req) as response:
+                with open(download_path, "wb") as out_file:
+                    out_file.write(response.read())
+            media_path = download_path
+        except urllib.error.HTTPError as e:
+            log_warning(f"Media not found at {url}: HTTP {e.code} {e.reason}")
+            _append_media_failed(question_id, url, e.code)
+            _append_ignore_question(question_id)
+            return False
+        except urllib.error.URLError as e:
+            log_warning(f"Failed to download media {url}: {e.reason}")
+            _append_media_failed(question_id, url, "URL_ERROR")
+            _append_ignore_question(question_id)
+            return False
+        except Exception as e:
+            log_warning(f"Unexpected error downloading media {url}: {e}")
+            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
+            _append_ignore_question(question_id)
+            return False
+
+    output_path = build_output_path(category, os.path.basename(media_path))
+    try:
+        shutil.copy2(media_path, output_path)
+    except Exception as error:
+        log_error(f"Failed to copy media {media_path} to {output_path}: {error}")
+        return False
     return True
 
 
@@ -274,3 +409,16 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
                     target_width=int(target_width),
                     target_height=int(target_height),
                 )
+
+    # Copy audio and video files without transformation
+    for media_entry in (resolution_result.get("question_audios") or []):
+        src = media_entry.get("src")
+        if not src:
+            continue
+        copy_media_and_save(question_id, category, src)
+
+    for media_entry in (resolution_result.get("question_videos") or []):
+        src = media_entry.get("src")
+        if not src:
+            continue
+        copy_media_and_save(question_id, category, src)

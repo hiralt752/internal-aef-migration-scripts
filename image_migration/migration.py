@@ -9,7 +9,7 @@ from pathlib import Path
 
 load_dotenv()
 
-key_list=["question_images", "option_images", "image_audit"]
+key_list=["question_images", "option_images", "image_audit", "question_audios", "question_videos"]
 
 media_path=r"C:\Users\PC\Desktop\alef_new\internal_repo\media_migration\image_transformation\image_transformation_output"
 BASE_DIR = Path(__file__).resolve().parent.parent
