@@ -133,11 +133,16 @@ def transform_and_save(
         
         env_file = os.path.join(SCRIPTS_DIR, ".env")
         cookie_val = ""
+        bearer_val = ""
         if os.path.isfile(env_file):
             with open(env_file, "r", encoding="utf-8") as f:
                 for line in f:
                     if line.startswith("YOUR_ASSETS_COOKIE="):
                         cookie_val = line.strip().split("=", 1)[1].strip('"\'')
+                    elif "BEARER_TOKEN" in line:
+                        parts = line.strip().split("=", 1)
+                        if len(parts) == 2:
+                            bearer_val = parts[1].strip().strip('"\'')
         
         download_dir = os.path.join(SCRIPTS_DIR, "downloaded_images", category)
         os.makedirs(download_dir, exist_ok=True)
@@ -148,6 +153,8 @@ def transform_and_save(
         req.add_header('cache-control', 'no-cache')
         if cookie_val:
             req.add_header('cookie', cookie_val)
+        if bearer_val:
+            req.add_header('Authorization', bearer_val)
         
         try:
             with urllib.request.urlopen(req) as response:
@@ -170,7 +177,11 @@ def transform_and_save(
             _append_ignore_question(question_id)
             raise MediaDownloadFailed(url)
 
-    output_path = build_output_path(category, os.path.basename(image_path))
+    out_basename = os.path.basename(image_path)
+    name_without_ext, ext = os.path.splitext(out_basename)
+    if ext.lower() in (".webp", ".jfif"):
+        out_basename = f"{name_without_ext}.png"
+    output_path = build_output_path(category, out_basename)
 
     try:
         transform_image(image_path, output_path, target_width, target_height)
@@ -205,11 +216,16 @@ def process_media_only(
         
         env_file = os.path.join(SCRIPTS_DIR, ".env")
         cookie_val = ""
+        bearer_val = ""
         if os.path.isfile(env_file):
             with open(env_file, "r", encoding="utf-8") as f:
                 for line in f:
                     if line.startswith("YOUR_ASSETS_COOKIE="):
                         cookie_val = line.strip().split("=", 1)[1].strip('"\'')
+                    elif "BEARER_TOKEN" in line:
+                        parts = line.strip().split("=", 1)
+                        if len(parts) == 2:
+                            bearer_val = parts[1].strip().strip('"\'')
         
         download_dir = os.path.join(SCRIPTS_DIR, "downloaded_images", category)
         os.makedirs(download_dir, exist_ok=True)
@@ -218,6 +234,8 @@ def process_media_only(
         req = urllib.request.Request(url)
         if cookie_val:
             req.add_header('cookie', cookie_val)
+        if bearer_val:
+            req.add_header('Authorization', bearer_val)
         
         try:
             with urllib.request.urlopen(req) as response:

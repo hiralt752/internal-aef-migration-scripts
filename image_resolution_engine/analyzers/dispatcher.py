@@ -29,26 +29,30 @@ def analyze_question(data, q_type, category):
     
     seen_audios = set()
     seen_videos = set()
+    seen_images = set()
     
     for list_key in ("question_images", "option_images", "image_audit"):
         items = res.get(list_key) or []
         filtered_items = []
         for item in items:
+            src = item.get("src")
+            if not src:
+                continue
             content_type = item.get("content_type", "IMAGE")
             if content_type == "AUDIO":
                 item.pop("width", None)
                 item.pop("height", None)
-                src = item.get("src")
-                if src and src not in seen_audios:
+                if src not in seen_audios:
                     seen_audios.add(src)
                     audios.append(item)
             elif content_type == "VIDEO":
-                src = item.get("src")
-                if src and src not in seen_videos:
+                if src not in seen_videos:
                     seen_videos.add(src)
                     videos.append(item)
             else:
-                filtered_items.append(item)
+                if src not in seen_images:
+                    seen_images.add(src)
+                    filtered_items.append(item)
         res[list_key] = filtered_items
         
     res["question_audios"] = audios

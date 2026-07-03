@@ -52,20 +52,30 @@ def migration_step_1(URL, image_data, question_id):
 
     final_url=f"{URL}/authoring-content-service/api/assets/presigned-upload-url?"
 
+    # Resolve filename & extension dynamically, handling webp/jfif conversion to png
+    src_basename = os.path.basename(image_data.get('src'))
+    name_without_ext, ext = os.path.splitext(src_basename)
+    ext = ext[1:].lower()
+    content_type = image_data.get("content_type", "IMAGE")
+    
+    if content_type == "IMAGE" and ext in ("webp", "jfif"):
+        src_basename = f"{name_without_ext}.png"
+        ext = "png"
+
     # Search for the media locally using both custom path and local path fallback.
     local_path = os.path.join(BASE_DIR, "image_transformation", "image_transformation_output")
     image_path = []
     for path in (media_path, local_path):
         if os.path.exists(path):
             image_path = glob(
-                os.path.join(path, "**", f"{question_id}_*_{os.path.basename(image_data.get('src'))}"),
+                os.path.join(path, "**", f"{question_id}_*_{src_basename}"),
                 recursive=True
             )
             if image_path:
                 break
     
     # Make a file name for server B
-    file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
+    file_name=f"{question_id}_{image_data.get("key")}_{src_basename}"
 
     if not image_path:
         print(f"Error: media file not found locally for question {question_id}, src {image_data.get('src')}")
@@ -77,9 +87,6 @@ def migration_step_1(URL, image_data, question_id):
     }
 
     # Resolve dynamic MIME types
-    ext = os.path.splitext(os.path.basename(image_data.get("src")))[1][1:].lower()
-    content_type = image_data.get("content_type", "IMAGE")
-    
     if content_type == "AUDIO":
         mime_type = f"audio/{ext}"
         if ext == "mp3":
@@ -119,13 +126,23 @@ def migration_step_2(step_1_response, image_data, URL, question_id):
     
     if step_1_response[key].get("status_code") == 200 :
         
+        # Resolve filename & extension dynamically, handling webp/jfif conversion to png
+        src_basename = os.path.basename(image_data.get('src'))
+        name_without_ext, ext = os.path.splitext(src_basename)
+        ext = ext[1:].lower()
+        content_type = image_data.get("content_type", "IMAGE")
+        
+        if content_type == "IMAGE" and ext in ("webp", "jfif"):
+            src_basename = f"{name_without_ext}.png"
+            ext = "png"
+
         # Search for the media locally using both custom path and local path fallback.
         local_path = os.path.join(BASE_DIR, "image_transformation", "image_transformation_output")
         image_path = []
         for path in (media_path, local_path):
             if os.path.exists(path):
                 image_path = glob(
-                    os.path.join(path, "**", f"{question_id}_*_{os.path.basename(image_data.get('src'))}"),
+                    os.path.join(path, "**", f"{question_id}_*_{src_basename}"),
                     recursive=True
                 )
                 if image_path:
@@ -134,15 +151,12 @@ def migration_step_2(step_1_response, image_data, URL, question_id):
         if not image_path:
             return {key: {"status_code": 404, "api_status": "failed", "response": "Local file not found"}}
 
-        file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
+        file_name=f"{question_id}_{image_data.get("key")}_{src_basename}"
 
         # Getting resignedUrl from response of step 1 migration
         presigned_url=step_1_response[key].get("response").get("presignedUrl").get("url")
 
         # Resolve dynamic MIME types
-        ext = os.path.splitext(os.path.basename(image_data.get("src")))[1][1:].lower()
-        content_type = image_data.get("content_type", "IMAGE")
-        
         if content_type == "AUDIO":
             mime_type = f"audio/{ext}"
             if ext == "mp3":
@@ -192,8 +206,13 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
     
     if step_2_response[key].get("status_code") == 201:
 
-        # key=next(iter(response))
-        file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
+        # Resolve filename dynamically, handling webp/jfif conversion to png
+        src_basename = os.path.basename(image_data.get('src'))
+        name_without_ext, ext = os.path.splitext(src_basename)
+        if image_data.get("content_type", "IMAGE") == "IMAGE" and ext.lower() in (".webp", ".jfif"):
+            src_basename = f"{name_without_ext}.png"
+            
+        file_name=f"{question_id}_{image_data.get("key")}_{src_basename}"
 
         final_url = f"{URL}/authoring-content-service/api/assets/create-and-publish"
 
