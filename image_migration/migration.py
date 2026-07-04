@@ -48,7 +48,7 @@ def write_in_json(file_path, list_data):
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def migration_step_1(URL, image_data, question_id):
+def migration_step_1(URL, image_data, question_id, content_type):
 
     final_url=f"{URL}/authoring-content-service/api/assets/presigned-upload-url?"
 
@@ -68,9 +68,11 @@ def migration_step_1(URL, image_data, question_id):
 
     params = {
         "fileName":file_name,
-        "contentType":f"image/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}",
+        "contentType":f"{content_type.lower()}/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}",
         "fileSize":f"{os.path.getsize(image_path[0])}"
     }
+    
+    # pprint(f"step -1 {params}\n")
 
     response = requests.get(final_url, headers=headers, params=params)
     
@@ -88,7 +90,7 @@ def migration_step_1(URL, image_data, question_id):
 
     return result
 
-def migration_step_2(step_1_response, image_data, URL, question_id):
+def migration_step_2(step_1_response, image_data, URL, question_id, content_type):
     
     key=next(iter(step_1_response))
     
@@ -107,8 +109,10 @@ def migration_step_2(step_1_response, image_data, URL, question_id):
             "Origin":URL,
             "Referer":f"{URL}/",
             "x-ms-blob-type": "BlockBlob",
-            "Content-Type": f"image/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}"
+            "Content-Type": f"{content_type.lower()}/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}"
         }
+        
+        # pprint(f"step -2 {headers}\n")
 
         with open(image_path[0], "rb") as f:
             response = requests.put(presigned_url, headers=headers, data=f)
@@ -134,7 +138,7 @@ def migration_step_2(step_1_response, image_data, URL, question_id):
         
         return value
     
-def migration_step_3(URL, step_1_response, question_code, media_count, question_id, image_data, step_2_response):
+def migration_step_3(URL, step_1_response, question_code, media_count, question_id, image_data, step_2_response, content_type):
     
     # step_1_key=next(iter(step_1_response))
     key=next(iter(step_2_response))
@@ -152,17 +156,26 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
             "Content-Type": "application/json"
         }
         
+        if content_type == "IMAGE" :
+            prefix= "img"
+        elif content_type == "AUDIO" :
+            prefix= "aud"
+        else :
+            prefix= "vid"
+        
         payload={
             "fileName":key,
             "fileId": step_1_response[key].get("response").get("fileId"),
             "uploadId": step_1_response[key].get("response").get("uploadId"),
-            "title": f"{question_code}_img_{media_count}",
-            "description": f"{question_code}_img_{media_count}",
-            "type": "IMAGE",
+            "title": f"{question_code}_{prefix}_{media_count}",
+            "description": f"{question_code}_{prefix}_{media_count}",
+            "type": content_type,
             "metadata": [],
             "systemMetadata": [],
             "tagIds": [],
         }
+        
+        # pprint(f"step -3 {payload}\n")
 
         response = requests.post(final_url, headers=headers, json=payload)
 
@@ -207,18 +220,22 @@ def image_migration(URL, resolution_list, question_code, question_data, file_nam
     for key in key_list:
         if resolution_list.get(key):
             for image in resolution_list.get(key):
+                # pprint(image)
                 question_id = resolution_list.get("question_id")
+                content_type= image.get("content_type")
+                # print(content_type)
 
-                step_1_response = migration_step_1(URL, image, question_id)
+                step_1_response = migration_step_1(URL, image, question_id, content_type)
                 
-                step_2_response = migration_step_2(step_1_response, image, URL, question_id)
+                step_2_response = migration_step_2(step_1_response, image, URL, question_id, content_type)
                 
-                step_3_response = migration_step_3(URL, step_1_response, question_code, img_count, question_id, image, step_2_response)
+                step_3_response = migration_step_3(URL, step_1_response, question_code, img_count, question_id, image, step_2_response, content_type)
 
                 question_data = url_replacement(step_3_response, step_1_response, question_data, image)
 
                 print(f"\t{img_count} image migrated")
                 img_count += 1
+                
 
     # write ONCE, after ALL images (question_images, option_images, image_audit) are done
     path = os.path.join(BASE_DIR, "final_output", folder)
