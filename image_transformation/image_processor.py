@@ -3,10 +3,8 @@ Locate and transform images using image_resolution_engine output.
 """
 
 import fnmatch
-import json
 import os
-import urllib.error
-import urllib.request
+import shutil  # For copying audio/video files without transformation
 from typing import Any
 
 from image_transformation.image_transformation import (
@@ -14,63 +12,13 @@ from image_transformation.image_transformation import (
     log_warning,
     transform_image,
 )
-import shutil  # For copying audio/video files without transformation
+
 SCRIPTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_ROOT = r"C:\Users\PC\Documents\project_migration\media"
 TRANSFORMATION_DIR = os.path.join(SCRIPTS_DIR, "image_transformation")
 TRANSFORMATION_OUTPUT_ROOT = os.path.join(
     TRANSFORMATION_DIR, "image_transformation_output"
 )
-IGNORE_QUESTION_FILE = os.path.join(SCRIPTS_DIR, "ignore_question.json")
-MEDIA_FAILED_FILE = os.path.join(TRANSFORMATION_DIR, "media_failed.json")
-
-
-class MediaDownloadFailed(Exception):
-    """Raised when an image cannot be found locally or downloaded remotely."""
-
-
-# =============================================================================
-# FAILURE TRACKING
-# =============================================================================
-
-def _append_ignore_question(question_id: str) -> None:
-    existing: list[str] = []
-    if os.path.isfile(IGNORE_QUESTION_FILE):
-        try:
-            with open(IGNORE_QUESTION_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if isinstance(data, list):
-                existing = data
-        except (json.JSONDecodeError, OSError):
-            pass
-
-    if question_id not in existing:
-        existing.append(question_id)
-
-    with open(IGNORE_QUESTION_FILE, "w", encoding="utf-8") as f:
-        json.dump(existing, f, ensure_ascii=False, indent=2)
-
-
-def _append_media_failed(question_id: str, media_url: str, status_code: Any) -> None:
-    existing: dict[str, Any] = {}
-    if os.path.isfile(MEDIA_FAILED_FILE):
-        try:
-            with open(MEDIA_FAILED_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if isinstance(data, dict):
-                existing = data
-        except (json.JSONDecodeError, OSError):
-            pass
-
-    entries = existing.get(question_id)
-    if not isinstance(entries, list):
-        entries = []
-
-    entries.append({"media_url": media_url, "status_code": status_code})
-    existing[question_id] = entries
-
-    with open(MEDIA_FAILED_FILE, "w", encoding="utf-8") as f:
-        json.dump(existing, f, ensure_ascii=False, indent=2)
 
 
 def extract_image_name(src: str) -> str:
@@ -113,8 +61,13 @@ def transform_and_save(
     src: str,
     target_width: int,
     target_height: int,
-) -> bool:
-    """Locate one image, transform it, and save the result."""
+) -> bool | None:
+    """Locate one image locally and transform it. No network fallback.
+
+    Returns True on success, False on a recoverable per-item failure (bad src,
+    transform error), or None if the file could not be found locally at all -
+    callers must treat None as "ignore the whole question", not just this item.
+    """
     if not src:
         return False
 
@@ -125,51 +78,8 @@ def transform_and_save(
 
     image_path = find_image_file(question_id, image_name)
     if not image_path:
-        
-        clean_src = src.replace('../', '')
-        if clean_src.startswith('./'):
-            clean_src = clean_src[2:]
-        url = f"https://shared.alefed.com/{clean_src}"
-        
-        env_file = os.path.join(SCRIPTS_DIR, ".env")
-        cookie_val = ""
-        if os.path.isfile(env_file):
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.startswith("YOUR_ASSETS_COOKIE="):
-                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
-        
-        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_images", category)
-        os.makedirs(download_dir, exist_ok=True)
-        download_path = os.path.join(download_dir, f"{question_id}_{image_name}")
-        
-        req = urllib.request.Request(url)
-        req.add_header('accept', 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8')
-        req.add_header('cache-control', 'no-cache')
-        if cookie_val:
-            req.add_header('cookie', cookie_val)
-        
-        try:
-            with urllib.request.urlopen(req) as response:
-                with open(download_path, "wb") as out_file:
-                    out_file.write(response.read())
-            image_path = download_path
-        except urllib.error.HTTPError as e:
-            log_warning(f"Image not found at {url}: HTTP {e.code} {e.reason}")
-            # Record failure but continue without raising
-            _append_media_failed(question_id, url, e.code)
-            _append_ignore_question(question_id)
-            return False
-        except urllib.error.URLError as e:
-            log_warning(f"Failed to download image {url}: {e.reason}")
-            _append_media_failed(question_id, url, "URL_ERROR")
-            _append_ignore_question(question_id)
-            return False
-        except Exception as e:
-            log_warning(f"Unexpected error downloading image {url}: {e}")
-            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
-            _append_ignore_question(question_id)
-            return False
+        log_warning(f"Media not found locally, ignoring question: {src}")
+        return None
 
     output_path = build_output_path(category, os.path.basename(image_path))
 
@@ -181,9 +91,14 @@ def transform_and_save(
 
     return True
 
-def copy_media_and_save(question_id: str, category: str, src: str) -> bool:
-    """Locate an audio or video file, download if necessary, and copy it to the output directory.
-    Returns True on success, False otherwise.
+
+def copy_media_and_save(question_id: str, category: str, src: str) -> bool | None:
+    """Locate an audio or video file locally and copy it to the output directory.
+    No network fallback.
+
+    Returns True on success, False on a recoverable per-item failure, or None
+    if the file could not be found locally at all - callers must treat None
+    as "ignore the whole question", not just this item.
     """
     if not src:
         return False
@@ -193,119 +108,10 @@ def copy_media_and_save(question_id: str, category: str, src: str) -> bool:
         log_warning(f"Could not extract media name from src: {src}")
         return False
 
-    # Try to find the media file locally using the same pattern as images.
     media_path = find_image_file(question_id, media_name)
     if not media_path:
-        # Attempt to download from the shared assets server.
-        clean_src = src.replace('../', '')
-        if clean_src.startswith('./'):
-            clean_src = clean_src[2:]
-        url = f"https://shared.alefed.com/{clean_src}"
-
-        env_file = os.path.join(SCRIPTS_DIR, ".env")
-        cookie_val = ""
-        if os.path.isfile(env_file):
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.startswith("YOUR_ASSETS_COOKIE="):
-                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
-
-        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_media", category)
-        os.makedirs(download_dir, exist_ok=True)
-        download_path = os.path.join(download_dir, f"{question_id}_{media_name}")
-
-        req = urllib.request.Request(url)
-        req.add_header('accept', '*/*')
-        req.add_header('cache-control', 'no-cache')
-        if cookie_val:
-            req.add_header('cookie', cookie_val)
-        try:
-            with urllib.request.urlopen(req) as response:
-                with open(download_path, "wb") as out_file:
-                    out_file.write(response.read())
-            media_path = download_path
-        except urllib.error.HTTPError as e:
-            log_warning(f"Media not found at {url}: HTTP {e.code} {e.reason}")
-            _append_media_failed(question_id, url, e.code)
-            _append_ignore_question(question_id)
-            return False
-        except urllib.error.URLError as e:
-            log_warning(f"Failed to download media {url}: {e.reason}")
-            _append_media_failed(question_id, url, "URL_ERROR")
-            _append_ignore_question(question_id)
-            return False
-        except Exception as e:
-            log_warning(f"Unexpected error downloading media {url}: {e}")
-            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
-            _append_ignore_question(question_id)
-            return False
-
-    output_path = build_output_path(category, os.path.basename(media_path))
-    try:
-        shutil.copy2(media_path, output_path)
-    except Exception as error:
-        log_error(f"Failed to copy media {media_path} to {output_path}: {error}")
-        return False
-    return True
-
-def copy_media_and_save(question_id: str, category: str, src: str) -> bool:
-    """Locate an audio or video file, download if necessary, and copy it to the output directory.
-    Returns True on success, False otherwise.
-    """
-    if not src:
-        return False
-
-    media_name = extract_image_name(src)
-    if not media_name:
-        log_warning(f"Could not extract media name from src: {src}")
-        return False
-
-    # Try to find the media file locally using the same pattern as images.
-    media_path = find_image_file(question_id, media_name)
-    if not media_path:
-        # Attempt to download from the shared assets server.
-        clean_src = src.replace('../', '')
-        if clean_src.startswith('./'):
-            clean_src = clean_src[2:]
-        url = f"https://shared.alefed.com/{clean_src}"
-
-        env_file = os.path.join(SCRIPTS_DIR, ".env")
-        cookie_val = ""
-        if os.path.isfile(env_file):
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.startswith("YOUR_ASSETS_COOKIE="):
-                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
-
-        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_media", category)
-        os.makedirs(download_dir, exist_ok=True)
-        download_path = os.path.join(download_dir, f"{question_id}_{media_name}")
-
-        req = urllib.request.Request(url)
-        req.add_header('accept', '*/*')
-        req.add_header('cache-control', 'no-cache')
-        if cookie_val:
-            req.add_header('cookie', cookie_val)
-        try:
-            with urllib.request.urlopen(req) as response:
-                with open(download_path, "wb") as out_file:
-                    out_file.write(response.read())
-            media_path = download_path
-        except urllib.error.HTTPError as e:
-            log_warning(f"Media not found at {url}: HTTP {e.code} {e.reason}")
-            _append_media_failed(question_id, url, e.code)
-            _append_ignore_question(question_id)
-            return False
-        except urllib.error.URLError as e:
-            log_warning(f"Failed to download media {url}: {e.reason}")
-            _append_media_failed(question_id, url, "URL_ERROR")
-            _append_ignore_question(question_id)
-            return False
-        except Exception as e:
-            log_warning(f"Unexpected error downloading media {url}: {e}")
-            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
-            _append_ignore_question(question_id)
-            return False
+        log_warning(f"Media not found locally, ignoring question: {src}")
+        return None
 
     output_path = build_output_path(category, os.path.basename(media_path))
     try:
@@ -316,7 +122,20 @@ def copy_media_and_save(question_id: str, category: str, src: str) -> bool:
     return True
 
 
-def process_resolution_output(resolution_result: dict[str, Any]) -> None:
+NON_TRANSFORMABLE_CONTENT_TYPES = {"AUDIO", "VIDEO"}
+
+
+def _is_non_image_media(entry: dict[str, Any]) -> bool:
+    """True if entry's content_type is AUDIO/VIDEO (case-insensitive) and must skip image transform."""
+    content_type = entry.get("content_type") or "IMAGE"
+    if str(content_type).strip().upper() in NON_TRANSFORMABLE_CONTENT_TYPES:
+        identifier = entry.get("key") or entry.get("src") or "<unknown>"
+        print(f"Skipped because of AUDIO/VIDEO: {identifier}")
+        return True
+    return False
+
+
+def process_resolution_output(resolution_result: dict[str, Any]) -> str | None:
     """
     Process all images described in one image_resolution_engine result.
 
@@ -324,13 +143,18 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     1. image_audit (uses per-record max_width / max_height)
     2. question_images
     3. option_images
+
+    Returns None if every media item was handled normally (including per-item
+    soft failures that were logged and skipped). Returns a reason string, and
+    stops processing further media, the moment a media file can't be found
+    locally - the caller must then ignore the whole question, not just that item.
     """
     question_id = resolution_result.get("question_id")
     category = resolution_result.get("category")
 
     if not question_id or not category:
         log_error("Resolution result is missing question_id or category.")
-        return
+        return None
 
     resolution = resolution_result.get("resolution") or {}
 
@@ -342,17 +166,21 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
         if not src:
             continue
 
+        if _is_non_image_media(audit_entry):
+            continue
+
         if target_width is None or target_height is None:
             log_warning(f"Skipping audit image with missing dimensions: {src}")
             continue
 
-        transform_and_save(
+        if transform_and_save(
             question_id=question_id,
             category=category,
             src=src,
             target_width=int(target_width),
             target_height=int(target_height),
-        )
+        ) is None:
+            return f"local media file not found: {src}"
 
     question_images = resolution_result.get("question_images") or []
     option_images = resolution_result.get("option_images") or []
@@ -368,31 +196,37 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
 
         for image_entry in question_images:
             src = image_entry.get("src")
+            if _is_non_image_media(image_entry):
+                continue
             if question_width is None or question_height is None:
                 log_warning(f"Skipping question image with missing resolution: {src}")
                 continue
 
-            transform_and_save(
+            if transform_and_save(
                 question_id=question_id,
                 category=category,
                 src=src,
                 target_width=int(question_width),
                 target_height=int(question_height),
-            )
+            ) is None:
+                return f"local media file not found: {src}"
 
         for image_entry in option_images:
             src = image_entry.get("src")
+            if _is_non_image_media(image_entry):
+                continue
             if option_width is None or option_height is None:
                 log_warning(f"Skipping option image with missing resolution: {src}")
                 continue
 
-            transform_and_save(
+            if transform_and_save(
                 question_id=question_id,
                 category=category,
                 src=src,
                 target_width=int(option_width),
                 target_height=int(option_height),
-            )
+            ) is None:
+                return f"local media file not found: {src}"
 
     elif has_question_images or has_option_images:
         target_width = resolution.get("max_width")
@@ -402,23 +236,30 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
             log_warning("Skipping images because resolution max_width/max_height is missing.")
         else:
             for image_entry in question_images + option_images:
-                transform_and_save(
+                if _is_non_image_media(image_entry):
+                    continue
+                if transform_and_save(
                     question_id=question_id,
                     category=category,
                     src=image_entry.get("src"),
                     target_width=int(target_width),
                     target_height=int(target_height),
-                )
+                ) is None:
+                    return f"local media file not found: {image_entry.get('src')}"
 
     # Copy audio and video files without transformation
     for media_entry in (resolution_result.get("question_audios") or []):
         src = media_entry.get("src")
         if not src:
             continue
-        copy_media_and_save(question_id, category, src)
+        if copy_media_and_save(question_id, category, src) is None:
+            return f"local media file not found: {src}"
 
     for media_entry in (resolution_result.get("question_videos") or []):
         src = media_entry.get("src")
         if not src:
             continue
-        copy_media_and_save(question_id, category, src)
+        if copy_media_and_save(question_id, category, src) is None:
+            return f"local media file not found: {src}"
+
+    return None
