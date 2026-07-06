@@ -3,6 +3,8 @@ Locate and transform images using image_resolution_engine output.
 """
 
 import fnmatch
+import urllib.request
+import urllib.error
 import os
 import shutil  # For copying audio/video files without transformation
 from typing import Any
@@ -19,6 +21,21 @@ TRANSFORMATION_DIR = os.path.join(SCRIPTS_DIR, "image_transformation")
 TRANSFORMATION_OUTPUT_ROOT = os.path.join(
     TRANSFORMATION_DIR, "image_transformation_output"
 )
+
+def _is_non_image_media(entry: dict) -> bool:
+    """Return True if entry is audio or video.
+
+    Checks the 'content_type' field and falls back to the file extension in 'src'.
+    Used to skip non‑image entries during image transformation passes.
+    """
+    content_type = entry.get("content_type", "IMAGE").upper()
+    if content_type in {"AUDIO", "VIDEO"}:
+        return True
+    src = entry.get("src", "")
+    if not src:
+        return False
+    ext = os.path.splitext(src)[1].lower()
+    return ext in {".mp3", ".wav", ".mp4", ".avi", ".mov", ".mkv"}
 
 
 def extract_image_name(src: str) -> str:
@@ -81,7 +98,11 @@ def transform_and_save(
         log_warning(f"Media not found locally, ignoring question: {src}")
         return None
 
-    output_path = build_output_path(category, os.path.basename(image_path))
+    out_basename = os.path.basename(image_path)
+    name_without_ext, ext = os.path.splitext(out_basename)
+    if ext.lower() in (".webp", ".jfif"):
+        out_basename = f"{name_without_ext}.png"
+    output_path = build_output_path(category, out_basename)
 
     try:
         transform_image(image_path, output_path, target_width, target_height)
@@ -92,14 +113,13 @@ def transform_and_save(
     return True
 
 
-def copy_media_and_save(question_id: str, category: str, src: str) -> bool | None:
-    """Locate an audio or video file locally and copy it to the output directory.
-    No network fallback.
-
-    Returns True on success, False on a recoverable per-item failure, or None
-    if the file could not be found locally at all - callers must treat None
-    as "ignore the whole question", not just this item.
-    """
+def process_media_only(
+    question_id: str,
+    category: str,
+    src: str,
+) -> bool:
+    """Locate one audio/video file, download if missing, and save to transformation output directory."""
+    import shutil
     if not src:
         return False
 
@@ -110,32 +130,95 @@ def copy_media_and_save(question_id: str, category: str, src: str) -> bool | Non
 
     media_path = find_image_file(question_id, media_name)
     if not media_path:
-        log_warning(f"Media not found locally, ignoring question: {src}")
-        return None
+        clean_src = src.replace('../', '')
+        if clean_src.startswith('./'):
+            clean_src = clean_src[2:]
+        url = f"https://shared.alefed.com/{clean_src}"
+        
+        env_file = os.path.join(SCRIPTS_DIR, ".env")
+        cookie_val = ""
+        bearer_val = ""
+        if os.path.isfile(env_file):
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("YOUR_ASSETS_COOKIE="):
+                        cookie_val = line.strip().split("=", 1)[1].strip('"\'')
+                    elif "BEARER_TOKEN" in line:
+                        parts = line.strip().split("=", 1)
+                        if len(parts) == 2:
+                            bearer_val = parts[1].strip().strip('"\'')
+        
+        download_dir = os.path.join(SCRIPTS_DIR, "downloaded_images", category)
+        os.makedirs(download_dir, exist_ok=True)
+        download_path = os.path.join(download_dir, f"{question_id}_{media_name}")
+        
+        req = urllib.request.Request(url)
+        if cookie_val:
+            req.add_header('cookie', cookie_val)
+        if bearer_val:
+            req.add_header('Authorization', bearer_val)
+        
+        try:
+            with urllib.request.urlopen(req) as response:
+                with open(download_path, "wb") as out_file:
+                    out_file.write(response.read())
+            media_path = download_path
+        except urllib.error.HTTPError as e:
+            log_error(f"Failed to download media {url}: HTTP {e.code} {e.reason}")
+            _append_media_failed(question_id, url, e.code)
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
+        except urllib.error.URLError as e:
+            log_error(f"Failed to download media {url}: {e.reason}")
+            _append_media_failed(question_id, url, "URL_ERROR")
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
+        except Exception as e:
+            log_error(f"Failed to download media {url}: {e}")
+            _append_media_failed(question_id, url, "UNKNOWN_ERROR")
+            _append_ignore_question(question_id)
+            raise MediaDownloadFailed(url)
 
+    output_path = build_output_path(category, os.path.basename(media_path))
+    
+    try:
+        shutil.copy2(media_path, output_path)
+    except Exception as error:
+        log_error(f"Media copy failed: {error}")
+        return False
+
+    return True
+
+
+def copy_media_and_save(question_id: str, category: str, src: str) -> bool | None:
+    """Copy audio/video files without transformation.
+
+    Returns True on success, None if the media cannot be located (even after download), and False on other failures.
+    """
+    if not src:
+        return False
+    # Locate the media file locally
+    media_name = extract_image_name(src)
+    if not media_name:
+        log_warning(f"Could not extract media name from src: {src}")
+        return False
+    media_path = find_image_file(question_id, media_name)
+    if not media_path:
+        # Attempt to download via process_media_only
+        if not process_media_only(question_id, category, src):
+            return None
+        media_path = find_image_file(question_id, media_name)
+        if not media_path:
+            return None
     output_path = build_output_path(category, os.path.basename(media_path))
     try:
         shutil.copy2(media_path, output_path)
     except Exception as error:
-        log_error(f"Failed to copy media {media_path} to {output_path}: {error}")
+        log_error(f"Media copy failed: {error}")
         return False
     return True
 
-
-NON_TRANSFORMABLE_CONTENT_TYPES = {"AUDIO", "VIDEO"}
-
-
-def _is_non_image_media(entry: dict[str, Any]) -> bool:
-    """True if entry's content_type is AUDIO/VIDEO (case-insensitive) and must skip image transform."""
-    content_type = entry.get("content_type") or "IMAGE"
-    if str(content_type).strip().upper() in NON_TRANSFORMABLE_CONTENT_TYPES:
-        identifier = entry.get("key") or entry.get("src") or "<unknown>"
-        print(f"Skipped because of AUDIO/VIDEO: {identifier}")
-        return True
-    return False
-
-
-def process_resolution_output(resolution_result: dict[str, Any]) -> str | None:
+def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     """
     Process all images described in one image_resolution_engine result.
 
@@ -149,6 +232,9 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> str | None:
     stops processing further media, the moment a media file can't be found
     locally - the caller must then ignore the whole question, not just that item.
     """
+    if not resolution_result:
+        return
+
     question_id = resolution_result.get("question_id")
     category = resolution_result.get("category")
 
@@ -158,6 +244,13 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> str | None:
 
     resolution = resolution_result.get("resolution") or {}
 
+    # Process all audio/video assets immediately
+    audios = resolution_result.get("question_audios") or []
+    videos = resolution_result.get("question_videos") or []
+    for entry in audios + videos:
+        process_media_only(question_id, category, entry.get("src"))
+
+    # Process audits (strictly images now)
     for audit_entry in (resolution_result.get("image_audit") or []):
         src = audit_entry.get("src")
         target_width = audit_entry.get("max_width")
@@ -182,6 +275,7 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> str | None:
         ) is None:
             return f"local media file not found: {src}"
 
+    # Process question and option images (strictly images now)
     question_images = resolution_result.get("question_images") or []
     option_images = resolution_result.get("option_images") or []
 

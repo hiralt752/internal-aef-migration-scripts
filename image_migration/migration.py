@@ -97,20 +97,39 @@ def migration_step_1(URL, image_data, question_id, content_type, local_path):
     final_url=f"{URL}/authoring-content-service/api/assets/presigned-upload-url?"
 
     # Make a file name for server B
-    file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
+    src_basename = os.path.basename(image_data.get('src', ''))
+    file_name = f"{question_id}_{image_data.get('key')}_{src_basename}"
+
+    # Locate the local media file (image/audio/video) for this question
+    image_path = find_local_media(question_id, image_data.get('src', ''))
+    if not image_path:
+        print(f"Error: media file not found locally for question {question_id}, src {image_data.get('src')}")
+        return {file_name: {"status_code": 404, "api_status": "failed", "response": "Local file not found"}}
 
     headers = {
         "X-tenantId": "shared",
         "Authorization": os.getenv("BEARER_TOKEN")
     }
 
-    params = {
-        "fileName":file_name,
-        "contentType":f"{content_type.lower()}/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}",
-        "fileSize":f"{os.path.getsize(local_path)}"
-    }
+    # Resolve dynamic MIME types
+    # Determine file extension from the source filename
+    ext = os.path.splitext(src_basename)[1].lower().lstrip('.')
+    if content_type == "AUDIO":
+        mime_type = f"audio/{ext}"
+        if ext == "mp3":
+            mime_type = "audio/mpeg"
+    elif content_type == "VIDEO":
+        mime_type = f"video/{ext}"
+    else:
+        mime_type = f"image/{ext}"
+        if ext == "jpg":
+            mime_type = "image/jpeg"
 
-    # pprint(f"step -1 {params}\n")
+    params = {
+        "fileName": file_name,
+        "contentType": mime_type,
+        "fileSize": f"{os.path.getsize(image_path)}",
+    }# pprint(f"step -1 {params}\n")
 
     result={}
     try:
@@ -141,27 +160,117 @@ def migration_step_1(URL, image_data, question_id, content_type, local_path):
     return result
 
 def migration_step_2(step_1_response, image_data, URL, question_id, content_type, local_path):
+    """Upload a media file to the presigned URL returned by step 1.
 
-    key=next(iter(step_1_response))
+    - For IMAGE entries, locate the transformed file in either the global
+      media_path or the per‑question transformation output directory.
+    - For AUDIO or VIDEO entries, skip the upload entirely and return a
+      "skipped" response so the caller can treat the whole question as
+      processed without error.
+    """
+    key = next(iter(step_1_response))
+
+    # Determine media type (default to IMAGE)
+    content_type = image_data.get("content_type", "IMAGE")
+    # For AUDIO and VIDEO we still need to upload the original file; no transformation is applied.
+    is_audio_video = content_type.upper() in {"AUDIO", "VIDEO"}
+    if is_audio_video:
+        print(f"Processing {content_type.upper()} file: {image_data.get('src')}")
+        # No early return; continue to locate the file for upload.
+
+    # At this point we are dealing with an image
+    src_basename = os.path.basename(image_data.get('src'))
+    name_without_ext, ext = os.path.splitext(src_basename)
+    ext = ext[1:].lower()
+    # Convert webp/jfif to png for legacy handling
+    if ext in ("webp", "jfif"):
+        src_basename = f"{name_without_ext}.png"
+        ext = "png"
+
+    # Find the transformed image on disk (search both global and per‑question dirs)
+    search_paths = (media_path, os.path.join(BASE_DIR, "image_transformation", "image_transformation_output"))
+    image_path = []
+    for path in search_paths:
+        if os.path.isdir(path):
+            image_path = glob(os.path.join(path, "**", f"{question_id}_*_{src_basename}"), recursive=True)
+            if image_path:
+                break
+    if not image_path:
+        # Image not found – signal caller to ignore the whole question
+        return {key: {"status_code": 404, "api_status": "failed", "response": "Local file not found"}}
+
+    # Resolve MIME type for upload
+    if ext == "jpg":
+        mime_type = "image/jpeg"
+    else:
+        mime_type = f"image/{ext}"
+
+    presigned_url = step_1_response[key].get("response", {}).get("presignedUrl", {}).get("url")
+    headers = {
+        "Origin": URL,
+        "Referer": f"{URL}/",
+        "x-ms-blob-type": "BlockBlob",
+        "Content-Type": mime_type,
+    }
+
+    result = {}
+    try:
+        with open(image_path[0], "rb") as f:
+            response = requests.put(presigned_url, headers=headers, data=f, timeout=REQUEST_TIMEOUT)
+        temp_dict = {
+            "api_status": "success" if response.status_code == 201 else "failed",
+            "status_code": response.status_code,
+            "response": response.text,
+        }
+    except requests.exceptions.RequestException as error:
+        print(f"\tstep 2 failed - network/API error for {key}: {error}")
+        temp_dict = {
+            "api_status": "failed",
+            "status_code": "REQUEST_ERROR",
+            "response": str(error),
+        }
+    except (AttributeError, OSError) as error:
+        print(f"\tstep 2 failed - could not read local file for {key}: {error}")
+        temp_dict = {
+            "api_status": "failed",
+            "status_code": "LOCAL_ERROR",
+            "response": str(error),
+        }
+
+    result[key] = temp_dict
+    check_json_exists(upload_path, "step_2_response.json", result)
+    return result
+
+# Deprecated old migration_step_2 implementation removed; new version defined above.
+
 
     if step_1_response[key].get("status_code") == 200 :
+        
+        presigned_url=step_1_response[key].get("response").get("presignedUrl").get("url")
 
-        file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
+        # Resolve MIME type for step 2
+        src_basename = os.path.basename(image_data.get('src'))
+        _, ext = os.path.splitext(src_basename)
+        ext = ext[1:].lower()
+        
+        if content_type == "AUDIO":
+            mime_type = f"audio/{ext}"
+            if ext == "mp3": mime_type = "audio/mpeg"
+        elif content_type == "VIDEO":
+            mime_type = f"video/{ext}"
+        else:
+            mime_type = f"image/{ext}"
+            if ext == "jpg": mime_type = "image/jpeg"
+
+        headers = {
+            "Origin":URL,
+            "Referer":f"{URL}/",
+            "x-ms-blob-type": "BlockBlob",
+            "Content-Type": mime_type
+        }
 
         result={}
         try:
-            # Getting presignedUrl from response of step 1 migration
-            presigned_url=step_1_response[key].get("response").get("presignedUrl").get("url")
-
-            headers = {
-                "Origin":URL,
-                "Referer":f"{URL}/",
-                "x-ms-blob-type": "BlockBlob",
-                "Content-Type": f"{content_type.lower()}/{os.path.splitext(os.path.basename(image_data.get("src")))[1][1:]}"
-            }
-
-            # pprint(f"step -2 {headers}\n")
-
             with open(local_path, "rb") as f:
                 response = requests.put(presigned_url, headers=headers, data=f, timeout=REQUEST_TIMEOUT)
 
@@ -171,21 +280,21 @@ def migration_step_2(step_1_response, image_data, URL, question_id, content_type
                 "response": response.text
             }
         except requests.exceptions.RequestException as error:
-            print(f"\tstep 2 failed - network/API error for {file_name}: {error}")
+            print(f"\tstep 2 failed - network/API error for {key}: {error}")
             temp_dict = {
                 "api_status": "failed",
                 "status_code": "REQUEST_ERROR",
                 "response": str(error),
             }
         except (AttributeError, OSError) as error:
-            print(f"\tstep 2 failed - could not read presigned URL / local file for {file_name}: {error}")
+            print(f"\tstep 2 failed - could not read local file for {key}: {error}")
             temp_dict = {
                 "api_status": "failed",
                 "status_code": "LOCAL_ERROR",
                 "response": str(error),
             }
 
-        result[file_name]=temp_dict
+        result[key]=temp_dict
         check_json_exists(upload_path,"step_2_response.json",result)
 
         return result
@@ -207,8 +316,13 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
 
     if step_2_response[key].get("status_code") == 201:
 
-        # key=next(iter(response))
-        file_name=f"{question_id}_{image_data.get("key")}_{os.path.basename(image_data.get("src"))}"
+        # Resolve filename dynamically, handling webp/jfif conversion to png
+        src_basename = os.path.basename(image_data.get('src'))
+        name_without_ext, ext = os.path.splitext(src_basename)
+        if image_data.get("content_type", "IMAGE") == "IMAGE" and ext.lower() in (".webp", ".jfif"):
+            src_basename = f"{name_without_ext}.png"
+            
+        file_name=f"{question_id}_{image_data.get("key")}_{src_basename}"
 
         final_url = f"{URL}/authoring-content-service/api/assets/create-and-publish"
 
@@ -217,20 +331,16 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
             "Authorization": os.getenv("BEARER_TOKEN"),
             "Content-Type": "application/json"
         }
-
-        if content_type == "IMAGE" :
-            prefix= "img"
-        elif content_type == "AUDIO" :
-            prefix= "aud"
-        else :
-            prefix= "vid"
-
+        
+        content_type = image_data.get("content_type", "IMAGE")
+        title_prefix = "img" if content_type == "IMAGE" else "aud" if content_type == "AUDIO" else "vid"
+        
         payload={
             "fileName":key,
             "fileId": step_1_response[key].get("response").get("fileId"),
             "uploadId": step_1_response[key].get("response").get("uploadId"),
-            "title": f"{question_code}_{prefix}_{media_count}",
-            "description": f"{question_code}_{prefix}_{media_count}",
+            "title": f"{question_code}_{title_prefix}_{media_count}",
+            "description": f"{question_code}_{title_prefix}_{media_count}",
             "type": content_type,
             "metadata": [],
             "systemMetadata": [],
@@ -289,15 +399,12 @@ def url_replacement(step_3_response, step_1_response, question_data, image):
     return question_data
 
 
-def image_migration(URL, resolution_list, question_code, question_data, file_name, folder):
-    """Upload every image/audio/video described in resolution_list.
+def     image_migration(URL, resolution_list, question_code, question_data, file_name, folder):
+    if not resolution_list:
+        path = os.path.join(BASE_DIR, "final_output", folder)
+        check_json_exists(path, file_name, question_data)
+        return
 
-    Returns (media_migrated_count, ignored) where:
-    - media_migrated_count: number of media items successfully published this call.
-    - ignored: True if the question was abandoned because its locally-transformed
-      media could not be found on disk (logged to ignored_question.json), in which
-      case final_output is NOT written for this question.
-    """
     img_count = 1
     media_migrated_count = 0
     question_id = resolution_list.get("question_id")
@@ -319,15 +426,17 @@ def image_migration(URL, resolution_list, question_code, question_data, file_nam
 
                 step_2_response = migration_step_2(step_1_response, image, URL, question_id, content_type, local_path)
 
+                # Perform step 3 to register the media and obtain URL
                 step_3_response = migration_step_3(URL, step_1_response, question_code, img_count, question_id, image, step_2_response, content_type)
-
                 question_data = url_replacement(step_3_response, step_1_response, question_data, image)
 
-                step_3_key = next(iter(step_3_response))
-                if step_3_response[step_3_key].get("status_code") == 201:
+                # Increment counter if upload succeeded (status_code 201)
+                key = next(iter(step_3_response))
+                if step_3_response.get(key, {}).get("status_code") == 201:
                     media_migrated_count += 1
 
-                print(f"\t{img_count} media migrated")
+                content_type = image.get("content_type", "IMAGE").lower()
+                print(f"\t{img_count} {content_type} migrated")
                 img_count += 1
 
 
