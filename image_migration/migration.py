@@ -327,7 +327,7 @@ def image_migration(URL, resolution_list, question_code, question_data, file_nam
                 if step_3_response[step_3_key].get("status_code") == 201:
                     media_migrated_count += 1
 
-                print(f"\t{img_count} image migrated")
+                print(f"\t{img_count} media migrated")
                 img_count += 1
 
 

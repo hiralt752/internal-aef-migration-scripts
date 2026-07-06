@@ -183,8 +183,6 @@ for folder in os.listdir(INPUT_FOLDER):
 
             write_in_json(resolution_output_file, image_resolution)
 
-            print("\tgot the image resolution output")
-
             # Step 2 - Transform
             transform_ignore_reason = process_resolution_output(image_resolution)
 
