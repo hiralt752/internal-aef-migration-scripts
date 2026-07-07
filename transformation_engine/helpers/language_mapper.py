@@ -1,14 +1,14 @@
 from helpers.debug_logger import DebugLogger
 logger = DebugLogger()
 LANGUAGE_MAPPING = {
-    "AR": "Arabic",
-    "EN_CA": "English US",
-    "EN_GB": "English GB",
-    "EN_US": "English US",
-    "FRA_FR": "French FR",
-    "IND": "Indonesian",
-    "SPA": "Spanish",
-    "UZB": "Uzbek",
+    "AR": "AR",
+    "EN_CA": "EN_US",
+    "EN_GB": "EN_GB",
+    "EN_US": "EN_US",
+    "FRA_FR": "FRA_FR",
+    "IND": "IND",
+    "SPA": "SPA",
+    "UZB": "UZB",
 }
 
 def languageMapper (language:str,q_id=None,q_type=None,lesson=None,filepath=None) -> str:
