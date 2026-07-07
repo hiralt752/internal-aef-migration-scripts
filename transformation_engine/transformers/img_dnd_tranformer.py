@@ -70,12 +70,9 @@ class ImageLabellingDNDTransformer:
                     self.raw,self.question_id,self.lesson
                 ),
 
-            "responseDeclaration":
-                build_response_declaration(
-                    self.raw,
-                    multiple_answer=False
-                ),
-
+            "responseDeclaration":{
+                    "maxAttempts": 1
+                },
             "outcomeDeclaration":
                 build_outcome_declaration(
                     self.raw,self.question_id,self.lesson,"IMAGE_LABELLING_DRAG_DROP"

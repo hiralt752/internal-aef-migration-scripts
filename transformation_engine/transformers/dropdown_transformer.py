@@ -8,7 +8,9 @@ from html.parser import HTMLParser
 from typing import Dict, List, Optional, Tuple
 from bs4 import BeautifulSoup
 from builders.metadata_builder import build_metadata
+from builders.modal_feedback_builder import build_modal_feedback as build_shared_modal_feedback
 from parsers.content_parser import strip_disallowed_tags, parse_html_content, ALLOWED_TAGS
+from helpers.feedback_mapper import map_hints_and_feedback
 from helpers.span_remover import remove_span_texts_from_html
 from builders.itembody_builder import _extract_side_image_from_sentence
 
@@ -515,6 +517,12 @@ class DropdownTransformer:
         prompt_html = body.get("prompt") or ""
         prompt_html = remove_span_texts_from_html(prompt_html, self.qid, self.lesson, self.file_path)
         blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
+        feedback_mapping = map_hints_and_feedback(
+            body.get("hints", []),
+            body.get("wrongAnswerFeedback", ""),
+            self.qid,
+            self.lesson,
+        )
 
         payload = {
             "schemaVersion": {"major": 1, "minor": 0, "patch": 0},
@@ -526,7 +534,10 @@ class DropdownTransformer:
             "outcomeDeclaration": build_outcome_declaration(body, validation, blank_ids_ordered),
         }
 
-        modal_feedback = build_modal_feedback(body)
+        modal_feedback = build_shared_modal_feedback(
+            self.raw,
+            feedback_mapping,
+        )
         if modal_feedback:
             payload["modalFeedback"] = modal_feedback
 

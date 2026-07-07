@@ -1,12 +1,122 @@
 from helpers.mathml_converter import process_html_and_convert_math
-
+from helpers.feedback_mapper import map_hints_and_feedback
 from helpers.language_mapper import (
     languageMapper
 )
+from bs4 import BeautifulSoup
+import urllib.parse
+from builders.modal_feedback_builder import build_modal_feedback
+
+def _is_wiris_math_image(img_tag):
+    src = img_tag.get("src", "") or ""
+    classes = img_tag.get("class") or []
+
+    return (
+        "Wirisformula" in classes
+        or (
+            src.startswith("data:image/svg+xml")
+            and "mathml" in urllib.parse.unquote(src).lower()
+        )
+    )
+
+
+def _detect_html_modalities(html_content):
+    soup = BeautifulSoup(html_content or "", "html.parser")
+
+    has_image = False
+    for img in soup.find_all("img"):
+        if not _is_wiris_math_image(img):
+            has_image = True
+
+    has_audio = bool(soup.find("audio"))
+    has_video = bool(soup.find("video"))
+
+    for tag in soup.find_all(["img", "audio", "video", "source"]):
+        tag.decompose()
+
+    has_text = bool(process_html_and_convert_math(str(soup)).strip())
+
+    return {
+        "text": has_text,
+        "image": has_image,
+        "audio": has_audio,
+        "video": has_video,
+    }
+
+
+def check_sub_type(body):
+    html_fragments = []
+
+    prompt = body.get("prompt")
+    if prompt:
+        html_fragments.append(prompt)
+
+    for field_name in (
+        "generalFeedback",
+        "correctAnswerFeedback",
+        "wrongAnswerFeedback",
+        "partialAnswerFeedback",
+    ):
+        value = body.get(field_name)
+        if value:
+            html_fragments.append(value)
+
+    for hint in body.get("hints", []) or []:
+        if hint:
+            html_fragments.append(hint)
+
+    matchers = body.get("matchers") or {}
+    for item in matchers.get("choices", []) or []:
+        if item.get("value"):
+            html_fragments.append(item.get("value"))
+        if item.get("feedback"):
+            html_fragments.append(item.get("feedback"))
+
+    for item in matchers.get("answers", []) or []:
+        if item.get("value"):
+            html_fragments.append(item.get("value"))
+        if item.get("feedback"):
+            html_fragments.append(item.get("feedback"))
+
+    has_text = False
+    has_image = False
+    has_audio = False
+    has_video = False
+
+    for html_content in html_fragments:
+        modalities = _detect_html_modalities(html_content)
+        has_text = has_text or modalities["text"]
+        has_image = has_image or modalities["image"]
+        has_audio = has_audio or modalities["audio"]
+        has_video = has_video or modalities["video"]
+
+    if has_video:
+        return "MIX"
+
+    if has_audio and not has_text and not has_image:
+        return "AUDIO_AUDIO"
+
+    if has_image and not has_text and not has_audio:
+        return "IMAGE_IMAGE"
+
+    if has_text and has_image and not has_audio:
+        return "TEXT_IMAGE"
+
+    if has_text and not has_image and not has_audio:
+        return "TEXT_TEXT"
+
+    if has_audio or has_image or has_text:
+        return "MIX"
+
+    return "TEXT_TEXT"
+
+
 class MatchingTransformer:
 
-    def __init__(self, raw):
+    def __init__(self, raw, question_id=None, lesson=None):
         self.raw = raw
+        self.question_id = question_id
+        self.lesson = lesson
 
     def transform(self):
         q = self.raw.get("response", self.raw)
@@ -25,7 +135,7 @@ class MatchingTransformer:
         qb_payload = {
             "schemaVersion": {"major": 1, "minor": 0, "patch": 0},
             "type": "MATCHING",
-            "subType": "MATCHING_PAIRS",
+            "subType": check_sub_type(body),
             "metadata": {
                 "general": {
                     "code": q.get("code"),
@@ -81,12 +191,14 @@ class MatchingTransformer:
                 "video": None,
                 "backgroundLayout": None,
                 "timeSpentConfig": None,
-                "splitContent": None,
-                "sideImage": None,
                 "shuffled": body.get("matchers", {}).get("shuffle", True),
-                "statement": None,
-                "sentence": None,
-                "sourceItems": [
+                "itemLabel":{
+                    "text":""
+                },
+                "optionLabel":{
+                    "text":""
+                },
+                "items": [
                     {
                         "id": item.get("id"),
                         "weight": item.get("weight", 1.0),
@@ -102,7 +214,7 @@ class MatchingTransformer:
                     }
                     for item in body.get("matchers", {}).get("choices", [])
                 ],
-                "targetItems": [
+                "options": [
                     {
                         "id": item.get("id"),
                         "content": {
@@ -114,8 +226,6 @@ class MatchingTransformer:
                 ],
             },
             "responseDeclaration": {
-                "type": "PAIR_MATCH",
-                "cardinality": "MULTIPLE",
                 "maxAttempts": 1,
             },
             "outcomeDeclaration": {
@@ -124,8 +234,7 @@ class MatchingTransformer:
                     "normalizedMin": 0,
                     "normalizedMax": 1,
                     "defaultNormalizedValue": 0,
-                },
-                "maxScore": q.get("maxScore", 1),
+                }
             },
         }
 
@@ -185,32 +294,27 @@ class MatchingTransformer:
         valid_resp = validation.get("validResponse")
         if valid_resp and valid_resp.get("answerMapping"):
             qb_payload["outcomeDeclaration"]["validResponse"] = {
-                "shouldAutoGraded": True,
                 "correctAnswers": [
                     {
-                        "sourceItemId": pair.get("choiceId"),
-                        "targetItemId": pair.get("answerId"),
+                        "itemId": pair.get("choiceId"),
+                        "optionId": pair.get("answerId"),
                     }
                     for pair in valid_resp.get("answerMapping", [])
                 ],
             }
 
-        hints = body.get("hints", [])
-        if hints:
-            qb_payload["modalFeedback"] = {
-                "needHelp": {
-                    "content": {
-                        "layout": "TEXT",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": process_html_and_convert_math(hint),
-                            }
-                            for hint in hints
-                        ],
-                    }
-                },
-                "passageId": None,
-            }
+        feedback_mapping = map_hints_and_feedback(
+            body.get("hints", []),
+            body.get("wrongAnswerFeedback", ""),self.question_id,self.lesson
+        )
+        modal_feedback = build_modal_feedback(
+            self.raw,
+            feedback_mapping
+        )
+
+        if modal_feedback:
+            qb_payload["modalFeedback"] = (
+                modal_feedback
+            )
 
         return qb_payload
