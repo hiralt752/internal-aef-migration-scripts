@@ -1,4 +1,51 @@
 from parsers.content_parser import parse_html_content
+from bs4 import BeautifulSoup
+
+
+def _get_media_src(tag):
+    if not tag:
+        return None
+
+    src = tag.get("src")
+    if src:
+        src = src.strip()
+        if src:
+            return src
+
+    source = tag.find("source")
+    if source:
+        src = source.get("src")
+        if src:
+            src = src.strip()
+            if src:
+                return src
+
+    return None
+
+
+def _extract_prompt_media(html):
+    if not html:
+        return None, None
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    audio_tag = soup.find("audio")
+    video_tag = soup.find("video")
+
+    audio = None
+    video = None
+
+    if audio_tag:
+        audio_src = _get_media_src(audio_tag)
+        if audio_src:
+            audio = {"url": audio_src}
+
+    if video_tag:
+        video_src = _get_media_src(video_tag)
+        if video_src:
+            video = {"url": video_src}
+
+    return audio, video
 
 
 def build_image_labelling_dnd_item_body(raw,question_id,lesson):
@@ -6,6 +53,7 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
     body = raw.get("body", {})
 
     choices = body.get("choices", {})
+    audio, video = _extract_prompt_media(body.get("prompt"))
 
     background_image = body.get("backgroundImage")
     if background_image and "src" in background_image:
@@ -21,9 +69,9 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
 
         "instruction": None,
 
-        "audio": None,
+        "audio": audio,
 
-        "video": None,
+        "video": video,
 
         "statement": None,
 

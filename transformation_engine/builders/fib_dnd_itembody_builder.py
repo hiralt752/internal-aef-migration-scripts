@@ -48,6 +48,54 @@ def normalize_weight(weight):
     )
 
 
+def _get_media_src(tag):
+    if not tag:
+        return None
+
+    src = tag.get("src")
+    if src:
+        src = src.strip()
+        if src:
+            return src
+
+    source = tag.find("source")
+    if source:
+        src = source.get("src")
+        if src:
+            src = src.strip()
+            if src:
+                return src
+
+    return None
+
+
+def _extract_prompt_media(html):
+    if not html:
+        return html, None, None
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    audio_tag = soup.find("audio")
+    video_tag = soup.find("video")
+
+    audio = None
+    video = None
+
+    if audio_tag:
+        audio_src = _get_media_src(audio_tag)
+        if audio_src:
+            audio = {"url": audio_src}
+        audio_tag.decompose()
+
+    if video_tag:
+        video_src = _get_media_src(video_tag)
+        if video_src:
+            video = {"url": video_src}
+        video_tag.decompose()
+
+    return str(soup), audio, video
+
+
 def _is_math_image(img):
     """Return True if the <img> represents a MathML / WIRIS / SVG equation."""
     import urllib.parse
@@ -117,10 +165,10 @@ def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
     choices = body.get("choices", {})
 
     prompt = body.get("prompt")
+    prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
+    prompt, audio, video = _extract_prompt_media(prompt)
     replaced = replace_blank_fields(prompt)
     cleaned_prompt, side_image = _extract_side_image_from_prompt(replaced)
-
-    prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
 
     parsed_content = parse_html_content(
         cleaned_prompt,
@@ -144,9 +192,9 @@ def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
 
         "instruction": None,
 
-        "audio": None,
+        "audio": audio,
 
-        "video": None,
+        "video": video,
 
         "image": None,
 
