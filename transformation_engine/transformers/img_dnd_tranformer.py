@@ -33,6 +33,12 @@ class ImageLabellingDNDTransformer:
             "body",
             {}
         )
+        # Extract background image and expose a convenient `url` field while keeping `src`
+        background_image = body.get("backgroundImage")
+        if background_image and "src" in background_image:
+            src_val = background_image["src"]
+            background_image["url"] = src_val
+            background_image["src"] = src_val
 
         feedback_mapping = map_hints_and_feedback(
             body.get(
@@ -65,6 +71,7 @@ class ImageLabellingDNDTransformer:
                     self.raw
                 ),
 
+            "backgroundImage": background_image,
             "itemBody":
                 build_image_labelling_dnd_item_body(
                     self.raw,self.question_id,self.lesson

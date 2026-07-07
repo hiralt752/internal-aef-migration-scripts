@@ -82,10 +82,17 @@ def analyze_dnd(data, q_type, category):
 
     question_id = data.get("question_id") or data.get("id")
     body = data.get("response", {}).get("body", {})
-    back_ground_image  = body.get("backgroundImage")
+    back_ground_image = body.get("backgroundImage")
     images = scan_json(data)
+    # If no images found, but a background image is present, treat it as an image
     if not images:
-        return None
+        if isinstance(back_ground_image, dict) and back_ground_image.get("src"):
+            images = [{
+                "key": "backgroundImage",
+                "src": back_ground_image.get("src")
+            }]
+        else:
+            return None
 
     # --------------------------------------------------
     # CLASSIFICATION (FIXED)

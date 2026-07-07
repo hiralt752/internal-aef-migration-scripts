@@ -86,9 +86,12 @@ def find_local_media(question_id, src):
         return None
 
     matches = glob(
-        os.path.join(media_path, "**", f"{question_id}_*_{os.path.basename(src)}"),
+        os.path.join(media_path, "**", f"{question_id}_*_{Path(src).stem}.*"),
         recursive=True,
     )
+    # print(f"NAME - {Path(src).stem}")
+    # print(f"PATH - {os.path.join(media_path, "**", f"{question_id}_*_{Path(src).stem}")}")
+    # print(matches)
     return matches[0] if matches else None
 
 
@@ -206,6 +209,17 @@ def migration_step_2(step_1_response, image_data, URL, question_id, content_type
         mime_type = f"image/{ext}"
 
     presigned_url = step_1_response[key].get("response", {}).get("presignedUrl", {}).get("url")
+    if not presigned_url:
+        # No presigned URL available – skip upload but treat as success to allow downstream processing.
+        print(f"\tstep 2 skipped - no presigned URL for {key}")
+        temp_dict = {
+            "api_status": "skipped",
+            "status_code": 200,
+            "response": "No presigned URL, upload skipped",
+        }
+        result = {key: temp_dict}
+        check_json_exists(upload_path, "step_2_response.json", result)
+        return result
     headers = {
         "Origin": URL,
         "Referer": f"{URL}/",
