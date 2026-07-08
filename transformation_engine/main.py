@@ -16,6 +16,7 @@ from transformers.fib_transformer import FIBTransformer
 from transformers.fib_dnd_transformer import FIBDNDTransformer
 from helpers.debug_logger import DebugLogger
 from helpers.json_reader import load_question_ids_from_json, is_question_id_present
+from helpers.mojibake_repair import repair_question_mojibake
 
 logger = DebugLogger()
 
@@ -206,6 +207,8 @@ def process_file(task):
 
         if not q or qid in seen:
             continue
+
+        q = repair_question_mojibake(q)
 
         seen.add(qid)
 

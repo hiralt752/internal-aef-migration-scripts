@@ -6,6 +6,7 @@ from helpers.language_mapper import (
 from bs4 import BeautifulSoup
 import urllib.parse
 from builders.modal_feedback_builder import build_modal_feedback
+from parsers.content_parser import parse_html_content
 
 def _is_wiris_math_image(img_tag):
     src = img_tag.get("src", "") or ""
@@ -18,6 +19,24 @@ def _is_wiris_math_image(img_tag):
             and "mathml" in urllib.parse.unquote(src).lower()
         )
     )
+
+
+def _process_html_preserving_tags(html_content, question_id=None, lesson=None):
+    """Return the universal parser's sanitized HTML text block."""
+    if not html_content:
+        return ""
+
+    parsed_contents = parse_html_content(
+        html_content,
+        question_id,
+        lesson
+    )
+
+    for content in parsed_contents:
+        if content.get("type") == "text":
+            return content.get("text", "")
+
+    return ""
 
 
 def _detect_html_modalities(html_content):
@@ -204,10 +223,14 @@ class MatchingTransformer:
                         "weight": item.get("weight", 1.0),
                         "content": {
                             "type": "text",
-                            "text": process_html_and_convert_math(item.get("value", "")),
+                            "text": _process_html_preserving_tags(
+                                item.get("value", ""), self.question_id, self.lesson
+                            ),
                         },
                         "feedback": (
-                            process_html_and_convert_math(item.get("feedback", ""))
+                            _process_html_preserving_tags(
+                                item.get("feedback", ""), self.question_id, self.lesson
+                            )
                             if item.get("feedback")
                             else None
                         ),
@@ -219,7 +242,9 @@ class MatchingTransformer:
                         "id": item.get("id"),
                         "content": {
                             "type": "text",
-                            "text": process_html_and_convert_math(item.get("value", "")),
+                            "text": _process_html_preserving_tags(
+                                item.get("value", ""), self.question_id, self.lesson
+                            ),
                         },
                     }
                     for item in body.get("matchers", {}).get("answers", [])
@@ -243,7 +268,9 @@ class MatchingTransformer:
                 "content": [
                     {
                         "type": "text",
-                        "text": process_html_and_convert_math(body.get("prompt")),
+                        "text": _process_html_preserving_tags(
+                            body.get("prompt"), self.question_id, self.lesson
+                        ),
                     }
                 ]
             }
@@ -254,7 +281,9 @@ class MatchingTransformer:
                 "content": [
                     {
                         "type": "text",
-                        "text": process_html_and_convert_math(body.get("correctAnswerFeedback")),
+                        "text": _process_html_preserving_tags(
+                            body.get("correctAnswerFeedback"), self.question_id, self.lesson
+                        ),
                     }
                 ]
             }
@@ -263,7 +292,9 @@ class MatchingTransformer:
                 "content": [
                     {
                         "type": "text",
-                        "text": process_html_and_convert_math(body.get("wrongAnswerFeedback")),
+                        "text": _process_html_preserving_tags(
+                            body.get("wrongAnswerFeedback"), self.question_id, self.lesson
+                        ),
                     }
                 ]
             }
@@ -272,7 +303,9 @@ class MatchingTransformer:
                 "content": [
                     {
                         "type": "text",
-                        "text": process_html_and_convert_math(body.get("partialAnswerFeedback")),
+                        "text": _process_html_preserving_tags(
+                            body.get("partialAnswerFeedback"), self.question_id, self.lesson
+                        ),
                     }
                 ]
             }
@@ -285,7 +318,9 @@ class MatchingTransformer:
                 "content": [
                     {
                         "type": "text",
-                        "text": process_html_and_convert_math(body.get("generalFeedback")),
+                        "text": _process_html_preserving_tags(
+                            body.get("generalFeedback"), self.question_id, self.lesson
+                        ),
                     }
                 ],
                 "audio": None,

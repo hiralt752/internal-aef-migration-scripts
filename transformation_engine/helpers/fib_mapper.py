@@ -1,4 +1,5 @@
 import re
+from urllib.parse import unquote
 from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
 from helpers.span_remover import remove_span_texts_from_html
@@ -48,6 +49,20 @@ def extract_feedback_text(feedback_html, question_id, lesson):
 
     return ""
 
+
+def is_legacy_blank_marker(tag):
+    """Return True for legacy WIRIS images that represent a FIB blank."""
+    if tag.name != "img":
+        return False
+
+    marker_data = " ".join([
+        tag.get("data-mathml", ""),
+        tag.get("alt", ""),
+        unquote(tag.get("src", ""))
+    ])
+
+    return bool(re.search(r"\bblank(?:\b|_)", marker_data, re.IGNORECASE))
+
 def map_fib_structure(raw, qid, lesson, file_path):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
@@ -85,15 +100,33 @@ def map_fib_structure(raw, qid, lesson, file_path):
     items = []
     correct_answers = []
 
-    for blank in soup.find_all("blank-field"):
-        old_blank_id = int(
-            blank.get("id")
-        )
+    blank_fields = soup.find_all("blank-field")
+    if blank_fields:
+        blank_sources = [
+            (
+                blank_lookup.get(int(blank.get("id")), {}),
+                int(blank.get("id")),
+                blank
+            )
+            for blank in blank_fields
+        ]
+    else:
 
-        blank_data = blank_lookup.get(
-            old_blank_id,
-            {}
-        )
+        legacy_markers = [
+            image
+            for image in soup.find_all("img")
+            if is_legacy_blank_marker(image)
+        ]
+        blank_sources = [
+            (
+                blank_data,
+                int(blank_data.get("id")),
+                legacy_markers[index] if index < len(legacy_markers) else None
+            )
+            for index, blank_data in enumerate(blanks)
+        ]
+
+    for blank_data, old_blank_id, blank_marker in blank_sources:
 
         validation_data = validation_lookup.get(
             old_blank_id,
@@ -173,7 +206,8 @@ def map_fib_structure(raw, qid, lesson, file_path):
             "answerInWidgetFormat": None
         })
 
-        blank.replace_with("@_@")
+        if blank_marker is not None:
+            blank_marker.replace_with("@_@")
         sequential_id += 1
 
     transformed_html = str(soup)

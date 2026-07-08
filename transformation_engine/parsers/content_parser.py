@@ -552,7 +552,11 @@ def parse_html_content(html_content,question_id,lesson):
     # Remaining HTML
     # ========================================================
 
-    sanitized_html = strip_disallowed_tags(str(soup))
+    sanitized_html = strip_disallowed_tags(
+        str(soup),
+        question_id,
+        lesson
+    )
 
 
     remaining_html = re.sub(
