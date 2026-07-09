@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 import urllib.parse
 from lxml import etree
 import html
@@ -22,18 +22,29 @@ GREEK_MAP = {
 }
 
 ALLOWED_TAGS = {
-    'ol', 'li', 'br', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
-    'b', 'i', 'u', 'em', 'strong', 'p', 'ul', 'span',
+    "ol", "li", "br", "table", "thead", "tbody", "tr", "td", "th",
+    "b", "i", "u", "em", "strong", "p", "ul", "span",
 }
 
+def normalize_math_words(latex: str) -> str:
+    if not latex:
+        return ""
+
+    # MathJax ignores normal spaces in math mode.
+    # So "x or x" must become "x\text{ or }x".
+    latex = re.sub(
+        r"(?<!\\text\{\s)\bor\b(?!\s*\})",
+        r"\\text{ or }",
+        latex
+    )
+
+    return latex
 
 def strip_disallowed_tags(html_content, question_id=None, lesson=None):
     soup = BeautifulSoup(html_content, "html.parser")
 
     for tag in soup.find_all():
-
         if tag.name not in ALLOWED_TAGS:
-
             logger.log(
                 question_id=question_id,
                 lesson=lesson,
@@ -41,49 +52,61 @@ def strip_disallowed_tags(html_content, question_id=None, lesson=None):
                 reason=f"Removed tag: <{tag.name}>",
                 file_path=None
             )
-
             tag.unwrap()
 
     return str(soup)
 
+
 def sanitize_mathml(mathml: str) -> str:
+    mathml = html.unescape(mathml or "")
 
-    mathml = html.unescape(mathml)
-
-    mathml = re.sub(
-        r"<mo><</mo>",
-        "<mo>&lt;</mo>",
-        mathml
-    )
-
-    mathml = re.sub(
-        r"<mo>></mo>",
-        "<mo>&gt;</mo>",
-        mathml
-    )
+    # Raw < and > inside <mo> make XML invalid, so keep them as entities
+    # while parsing. They are converted back to normal LaTeX operators later.
+    mathml = re.sub(r"<mo>\s*<\s*</mo>", "<mo>&lt;</mo>", mathml)
+    mathml = re.sub(r"<mo>\s*>\s*</mo>", "<mo>&gt;</mo>", mathml)
 
     return mathml
 
-# ==========================================
-# Helper
-# ==========================================
+
+def decode_wiris_mathml(mathml: str) -> str:
+    return (
+        (mathml or "")
+        .replace("«", "<")
+        .replace("»", ">")
+        .replace("¨", '"')
+        .replace("§", "&")
+    )
+
+
 def has_children(node, expected):
     return len(node) >= expected
 
 
+def normalize_latex_for_preview(latex: str) -> str:
+    if not latex:
+        return ""
+
+    latex = html.unescape(latex)
+
+    # Keep valid TeX, but normalize spacing so operators don't join variables:
+    # \le x should not become \lex.
+    latex = re.sub(r"(\\\ ){2,}", r"\ ", latex)
+    latex = re.sub(r"(?<!\\) {2,}", " ", latex)
+    latex = re.sub(r"\s*([<>])\s*", r" \1 ", latex)
+
+    latex = latex.replace(r"\left\{ ", r"\left\{")
+    latex = latex.replace(r" \right\}", r"\right\}")
+    latex = re.sub(r"\\mid\s*", r"\\mid ", latex)
+
+    return latex.strip()
 
 
 def node_to_latex(node):
 
     tag = etree.QName(node).localname
 
-    if tag == "math":
-        return "".join(node_to_latex(c) + (c.tail or "")
-                       for c in node)
-
-    if tag == "mrow":
-        return "".join(node_to_latex(c) + (c.tail or "")
-                       for c in node)
+    if tag in {"math", "mrow"}:
+        return "".join(node_to_latex(c) + (c.tail or "") for c in node)
 
     if tag == "mn":
         return (node.text or "").strip()
@@ -100,39 +123,50 @@ def node_to_latex(node):
 
 
         if len(value) > 1:
-            return r"\ " + value + r"\ "
+            return rf"\text{{{value}}}"
 
         return value
 
     if tag == "mo":
-        raw = node.text or ""
+        raw = html.unescape(node.text or "")
+
+        if raw in {" ", "\u00a0"}:
+            return " "
+
         value = raw.strip()
 
-        if not value or value == "\u00a0":
-            return r"\ "  # ← your approach, explicit LaTeX space
-
-        # value = (node.text or "").strip()
+        if not value:
+            return " "
 
         mapping = {
-            "<": "<",
-            ">": ">",
-            "≤": r"\le",
-            "≥": r"\ge",
-            "≠": r"\ne",
-            "±": r"\pm",
-            "×": r"\times",
-            "÷": r"\div",
-            "∞": r"\infty",
-            "=": "=",
+            "<": " < ",
+            ">": " > ",
+            "≤": r"\le ",
+            "≥": r"\ge ",
+            "≠": r"\ne ",
+            "±": r"\pm ",
+            "×": r"\times ",
+            "÷": r"\div ",
+            "∞": r"\infty ",
+            "=": " = ",
             "+": "+",
             "-": "-",
             "\u00a0": " ",
+            "{": r"\left\{",
+            "}": r"\right\}",
+            "|": r"\mid ",
             "(": "(",
             ")": ")",
             ".": ".",
+            ",": ",",
         }
 
-        return mapping.get(value, value)
+        latex = mapping.get(value, value)
+
+        if latex.startswith("\\") and not latex.endswith(" "):
+            latex += " "
+
+        return latex
 
     if tag == "mtext":
         text = (node.text or " ").strip()
@@ -142,7 +176,6 @@ def node_to_latex(node):
         return rf" \text{{{text_escaped}}} "
 
     if tag == "mspace":
-        # linebreak="newline" means a new line in the rendered math block
         if node.attrib.get("linebreak") == "newline":
             return "\\\\ "
         return " "
@@ -190,8 +223,7 @@ def node_to_latex(node):
 
         return (
             r"\sqrt{"
-            + node_to_latex(node[0])
-            + (node[0].tail or "")
+            + "".join(node_to_latex(c) + (c.tail or "") for c in node)
             + "}"
         )
 
@@ -200,8 +232,11 @@ def node_to_latex(node):
         if len(node) < 2:
 
             logger.log(
+                question_id=None,
+                lesson=None,
                 question_type="MATHML",
-                reason=f"Invalid mroot: expected 2 children got {len(node)}"
+                reason=f"Invalid mroot: expected 2 children got {len(node)}",
+                file_path=None
             )
 
             return "".join(
@@ -335,8 +370,11 @@ def node_to_latex(node):
         if not has_children(node, 2):
 
             logger.log(
+                question_id=None,
+                lesson=None,
                 question_type="MATHML",
-                reason=f"Invalid munder: expected 2 children got {len(node)}"
+                reason=f"Invalid munder: expected 2 children got {len(node)}",
+                file_path=None
             )
 
             return "".join(
@@ -353,7 +391,6 @@ def node_to_latex(node):
         )
 
     if tag == "munderover":
-
         if len(node) < 3:
 
             logger.log(
@@ -403,15 +440,11 @@ def mathml_to_latex(mathml,question_id,lesson):
 
         latex = node_to_latex(root)
 
-        # Step 1 — collapse multiple consecutive \ spaces into one
-        latex = re.sub(r"(\\\ ){2,}", r"\ ", latex)
+        # Preserve existing support for old "\ or\" style output.
+        latex = re.sub(r"\\\s*or\\?", r"\\text{ or }", latex)
 
-        # Step 2 — collapse plain spaces only (NOT touching \ )
-        latex = re.sub(r"(?<!\\) {2,}", " ", latex)
-
-        # Step 3 — trim
-        latex = latex.strip()
-
+        latex = normalize_latex_for_preview(latex)
+        latex = normalize_math_words(latex)
         return latex
 
     except Exception as ex:
@@ -437,7 +470,7 @@ def extract_mathml_from_svg(src):
         decoded = urllib.parse.unquote(src)
 
         match = re.search(
-            r'<!--MathML:\s*(.*?)-->',
+            r"<!--MathML:\s*(.*?)-->",
             decoded,
             re.DOTALL
         )
@@ -488,12 +521,8 @@ def parse_html_content(html_content,question_id,lesson):
 
         if not latex and img.get("data-mathml"):
             try:
-                mathml = (
+                mathml = decode_wiris_mathml(
                     img.get("data-mathml", "")
-                    .replace("«", "<")
-                    .replace("»", ">")
-                    .replace("¨", '"')
-                    .replace("§", "&")
                 )
                 latex = mathml_to_latex(mathml,question_id,lesson)
             except Exception as ex:
@@ -525,7 +554,13 @@ def parse_html_content(html_content,question_id,lesson):
                 print(f"[ALT FALLBACK USED] {latex}")
 
         if latex:
-            img.replace_with(f" \\({latex}\\) ")
+            latex = normalize_latex_for_preview(latex)
+            latex = normalize_math_words(latex)
+            # Critical fix:
+            # Use NavigableString so BeautifulSoup serializes raw < and >
+            # as &lt; and &gt; in final HTML, while MathJax still receives
+            # valid TeX when rendered.
+            img.replace_with(NavigableString(f" \\({latex}\\) "))
 
     # ========================================================
     # Handle remaining images

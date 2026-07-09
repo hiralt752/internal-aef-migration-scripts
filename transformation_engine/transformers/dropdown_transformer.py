@@ -154,6 +154,23 @@ def extract_blank_ids_in_order(prompt_html: str) -> List[int]:
     return parser.blank_ids
 
 
+def filter_blank_ids_with_options(body: Dict, blank_ids_ordered: List[int]) -> List[int]:
+    """
+    Keeps only blank IDs that have at least one available choice.
+    """
+    blanks_obj = body.get("blanks") or {}
+    blank_items_list = blanks_obj.get("blankItems") or []
+    blank_items_by_id = {item.get("id"): item for item in blank_items_list}
+
+    valid_blank_ids = []
+    for blank_id in blank_ids_ordered:
+        blank_item = blank_items_by_id.get(blank_id, {})
+        choices = blank_item.get("choices") or []
+        if choices:
+            valid_blank_ids.append(blank_id)
+    return valid_blank_ids
+
+
 def extract_prompt_media(prompt_html: str) -> Tuple[Optional[str], Optional[str]]:
     """
     Extracts the first audio and video URLs from the prompt HTML.
@@ -290,6 +307,7 @@ def build_item_body(body: Dict) -> Dict:
     """
     prompt_html = body.get("prompt", "") or ""
     blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
+    blank_ids_ordered = filter_blank_ids_with_options(body, blank_ids_ordered)
     audio_url, video_url = extract_prompt_media(prompt_html)
     sentence_text = replace_blank_fields_with_placeholder(prompt_html)
 
@@ -517,6 +535,7 @@ class DropdownTransformer:
         prompt_html = body.get("prompt") or ""
         prompt_html = remove_span_texts_from_html(prompt_html, self.qid, self.lesson, self.file_path)
         blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
+        blank_ids_ordered = filter_blank_ids_with_options(body, blank_ids_ordered)
         feedback_mapping = map_hints_and_feedback(
             body.get("hints", []),
             body.get("wrongAnswerFeedback", ""),
