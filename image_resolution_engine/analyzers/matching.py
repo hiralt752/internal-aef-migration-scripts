@@ -40,10 +40,7 @@ def _get_html_audit_entries(html_content, image_role, section=None, content_inde
     if not images:
         return []
 
-    widget_type = get_see_why_widget_type(html_content)
-    if not widget_type:
-        return []
-
+    widget_type = get_see_why_widget_type(html_content) or "See Why/Need Help (mainimage)"
     resolution = get_widget_resolution(widget_type)
 
     return _build_audit_entries(
@@ -148,6 +145,18 @@ def analyze_matching(data, q_type, category):
                 image_role="hint",
                 section="hints",
                 content_index=idx
+            )
+        )
+
+    # passage audit
+    passage = body.get("passage")
+    if isinstance(passage, dict):
+        passage_content = passage.get("content", "")
+        image_audit.extend(
+            _get_html_audit_entries(
+                passage_content,
+                image_role="passage",
+                section="passage"
             )
         )
 

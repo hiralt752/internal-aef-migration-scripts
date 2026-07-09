@@ -153,6 +153,17 @@ def analyze_mcq(data, q_type, category):
             content_index=idx
         )
 
+    passage = body.get("passage")
+    if isinstance(passage, dict):
+        passage_content = passage.get("content", "")
+        image_audit += _build_audit_entries(
+            _safe_scan({"passage": passage_content}, seen),
+            "passage",
+            widget_type,
+            resolution,
+            section="passage"
+        )
+
     # --------------------------------------------------
     # RETURN
     # --------------------------------------------------

@@ -55,10 +55,7 @@ def _get_html_audit_entries(html_content, image_role, section=None, content_inde
     if not images:
         return []
 
-    widget_type = get_see_why_widget_type(html_content)
-    if not widget_type:
-        return []
-
+    widget_type = get_see_why_widget_type(html_content) or "See Why/Need Help (mainimage)"
     resolution = get_widget_resolution(widget_type)
 
     return [
@@ -169,16 +166,44 @@ def analyze_dnd(data, q_type, category):
 
     image_audit = []
 
-    
-    general_feedback = body.get("generalFeedback", "")
-
-    image_audit.extend(
-        _get_html_audit_entries(
-            general_feedback,
-            image_role="generalFeedback",
-            section="generalFeedback"
+    # Check all 4 feedback fields
+    for field in [
+        "generalFeedback",
+        "correctAnswerFeedback",
+        "wrongAnswerFeedback",
+        "partialAnswerFeedback"
+    ]:
+        image_audit.extend(
+            _get_html_audit_entries(
+                body.get(field, ""),
+                image_role=field,
+                section=field
+            )
         )
-    )
+
+    # Check hints list
+    hints = body.get("hints", [])
+    for idx, hint in enumerate(hints):
+        image_audit.extend(
+            _get_html_audit_entries(
+                hint,
+                image_role="hint",
+                section="hints",
+                content_index=idx
+            )
+        )
+
+    # Check passage content
+    passage = body.get("passage")
+    if isinstance(passage, dict):
+        passage_content = passage.get("content", "")
+        image_audit.extend(
+            _get_html_audit_entries(
+                passage_content,
+                image_role="passage",
+                section="passage"
+            )
+        )
 
     # --------------------------------------------------
     # RETURN

@@ -1,11 +1,13 @@
 import requests
 import os
 import json
+import threading
 from glob import glob
 from dotenv import load_dotenv
 from pprint import pprint
 from pathlib import Path
 
+migration_lock = threading.RLock()
 
 load_dotenv()
 
@@ -40,43 +42,61 @@ def _atomic_write_json(file_path, data, indent=2):
 
 
 def check_json_exists(upload_path, file_name, data):
-    if os.path.exists(os.path.join(upload_path,file_name)):
-        write_in_json(os.path.join(upload_path,file_name),data)
-
-    else:
+    file_path = os.path.join(upload_path, file_name)
+    if not os.path.exists(file_path):
         os.makedirs(upload_path, exist_ok=True)
-        create_json(os.path.join(upload_path,file_name))
-        write_in_json(os.path.join(upload_path,file_name),data)
+        create_json(file_path)
+    write_in_json_unique(file_path, data)
 
 def create_json(file_path, data=None):
     if data is None:
         data = []
     _atomic_write_json(file_path, data, indent=4)
 
-def write_in_json(file_path, list_data):
-    with open(file_path, "r", encoding='utf-8') as f:
-        data=json.load(f)
+def write_in_json_unique(file_path, item):
+    with migration_lock:
+        try:
+            with open(file_path, "r", encoding='utf-8') as f:
+                data = json.load(f)
+            if not isinstance(data, list):
+                data = []
+        except (json.JSONDecodeError, OSError):
+            data = []
 
-    data.append(list_data)
+        if isinstance(item, dict) and "question_id" in item:
+            q_id = item["question_id"]
+            # Remove ALL existing entries with this question_id (deduplication),
+            # then append the latest version. This handles duplicates from previous
+            # race conditions or retries without leaving stale copies.
+            data = [val for val in data if not (isinstance(val, dict) and val.get("question_id") == q_id)]
+        elif isinstance(item, dict) and len(item) == 1:
+            item_key = next(iter(item.keys()))
+            data = [val for val in data if not (isinstance(val, dict) and len(val) == 1 and next(iter(val.keys())) == item_key)]
 
-    _atomic_write_json(file_path, data)
+        data.append(item)
+
+        _atomic_write_json(file_path, data)
+
+
 
 
 def append_ignored_question(question_id: str, reason: str) -> None:
     """ignored_question.json is a dict of {question_id: reason} for any question
     media_migration.py gives up on (missing local media, malformed record, etc.)."""
-    existing = {}
-    if os.path.isfile(IGNORED_QUESTION_FILE):
-        try:
-            with open(IGNORED_QUESTION_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if isinstance(data, dict):
-                existing = data
-        except (json.JSONDecodeError, OSError):
-            pass
+    with migration_lock:
+        existing = {}
+        if os.path.isfile(IGNORED_QUESTION_FILE):
+            try:
+                with open(IGNORED_QUESTION_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    existing = data
+            except (json.JSONDecodeError, OSError):
+                pass
 
-    existing[question_id] = reason
-    _atomic_write_json(IGNORED_QUESTION_FILE, existing)
+        existing[question_id] = reason
+        _atomic_write_json(IGNORED_QUESTION_FILE, existing)
+
 
 
 def find_local_media(question_id, src):
@@ -85,13 +105,15 @@ def find_local_media(question_id, src):
     if not src:
         return None
 
+    # Strip query parameters and extract basename
+    clean_src = src.replace("\\", "/").split("?")[0]
+    src_basename = os.path.basename(clean_src)
+    stem = os.path.splitext(src_basename)[0]
+
     matches = glob(
-        os.path.join(media_path, "**", f"{question_id}_*_{Path(src).stem}.*"),
+        os.path.join(media_path, "**", f"{question_id}_*_{stem}.*"),
         recursive=True,
     )
-    # print(f"NAME - {Path(src).stem}")
-    # print(f"PATH - {os.path.join(media_path, "**", f"{question_id}_*_{Path(src).stem}")}")
-    # print(matches)
     return matches[0] if matches else None
 
 
@@ -101,6 +123,15 @@ def migration_step_1(URL, image_data, question_id, content_type, local_path):
 
     # Make a file name for server B
     src_basename = os.path.basename(image_data.get('src', ''))
+    name_without_ext, ext = os.path.splitext(src_basename)
+    ext = ext.lower().lstrip('.')
+
+    # Normalize webp and jfif to png
+    resolved_content_type = (content_type or image_data.get("content_type", "IMAGE")).upper()
+    if resolved_content_type == "IMAGE" and ext in ("webp", "jfif"):
+        src_basename = f"{name_without_ext}.png"
+        ext = "png"
+
     file_name = f"{question_id}_{image_data.get('key')}_{src_basename}"
 
     # Locate the local media file (image/audio/video) for this question
@@ -115,17 +146,15 @@ def migration_step_1(URL, image_data, question_id, content_type, local_path):
     }
 
     # Resolve dynamic MIME types
-    # Determine file extension from the source filename
-    ext = os.path.splitext(src_basename)[1].lower().lstrip('.')
-    if content_type == "AUDIO":
+    if resolved_content_type == "AUDIO":
         mime_type = f"audio/{ext}"
         if ext == "mp3":
             mime_type = "audio/mpeg"
-    elif content_type == "VIDEO":
+    elif resolved_content_type == "VIDEO":
         mime_type = f"video/{ext}"
     else:
         mime_type = f"image/{ext}"
-        if ext == "jpg":
+        if ext in ("jpg", "jpeg"):
             mime_type = "image/jpeg"
 
     params = {
@@ -413,11 +442,11 @@ def url_replacement(step_3_response, step_1_response, question_data, image):
     return question_data
 
 
-def     image_migration(URL, resolution_list, question_code, question_data, file_name, folder):
+def image_migration(URL, resolution_list, question_code, question_data, file_name, folder):
     if not resolution_list:
         path = os.path.join(BASE_DIR, "final_output", folder)
         check_json_exists(path, file_name, question_data)
-        return
+        return 0, False, None
 
     img_count = 1
     media_migrated_count = 0
@@ -434,28 +463,46 @@ def     image_migration(URL, resolution_list, question_code, question_data, file
                     reason = f"local media file not found for src={src!r} (key={image.get('key')})"
                     append_ignored_question(question_id, reason)
                     print(f"\tIgnored question {question_id}: {reason}")
-                    return media_migrated_count, True
+                    return media_migrated_count, True, reason
 
                 step_1_response = migration_step_1(URL, image, question_id, content_type, local_path)
+                s1_key = next(iter(step_1_response))
+                s1_res = step_1_response[s1_key]
+                if s1_res.get("api_status") == "failed":
+                    err_msg = f"Step 1 failed with status {s1_res.get('status_code')}: {s1_res.get('response')}"
+                    print(f"\t{err_msg}")
+                    return media_migrated_count, False, err_msg
 
                 step_2_response = migration_step_2(step_1_response, image, URL, question_id, content_type, local_path)
+                s2_key = next(iter(step_2_response))
+                s2_res = step_2_response[s2_key]
+                if s2_res.get("api_status") == "failed":
+                    err_msg = f"Step 2 failed with status {s2_res.get('status_code')}: {s2_res.get('response')}"
+                    print(f"\t{err_msg}")
+                    return media_migrated_count, False, err_msg
 
                 # Perform step 3 to register the media and obtain URL
                 step_3_response = migration_step_3(URL, step_1_response, question_code, img_count, question_id, image, step_2_response, content_type)
+                s3_key = next(iter(step_3_response))
+                s3_res = step_3_response[s3_key]
+                if s3_res.get("api_status") == "failed" or s3_res.get("status_code") != 201:
+                    err_msg = f"Step 3 failed with status {s3_res.get('status_code')}: {s3_res.get('response')}"
+                    print(f"\t{err_msg}")
+                    return media_migrated_count, False, err_msg
+
                 question_data = url_replacement(step_3_response, step_1_response, question_data, image)
 
                 # Increment counter if upload succeeded (status_code 201)
-                key = next(iter(step_3_response))
-                if step_3_response.get(key, {}).get("status_code") == 201:
+                if s3_res.get("status_code") == 201:
                     media_migrated_count += 1
 
                 content_type = image.get("content_type", "IMAGE").lower()
                 print(f"\t{img_count} {content_type} migrated")
                 img_count += 1
 
-
     # write ONCE, after ALL images (question_images, option_images, image_audit) are done
     path = os.path.join(BASE_DIR, "final_output", folder)
     check_json_exists(path, file_name, question_data)
 
-    return media_migrated_count, False
+    return media_migrated_count, False, None
+

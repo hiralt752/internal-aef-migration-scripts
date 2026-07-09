@@ -6,7 +6,8 @@ Resize images proportionally with padding to target dimensions.
 
 import os
 
-from PIL import Image
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 PADDING_COLOR = (255, 255, 255)
 

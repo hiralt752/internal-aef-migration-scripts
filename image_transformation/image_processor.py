@@ -285,8 +285,8 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     if has_question_images and has_option_images:
         question_width = resolution.get("max_width")
         question_height = resolution.get("max_height")
-        option_width = resolution.get("option_width")
-        option_height = resolution.get("option_height")
+        option_width = resolution.get("option_width") or resolution.get("option_image_width")
+        option_height = resolution.get("option_height") or resolution.get("option_image_height")
 
         for image_entry in question_images:
             src = image_entry.get("src")
