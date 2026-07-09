@@ -15,7 +15,13 @@ MATH_SUBJECTS = {
 
 SCIENCE_SUBJECTS = {
     "SCIENCE",
-    "SCIENCE_EN"
+    "SCIENCE_EN",
+    "BIOLOGY",
+    "BIOLOGY_EN",
+    "CHEMISTRY",
+    "CHEMISTRY_EN",
+    "PHYSICS",
+    "PHYSICS_EN"
 }
 
 FIXED_DOK1_SUBJECTS = {
@@ -71,7 +77,7 @@ CONGNITIVE_DIMENSION = {
 
 
 REPORT_LIMIT = 100
-INPUT_DIR_NAME = "input"
+INPUT_DIR_NAME = "test"
 
 
 def resolve_project_root():
