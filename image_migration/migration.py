@@ -81,8 +81,10 @@ def write_in_json_unique(file_path, item):
 
 
 def append_ignored_question(question_id: str, reason: str) -> None:
-    """ignored_question.json is a dict of {question_id: reason} for any question
-    media_migration.py gives up on (missing local media, malformed record, etc.)."""
+    """ignored_question.json is a dict of {question_id: reason} for any question.
+    Only SVG questions are added to this file, per user request."""
+    if "svg" not in reason.lower():
+        return
     with migration_lock:
         existing = {}
         if os.path.isfile(IGNORED_QUESTION_FILE):
@@ -156,6 +158,8 @@ def migration_step_1(URL, image_data, question_id, content_type, local_path):
         mime_type = f"image/{ext}"
         if ext in ("jpg", "jpeg"):
             mime_type = "image/jpeg"
+        elif ext == "svg":
+            mime_type = "image/svg+xml"
 
     params = {
         "fileName": file_name,
@@ -457,6 +461,9 @@ def image_migration(URL, resolution_list, question_code, question_data, file_nam
             for image in resolution_list.get(key):
                 content_type = image.get("content_type")
                 src = image.get("src")
+
+                if src and (src.startswith("data:") or src.startswith("http://") or src.startswith("https://")):
+                    continue
 
                 local_path = find_local_media(question_id, src)
                 if not local_path:

@@ -14,6 +14,20 @@ from image_migration.migration import image_migration, check_json_exists, append
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Exclusive process lock to prevent concurrent runs
+lock_file = os.path.join(BASE_DIR, "media_migration.lock")
+lock_file_handle = None
+try:
+    lock_file_handle = open(lock_file, "w")
+    lock_file_handle.write(str(os.getpid()))
+    lock_file_handle.flush()
+except PermissionError:
+    import sys
+    print("\n[ERROR] Another instance of media_migration.py is already running in the background.")
+    print("Please wait for it to complete or close it before running again.\n")
+    sys.exit(1)
+
 INPUT_FOLDER = os.path.join(BASE_DIR, "test", "test")
 IMAGE_RESOLUTION_OUTPUT = os.path.join(
     BASE_DIR,
@@ -42,6 +56,10 @@ def _atomic_write_json(file_path, data, indent=2):
     with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=indent)
     os.replace(tmp_path, file_path)
+
+
+def print_progress(completed, remaining, elapsed_str):
+    print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={len(success_ids)} | Failed={len(failed_ids)} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
 
 
 def write_in_json(file_path, item):
@@ -276,7 +294,7 @@ if COUNT_ONLY:
     print(f"Invalid JSON files parsed at start: {initial_invalid_json}")
     completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
     remaining = total_questions - completed
-    print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success=0 | Failed=0 | InvalidJSON=0 | Elapsed=00m 00s")
+    print_progress(completed, remaining, "00m 00s")
     print("Exiting count only mode.\n")
     os._exit(0)
 
@@ -321,295 +339,260 @@ def process_single_question(task):
 
     subject_folder, filename, question_id, question, q_idx, total_in_file, resolution_output_file = task
 
-    # Parse type and code
     try:
-        question_type = question["response"]["type"]
-        question_code = question["response"]["code"]
-    except (KeyError, TypeError) as error:
-        reason = f"malformed question record - missing/invalid required field: {error}"
+        # Parse type and code
+        try:
+            question_type = question["response"]["type"]
+            question_code = question["response"]["code"]
+        except (KeyError, TypeError) as error:
+            reason = f"malformed question record - missing/invalid required field: {error}"
+            with io_lock:
+                print(f"\t[ERROR] Skipping {question_id}: {reason}")
+                append_ignored_question(question_id, reason)
+
+                # Move from success to failed
+                if question_id in success_ids:
+                    success_ids.remove(question_id)
+                    success_ids_list = [qid for qid in success_ids_list if qid != question_id]
+                    save_chunks(report_folder, "success", success_ids_list)
+
+                if question_id not in failed_ids:
+                    failed_ids.add(question_id)
+                    failed_questions.append({
+                        "question_id": question_id,
+                        "subject_code": subject_folder,
+                        "question_code": None,
+                        "error": reason
+                    })
+                    save_chunks(report_folder, "failed", failed_questions)
+                else:
+                    for q in failed_questions:
+                        if isinstance(q, dict) and q.get("question_id") == question_id:
+                            q["error"] = reason
+                            break
+                    save_chunks(report_folder, "failed", failed_questions)
+
+                new_failed_count += 1
+                total_ignored += 1
+            return
+
         with io_lock:
-            print(f"\t[ERROR] Skipping {question_id}: {reason}")
-            append_ignored_question(question_id, reason)
+            print(f"\t[{q_idx}/{total_in_file}] Processing question :- {question_id}")
 
-            # Move from success to failed
-            if question_id in success_ids:
-                success_ids.remove(question_id)
-                success_ids_list = [qid for qid in success_ids_list if qid != question_id]
-                save_chunks(report_folder, "success", success_ids_list)
+        # Step 1 - Analyze
+        try:
+            image_resolution = analyze_question(
+                question,
+                question_type,
+                subject_folder
+            )
+        except Exception as e:
+            reason = f"exception in analyze_question: {e}"
+            with io_lock:
+                print(f"\t[ERROR] Failed to analyze {question_id}: {reason}")
+                if question_id in success_ids:
+                    success_ids.remove(question_id)
+                    success_ids_list = [qid for qid in success_ids_list if qid != question_id]
+                    save_chunks(report_folder, "success", success_ids_list)
+                if question_id not in failed_ids:
+                    failed_ids.add(question_id)
+                    failed_questions.append({
+                        "question_id": question_id,
+                        "subject_code": subject_folder,
+                        "question_code": question_code,
+                        "error": reason
+                    })
+                    save_chunks(report_folder, "failed", failed_questions)
+                new_failed_count += 1
+                total_ignored += 1
+            return
 
-            if question_id not in failed_ids:
-                failed_ids.add(question_id)
-                failed_questions.append({
-                    "question_id": question_id,
-                    "subject_code": subject_folder,
-                    "question_code": None,
-                    "error": reason
-                })
-                save_chunks(report_folder, "failed", failed_questions)
+        if image_resolution is None:
+            # No image/audio/video anywhere in this question - pass it through untouched.
+            with io_lock:
+                print(f"\tNo media found for {question_id} - copying question as-is to final_output")
+                final_output_path = os.path.join(BASE_DIR, "final_output", subject_folder)
+                check_json_exists(final_output_path, filename, question)
+
+                # Move from failed to success
+                if question_id in failed_ids:
+                    failed_ids.remove(question_id)
+                    failed_questions = [q for q in failed_questions if isinstance(q, dict) and q.get("question_id") != question_id]
+                    save_chunks(report_folder, "failed", failed_questions)
+
+                if question_id not in success_ids:
+                    success_ids.add(question_id)
+                    success_ids_list.append(question_id)
+                    save_chunks(report_folder, "success", success_ids_list)
+
+                new_success_count += 1
+                total_questions_processed += 1
+            return
+
+        with io_lock:
+            write_in_json(resolution_output_file, image_resolution)
+
+        # Step 2 - Transform
+        try:
+            transform_ignore_reason = process_resolution_output(image_resolution)
+        except Exception as e:
+            reason = f"exception in process_resolution_output: {e}"
+            with io_lock:
+                print(f"\t[ERROR] Failed to transform {question_id}: {reason}")
+                if question_id in success_ids:
+                    success_ids.remove(question_id)
+                    success_ids_list = [qid for qid in success_ids_list if qid != question_id]
+                    save_chunks(report_folder, "success", success_ids_list)
+                if question_id not in failed_ids:
+                    failed_ids.add(question_id)
+                    failed_questions.append({
+                        "question_id": question_id,
+                        "subject_code": subject_folder,
+                        "question_code": question_code,
+                        "error": reason
+                    })
+                    save_chunks(report_folder, "failed", failed_questions)
+                new_failed_count += 1
+                total_ignored += 1
+            return
+
+        if transform_ignore_reason is not None:
+            # A media file referenced by this question doesn't exist locally
+            with io_lock:
+                print(f"\tIgnored question {question_id}: {transform_ignore_reason}")
+                append_ignored_question(question_id, transform_ignore_reason)
+
+                # Move from success to failed
+                if question_id in success_ids:
+                    success_ids.remove(question_id)
+                    success_ids_list = [qid for qid in success_ids_list if qid != question_id]
+                    save_chunks(report_folder, "success", success_ids_list)
+
+                if question_id not in failed_ids:
+                    failed_ids.add(question_id)
+                    failed_questions.append({
+                        "question_id": question_id,
+                        "subject_code": subject_folder,
+                        "question_code": question_code,
+                        "error": transform_ignore_reason
+                    })
+                    save_chunks(report_folder, "failed", failed_questions)
+                else:
+                    for q in failed_questions:
+                        if isinstance(q, dict) and q.get("question_id") == question_id:
+                            q["error"] = transform_ignore_reason
+                            break
+                    save_chunks(report_folder, "failed", failed_questions)
+
+                new_failed_count += 1
+                total_ignored += 1
+            return
+
+        # Step 3 - Upload
+        try:
+            media_count, was_ignored, error_reason = image_migration(
+                URL,
+                image_resolution,
+                question_code,
+                question,
+                filename,
+                subject_folder
+            )
+        except Exception as e:
+            reason = f"exception in image_migration: {e}"
+            with io_lock:
+                print(f"\t[ERROR] Failed to migrate {question_id}: {reason}")
+                if question_id in success_ids:
+                    success_ids.remove(question_id)
+                    success_ids_list = [qid for qid in success_ids_list if qid != question_id]
+                    save_chunks(report_folder, "success", success_ids_list)
+                if question_id not in failed_ids:
+                    failed_ids.add(question_id)
+                    failed_questions.append({
+                        "question_id": question_id,
+                        "subject_code": subject_folder,
+                        "question_code": question_code,
+                        "error": reason
+                    })
+                    save_chunks(report_folder, "failed", failed_questions)
+                new_failed_count += 1
+                total_ignored += 1
+            return
+
+        with io_lock:
+            total_media_migrated += media_count
+
+            # Determine total media that should have been migrated
+            key_list = ["question_images", "option_images", "image_audit", "question_audios", "question_videos"]
+            total_media_in_question = 0
+            for key in key_list:
+                if image_resolution.get(key):
+                    for media_entry in image_resolution[key]:
+                        src = media_entry.get("src")
+                        if src and (src.startswith("data:") or src.startswith("http://") or src.startswith("https://")):
+                            continue
+                        total_media_in_question += 1
+
+            is_success = False
+            if not was_ignored and media_count == total_media_in_question:
+                is_success = True
+
+            if is_success:
+                # Move from failed to success
+                if question_id in failed_ids:
+                    failed_ids.remove(question_id)
+                    failed_questions = [q for q in failed_questions if isinstance(q, dict) and q.get("question_id") != question_id]
+                    save_chunks(report_folder, "failed", failed_questions)
+
+                if question_id not in success_ids:
+                    success_ids.add(question_id)
+                    success_ids_list.append(question_id)
+                    save_chunks(report_folder, "success", success_ids_list)
+
+                new_success_count += 1
+                total_questions_processed += 1
             else:
-                for q in failed_questions:
-                    if isinstance(q, dict) and q.get("question_id") == question_id:
-                        q["error"] = reason
-                        break
-                save_chunks(report_folder, "failed", failed_questions)
+                err_msg = error_reason or "Unknown upload failure"
+                # Move from success to failed
+                if question_id in success_ids:
+                    success_ids.remove(question_id)
+                    success_ids_list = [qid for qid in success_ids_list if qid != question_id]
+                    save_chunks(report_folder, "success", success_ids_list)
 
-            new_failed_count += 1
-            total_ignored += 1
+                if question_id not in failed_ids:
+                    failed_ids.add(question_id)
+                    failed_questions.append({
+                        "question_id": question_id,
+                        "subject_code": subject_folder,
+                        "question_code": question_code,
+                        "error": err_msg
+                    })
+                    save_chunks(report_folder, "failed", failed_questions)
+                else:
+                    for q in failed_questions:
+                        if isinstance(q, dict) and q.get("question_id") == question_id:
+                            q["error"] = err_msg
+                            break
+                    save_chunks(report_folder, "failed", failed_questions)
 
+                new_failed_count += 1
+                total_ignored += 1
+
+    finally:
+        with io_lock:
             # Print progression log
             completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
             remaining = total_questions - completed
             elapsed_seconds = int(time.perf_counter() - start_time)
             elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
+            print_progress(completed, remaining, elapsed_str)
             print("\tNext question ...\n")
-        return
-
-    with io_lock:
-        print(f"\t[{q_idx}/{total_in_file}] Processing question :- {question_id}")
-
-    # Step 1 - Analyze
-    try:
-        image_resolution = analyze_question(
-            question,
-            question_type,
-            subject_folder
-        )
-    except Exception as e:
-        reason = f"exception in analyze_question: {e}"
-        with io_lock:
-            print(f"\t[ERROR] Failed to analyze {question_id}: {reason}")
-            if question_id in success_ids:
-                success_ids.remove(question_id)
-                success_ids_list = [qid for qid in success_ids_list if qid != question_id]
-                save_chunks(report_folder, "success", success_ids_list)
-            if question_id not in failed_ids:
-                failed_ids.add(question_id)
-                failed_questions.append({
-                    "question_id": question_id,
-                    "subject_code": subject_folder,
-                    "question_code": question_code,
-                    "error": reason
-                })
-                save_chunks(report_folder, "failed", failed_questions)
-            new_failed_count += 1
-            total_ignored += 1
-            completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-            remaining = total_questions - completed
-            elapsed_seconds = int(time.perf_counter() - start_time)
-            elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
-            print("\tNext question ...\n")
-        return
-
-    if image_resolution is None:
-        # No image/audio/video anywhere in this question - pass it through untouched.
-        with io_lock:
-            print(f"\tNo media found for {question_id} - copying question as-is to final_output")
-            final_output_path = os.path.join(BASE_DIR, "final_output", subject_folder)
-            check_json_exists(final_output_path, filename, question)
-
-            # Move from failed to success
-            if question_id in failed_ids:
-                failed_ids.remove(question_id)
-                failed_questions = [q for q in failed_questions if isinstance(q, dict) and q.get("question_id") != question_id]
-                save_chunks(report_folder, "failed", failed_questions)
-
-            if question_id not in success_ids:
-                success_ids.add(question_id)
-                success_ids_list.append(question_id)
-                save_chunks(report_folder, "success", success_ids_list)
-
-            new_success_count += 1
-            total_questions_processed += 1
-
-            # Print progression log
-            completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-            remaining = total_questions - completed
-            elapsed_seconds = int(time.perf_counter() - start_time)
-            elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
-            print("\tNext question ...\n")
-        return
-
-    with io_lock:
-        write_in_json(resolution_output_file, image_resolution)
-
-    # Step 2 - Transform
-    try:
-        transform_ignore_reason = process_resolution_output(image_resolution)
-    except Exception as e:
-        reason = f"exception in process_resolution_output: {e}"
-        with io_lock:
-            print(f"\t[ERROR] Failed to transform {question_id}: {reason}")
-            if question_id in success_ids:
-                success_ids.remove(question_id)
-                success_ids_list = [qid for qid in success_ids_list if qid != question_id]
-                save_chunks(report_folder, "success", success_ids_list)
-            if question_id not in failed_ids:
-                failed_ids.add(question_id)
-                failed_questions.append({
-                    "question_id": question_id,
-                    "subject_code": subject_folder,
-                    "question_code": question_code,
-                    "error": reason
-                })
-                save_chunks(report_folder, "failed", failed_questions)
-            new_failed_count += 1
-            total_ignored += 1
-            completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-            remaining = total_questions - completed
-            elapsed_seconds = int(time.perf_counter() - start_time)
-            elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
-            print("\tNext question ...\n")
-        return
-
-    if transform_ignore_reason is not None:
-        # A media file referenced by this question doesn't exist locally
-        with io_lock:
-            print(f"\tIgnored question {question_id}: {transform_ignore_reason}")
-            append_ignored_question(question_id, transform_ignore_reason)
-
-            # Move from success to failed
-            if question_id in success_ids:
-                success_ids.remove(question_id)
-                success_ids_list = [qid for qid in success_ids_list if qid != question_id]
-                save_chunks(report_folder, "success", success_ids_list)
-
-            if question_id not in failed_ids:
-                failed_ids.add(question_id)
-                failed_questions.append({
-                    "question_id": question_id,
-                    "subject_code": subject_folder,
-                    "question_code": question_code,
-                    "error": transform_ignore_reason
-                })
-                save_chunks(report_folder, "failed", failed_questions)
-            else:
-                for q in failed_questions:
-                    if isinstance(q, dict) and q.get("question_id") == question_id:
-                        q["error"] = transform_ignore_reason
-                        break
-                save_chunks(report_folder, "failed", failed_questions)
-
-            new_failed_count += 1
-            total_ignored += 1
-
-            # Print progression log
-            completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-            remaining = total_questions - completed
-            elapsed_seconds = int(time.perf_counter() - start_time)
-            elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
-            print("\tNext question ...\n")
-        return
-
-    # Step 3 - Upload
-    try:
-        media_count, was_ignored, error_reason = image_migration(
-            URL,
-            image_resolution,
-            question_code,
-            question,
-            filename,
-            subject_folder
-        )
-    except Exception as e:
-        reason = f"exception in image_migration: {e}"
-        with io_lock:
-            print(f"\t[ERROR] Failed to migrate {question_id}: {reason}")
-            if question_id in success_ids:
-                success_ids.remove(question_id)
-                success_ids_list = [qid for qid in success_ids_list if qid != question_id]
-                save_chunks(report_folder, "success", success_ids_list)
-            if question_id not in failed_ids:
-                failed_ids.add(question_id)
-                failed_questions.append({
-                    "question_id": question_id,
-                    "subject_code": subject_folder,
-                    "question_code": question_code,
-                    "error": reason
-                })
-                save_chunks(report_folder, "failed", failed_questions)
-            new_failed_count += 1
-            total_ignored += 1
-            completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-            remaining = total_questions - completed
-            elapsed_seconds = int(time.perf_counter() - start_time)
-            elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
-            print("\tNext question ...\n")
-        return
-
-    with io_lock:
-        total_media_migrated += media_count
-
-        # Determine total media that should have been migrated
-        key_list = ["question_images", "option_images", "image_audit", "question_audios", "question_videos"]
-        total_media_in_question = 0
-        for key in key_list:
-            if image_resolution.get(key):
-                total_media_in_question += len(image_resolution[key])
-
-        is_success = False
-        if not was_ignored and media_count == total_media_in_question:
-            is_success = True
-
-        if is_success:
-            # Move from failed to success
-            if question_id in failed_ids:
-                failed_ids.remove(question_id)
-                failed_questions = [q for q in failed_questions if isinstance(q, dict) and q.get("question_id") != question_id]
-                save_chunks(report_folder, "failed", failed_questions)
-
-            if question_id not in success_ids:
-                success_ids.add(question_id)
-                success_ids_list.append(question_id)
-                save_chunks(report_folder, "success", success_ids_list)
-
-            new_success_count += 1
-            total_questions_processed += 1
-        else:
-            err_msg = error_reason or "Unknown upload failure"
-            # Move from success to failed
-            if question_id in success_ids:
-                success_ids.remove(question_id)
-                success_ids_list = [qid for qid in success_ids_list if qid != question_id]
-                save_chunks(report_folder, "success", success_ids_list)
-
-            if question_id not in failed_ids:
-                failed_ids.add(question_id)
-                failed_questions.append({
-                    "question_id": question_id,
-                    "subject_code": subject_folder,
-                    "question_code": question_code,
-                    "error": err_msg
-                })
-                save_chunks(report_folder, "failed", failed_questions)
-            else:
-                for q in failed_questions:
-                    if isinstance(q, dict) and q.get("question_id") == question_id:
-                        q["error"] = err_msg
-                        break
-                save_chunks(report_folder, "failed", failed_questions)
-
-            new_failed_count += 1
-            total_ignored += 1
-
-        # Print progression log
-        completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-        remaining = total_questions - completed
-        elapsed_seconds = int(time.perf_counter() - start_time)
-        elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-        print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={new_success_count} | Failed={new_failed_count} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
-        print("\tNext question ...\n")
 
 
 # Print initial progression log
 initial_completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
 initial_remaining = total_questions - initial_completed
-print(f"[PROGRESS] Completed={initial_completed}/{total_questions} | Remaining={initial_remaining} | Success=0 | Failed=0 | InvalidJSON=0 | Elapsed=00m 00s")
+print_progress(initial_completed, initial_remaining, "00m 00s")
 print("\tNext question ...\n")
 
 print(f"[INFO] Starting multithreaded processing with {MAX_WORKERS} workers...")
