@@ -12,7 +12,7 @@ UPDATE_ENV_VAR = "AI_ENGINE_UPDATE_INPUT_LANGUAGES"
 
 LANGUAGE_MAPPING = {
     "AR": "Arabic",
-    "EN_CA": "English CA",
+    "EN_CA": "English US",
     "EN_GB": "English GB",
     "EN_US": "English US",
     "FRA_FR": "French FR",
