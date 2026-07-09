@@ -1,5 +1,4 @@
 import re
-from urllib.parse import unquote
 from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
 from helpers.span_remover import remove_span_texts_from_html
@@ -13,6 +12,14 @@ def get_text_value(value) :
 
 
 def extract_correct_answer_text(answer_html, question_id, lesson):
+    if answer_html:
+        soup = BeautifulSoup(answer_html, "html.parser")
+
+        for blank in soup.find_all("blank"):
+            blank.unwrap()
+
+        answer_html = str(soup)
+
     parsed_answer = parse_html_content(
         answer_html,
         question_id,
@@ -49,25 +56,11 @@ def extract_feedback_text(feedback_html, question_id, lesson):
 
     return ""
 
-
-def is_legacy_blank_marker(tag):
-    """Return True for legacy WIRIS images that represent a FIB blank."""
-    if tag.name != "img":
-        return False
-
-    marker_data = " ".join([
-        tag.get("data-mathml", ""),
-        tag.get("alt", ""),
-        unquote(tag.get("src", ""))
-    ])
-
-    return bool(re.search(r"\bblank(?:\b|_)", marker_data, re.IGNORECASE))
-
 def map_fib_structure(raw, qid, lesson, file_path):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
 
-    prompt = remove_span_texts_from_html(prompt, qid, lesson, file_path)
+    prompt = remove_span_texts_from_html( prompt, qid, lesson, file_path )
 
     soup = BeautifulSoup(
         prompt,
@@ -80,8 +73,9 @@ def map_fib_structure(raw, qid, lesson, file_path):
     )
 
     blank_lookup = {
-        int(x.get("id")): x
-        for x in blanks
+        int(blank.get("id")): blank
+        for blank in blanks
+        if blank.get("id") is not None
     }
 
     validation_lookup = {}
@@ -92,91 +86,53 @@ def map_fib_structure(raw, qid, lesson, file_path):
     )
 
     for answer in answer_mapping:
-        validation_lookup[
-            int(answer.get("blankId"))
-        ] = answer
+        blank_id = answer.get("blankId")
+        if blank_id is not None:
+            validation_lookup[int(blank_id)] = answer
 
     sequential_id = 1
     items = []
     correct_answers = []
 
     blank_fields = soup.find_all("blank-field")
-    if blank_fields:
-        blank_sources = [
-            (
-                blank_lookup.get(int(blank.get("id")), {}),
-                int(blank.get("id")),
-                blank
-            )
-            for blank in blank_fields
-        ]
-    else:
 
-        legacy_markers = [
-            image
-            for image in soup.find_all("img")
-            if is_legacy_blank_marker(image)
-        ]
-        blank_sources = [
-            (
-                blank_data,
-                int(blank_data.get("id")),
-                legacy_markers[index] if index < len(legacy_markers) else None
-            )
-            for index, blank_data in enumerate(blanks)
-        ]
+    # Normal flow: Use <blank-field> tags from HTML
+    for blank in blank_fields:
 
-    for blank_data, old_blank_id, blank_marker in blank_sources:
+        old_blank_id = int(blank.get("id"))
+
+        blank_data = blank_lookup.get(
+            old_blank_id,
+            {}
+        )
 
         validation_data = validation_lookup.get(
             old_blank_id,
             {}
         )
 
-        correct_answer = (
-            validation_data.get(
-                "correctAnswer",
-                ""
-            )
-        )
+        correct_answer = validation_data.get("correctAnswer")
+        alternate_answers = validation_data.get( "alternateAnswers", [])
 
-        alternate_answers = (
-            validation_data.get(
-                "alternateAnswers",
-                []
-            )
-        )
+        answer_type = detect_answer_type( correct_answer or "")
 
-        answer_type = detect_answer_type(
-            correct_answer
-        )
+        feedback = blank_data.get("feedback")
+        feedback_text = ""
 
-        feedback = blank_data.get("feedback") or ""
-        parsed_feedback = extract_feedback_text(
-            feedback,
-            qid,
-            lesson
-        )
+        if feedback:
+            parsed_feedback = parse_html_content(feedback, qid, lesson)
+            if parsed_feedback:
+                feedback_text = parsed_feedback[0]["text"]
 
-        item = {
+        items.append({
             "id": sequential_id,
             "weight": normalize_weight(
-                blank_data.get(
-                    "weight",
-                    100.0
-                )
+                blank_data.get("weight", 100.0)
             ),
-            "feedback": parsed_feedback,
-            "rules": blank_data.get(
-                "rules",
-                []
-            ),
-            "decimalNotation": blank_data.get(
-                "decimalNotation"
-            ),
-            "periodNotation": blank_data.get(
-                "periodNotation"
-            ),
+            "feedback": feedback_text,
+            "rules": blank_data.get("rules", []),
+            "decimalNotation": blank_data.get("decimalNotation"),
+            "periodNotation": blank_data.get("periodNotation"),
             "answerType": answer_type,
             "inputType": blank_data.get(
                 "type",
@@ -192,33 +148,144 @@ def map_fib_structure(raw, qid, lesson, file_path):
             "position": None,
             "wirisXml": None,
             "wirisSvg": None
-        }
+        })
 
-        items.append(item)
         correct_answers.append({
             "blankId": sequential_id,
-            "correctAnswer": extract_correct_answer_text(
-                correct_answer,
-                qid,
-                lesson
+            "correctAnswer": (
+                extract_correct_answer_text(
+                    correct_answer,
+                    qid,
+                    lesson
+                )
+                if correct_answer
+                else None
             ),
             "alternateAnswers": alternate_answers,
             "answerInWidgetFormat": None
         })
 
-        if blank_marker is not None:
-            blank_marker.replace_with("@_@")
+        blank.replace_with("@_@")
         sequential_id += 1
 
-    transformed_html = str(soup)
+    # Fallback: No <blank-field> tags found.
+    # Build items from body["blanks"].
+    if not items and blanks:
 
+        for blank_data in blanks:
+
+            old_blank_id = int(blank_data.get("id"))
+
+            validation_data = validation_lookup.get(
+                old_blank_id,
+                {}
+            )
+
+            correct_answer = validation_data.get("correctAnswer")
+            alternate_answers = validation_data.get(
+                "alternateAnswers",
+                []
+            )
+
+            answer_type = detect_answer_type(
+                correct_answer or ""
+            )
+
+            feedback = blank_data.get("feedback")
+            feedback_text = ""
+
+            if feedback:
+                parsed_feedback = parse_html_content(
+                    feedback,
+                    qid,
+                    lesson
+                )
+
+                if parsed_feedback:
+                    feedback_text = parsed_feedback[0]["text"]
+
+            items.append({
+                "id": sequential_id,
+                "weight": normalize_weight(
+                    blank_data.get("weight", 100.0)
+                ),
+                "feedback": feedback_text,
+                "rules": blank_data.get("rules", []),
+                "decimalNotation": blank_data.get("decimalNotation"),
+                "periodNotation": blank_data.get("periodNotation"),
+                "answerType": answer_type,
+                "inputType": blank_data.get(
+                    "type",
+                    "TEXT_BLANK"
+                ),
+                "swappable": False,
+                "swapGroupId": 0,
+                "withBlankPicker": False,
+                "allowEquivalentNumber": False,
+                "simplestFormFraction": False,
+                "decimals": None,
+                "itemId": None,
+                "position": None,
+                "wirisXml": None,
+                "wirisSvg": None
+            })
+
+            correct_answers.append({
+                "blankId": sequential_id,
+                "correctAnswer": (
+                    extract_correct_answer_text(
+                        correct_answer,
+                        qid,
+                        lesson
+                    )
+                    if correct_answer
+                    else None
+                ),
+                "alternateAnswers": alternate_answers,
+                "answerInWidgetFormat": None
+            })
+
+            sequential_id += 1
+
+    # Final fallback:
+    # Guarantee items is never empty.
+    if not items:
+
+        items.append({
+            "id": 1,
+            "weight": None,
+            "feedback": None,
+            "rules": [],
+            "decimalNotation": None,
+            "periodNotation": None,
+            "answerType": None,
+            "inputType": "TEXT_BLANK",
+            "swappable": False,
+            "swapGroupId": 0,
+            "withBlankPicker": False,
+            "allowEquivalentNumber": False,
+            "simplestFormFraction": False,
+            "decimals": None,
+            "itemId": None,
+            "position": None,
+            "wirisXml": None,
+            "wirisSvg": None
+        })
+
+        correct_answers.append({
+            "blankId": 1,
+            "correctAnswer": None,
+            "alternateAnswers": [],
+            "answerInWidgetFormat": None
+        })
+
+    transformed_html = str(soup)
     return {
         "sentence_text": transformed_html,
         "items": items,
         "correct_answers": correct_answers,
         "multiple_answer": False
     }
-
 
 def normalize_weight(weight):
     try:

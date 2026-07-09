@@ -8,9 +8,7 @@ from html.parser import HTMLParser
 from typing import Dict, List, Optional, Tuple
 from bs4 import BeautifulSoup
 from builders.metadata_builder import build_metadata
-from builders.modal_feedback_builder import build_modal_feedback as build_shared_modal_feedback
 from parsers.content_parser import strip_disallowed_tags, parse_html_content, ALLOWED_TAGS
-from helpers.feedback_mapper import map_hints_and_feedback
 from helpers.span_remover import remove_span_texts_from_html
 from builders.itembody_builder import _extract_side_image_from_sentence
 
@@ -197,35 +195,48 @@ def replace_blank_fields_with_placeholder(prompt_html: str) -> Optional[str]:
     return result if result else None
 
 
-def parse_choice_content(value_html: str, opt_id: int, question_id=None, lesson=None) -> Dict:
-    """
-    Parses choice content into structured text or image objects.
-    WIRIS math formulas are cleanly extracted as LaTeX text strings by parse_html_content.
-    If a legacy option is genuinely empty, this will intentionally return an empty string
-    so that downstream API validation throws a visible error to flag the bad data.
-    """
+def parse_choice_content(value_html: str, question_id=None, lesson=None) -> Dict:
     if not value_html:
         return {"type": "text", "text": ""}
-    parsed_contents = parse_html_content(value_html, question_id, lesson)
-    
-    if parsed_contents:
-        item = parsed_contents[0]
-        if item.get("type") == "text":
-            # Target API completely rejects HTML tags in Dropdown options.
-            # We use BeautifulSoup get_text() to strip all tags (like <p>, <span>)
-            # but this correctly preserves LaTeX strings like "\( ... \)" which have no tags.
-            from bs4 import BeautifulSoup
-            clean_text = BeautifulSoup(item.get("text", ""), "html.parser").get_text().strip()
-            return {"type": "text", "text": clean_text}
-        elif item.get("type") == "image":
-            return {
-                "type": "image", 
-                "text": "",  # Intentionally blank to flag missing alt-text or data loss in QA
-                "image": item.get("image")
-            }
-            
-    return {"type": "text", "text": ""}
+    parsed_content = parse_html_content(value_html, question_id, lesson)  
 
+    if parsed_content:
+        text = None
+        image = None
+
+        for item in parsed_content:
+            item_type = item.get("type")
+
+            if item_type == "text":
+                text = item.get("text", "")
+
+            elif item_type == "image":
+                image = item.get("image")
+
+        # Case 1: Text only
+        if text is not None and image is None:
+            return {
+                "type": "text",
+                "text": text
+            }
+
+        # Case 2: Image only
+        if image is not None and text is None:
+            return {
+                "type": "image",
+                "text": image.get("url", "")
+            }
+
+        # Case 3: Text + Image
+        if text is not None and image is not None:
+            return {
+                "type": "image/text",
+                "text": text,
+                "image": image
+            }
+
+        # Empty list
+        return {}
 
 class _ParsedHint:
     def __init__(self, items):
@@ -277,8 +288,7 @@ def run_hint_mapper(wrong_answer_feedback_html: str, hints_html: List[str]) -> T
     need_help.extend(last.media_only_items())
     return incorrect, (need_help if need_help else None)
 
-
-def build_item_body(body: Dict) -> Dict:
+def build_item_body(body: Dict, qid, lesson) -> Dict:
     """
     Builds the main itemBody structure for a Dropdown question, handling options and weights.
     
@@ -321,7 +331,7 @@ def build_item_body(body: Dict) -> Dict:
 
             options.append({
                 "id": opt_id,
-                "content": parse_choice_content(choice.get("value", ""), opt_id),
+                "content": parse_choice_content(choice.get("value", ""), qid, lesson),
                 "feedback": fb_final,
             })
 
@@ -517,27 +527,18 @@ class DropdownTransformer:
         prompt_html = body.get("prompt") or ""
         prompt_html = remove_span_texts_from_html(prompt_html, self.qid, self.lesson, self.file_path)
         blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
-        feedback_mapping = map_hints_and_feedback(
-            body.get("hints", []),
-            body.get("wrongAnswerFeedback", ""),
-            self.qid,
-            self.lesson,
-        )
 
         payload = {
             "schemaVersion": {"major": 1, "minor": 0, "patch": 0},
             "type": "DROPDOWN",
             "subType": "DROPDOWN_SENTENCE",
             "metadata": build_metadata(q),
-            "itemBody": build_item_body(body),
+            "itemBody": build_item_body(body, self.qid, self.lesson),
             "responseDeclaration": {"maxAttempts": 1},
             "outcomeDeclaration": build_outcome_declaration(body, validation, blank_ids_ordered),
         }
 
-        modal_feedback = build_shared_modal_feedback(
-            self.raw,
-            feedback_mapping,
-        )
+        modal_feedback = build_modal_feedback(body)
         if modal_feedback:
             payload["modalFeedback"] = modal_feedback
 
