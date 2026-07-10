@@ -58,7 +58,9 @@ def _atomic_write_json(file_path, data, indent=2):
     os.replace(tmp_path, file_path)
 
 
-def print_progress(completed, remaining, elapsed_str):
+def print_progress(elapsed_str):
+    completed = len(success_ids) + len(failed_ids) + new_invalid_json_count
+    remaining = total_questions - completed
     print(f"[PROGRESS] Completed={completed}/{total_questions} | Remaining={remaining} | Success={len(success_ids)} | Failed={len(failed_ids)} | InvalidJSON={new_invalid_json_count} | Elapsed={elapsed_str}")
 
 
@@ -208,6 +210,15 @@ print("[INFO] Scanning input folder structure...")
 total_questions, initial_invalid_json, questions_by_file = scan_input_folder(INPUT_FOLDER)
 print(f"[INFO] Scan complete. Found {total_questions} total questions and {initial_invalid_json} invalid JSON files.")
 
+# Build set of all unique question IDs in input files
+input_q_ids = set()
+for (folder, file), questions in questions_by_file.items():
+    for question in questions:
+        if isinstance(question, dict):
+            q_id = question.get("question_id")
+            if q_id:
+                input_q_ids.add(q_id)
+
 # Load chunks
 success_ids_list = load_chunks(report_folder, "success")
 success_ids_list = [
@@ -215,12 +226,15 @@ success_ids_list = [
     for item in success_ids_list
 ]
 success_ids_list = [item for item in success_ids_list if isinstance(item, str)]
+success_ids_list = [item for item in success_ids_list if item in input_q_ids]
 success_ids = set(success_ids_list)
 
 failed_questions = load_chunks(report_folder, "failed")
 standardized_failed = []
 for q in failed_questions:
     if isinstance(q, dict) and "question_id" in q:
+        if q["question_id"] not in input_q_ids:
+            continue
         if "error" not in q:
             q_code = q.get("response", {}).get("code") if isinstance(q.get("response"), dict) else q.get("question_code")
             standardized_failed.append({
@@ -244,6 +258,9 @@ if os.path.isfile(IGNORED_QUESTION_FILE):
             ignored_data = json.load(f)
         if isinstance(ignored_data, dict):
             for iq_id, iq_reason in ignored_data.items():
+                # Only keep active questions
+                if iq_id not in input_q_ids:
+                    continue
                 # Skip already-succeeded questions
                 if iq_id in success_ids:
                     continue
@@ -292,9 +309,7 @@ if COUNT_ONLY:
     print(f"Previously Failed (will be retried): {len(failed_ids)}")
     print(f"Remaining / Unprocessed: {total_questions - skipped_success_count}")
     print(f"Invalid JSON files parsed at start: {initial_invalid_json}")
-    completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-    remaining = total_questions - completed
-    print_progress(completed, remaining, "00m 00s")
+    print_progress("00m 00s")
     print("Exiting count only mode.\n")
     os._exit(0)
 
@@ -581,18 +596,14 @@ def process_single_question(task):
     finally:
         with io_lock:
             # Print progression log
-            completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-            remaining = total_questions - completed
             elapsed_seconds = int(time.perf_counter() - start_time)
             elapsed_str = f"{elapsed_seconds // 60:02d}m {elapsed_seconds % 60:02d}s"
-            print_progress(completed, remaining, elapsed_str)
+            print_progress(elapsed_str)
             print("\tNext question ...\n")
 
 
 # Print initial progression log
-initial_completed = skipped_success_count + new_success_count + new_failed_count + new_invalid_json_count
-initial_remaining = total_questions - initial_completed
-print_progress(initial_completed, initial_remaining, "00m 00s")
+print_progress("00m 00s")
 print("\tNext question ...\n")
 
 print(f"[INFO] Starting multithreaded processing with {MAX_WORKERS} workers...")
