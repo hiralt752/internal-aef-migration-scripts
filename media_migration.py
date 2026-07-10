@@ -14,7 +14,7 @@ from image_migration.migration import image_migration, check_json_exists, append
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-INPUT_FOLDER = os.path.join(BASE_DIR, "test", "test")
+INPUT_FOLDER = os.path.join(BASE_DIR, "947")
 IMAGE_RESOLUTION_OUTPUT = os.path.join(
     BASE_DIR,
     "image_resolution_engine",

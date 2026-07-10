@@ -21,16 +21,22 @@ IGNORED_QUESTION_FILE = os.path.join(BASE_DIR, "ignored_question.json")
 REQUEST_TIMEOUT = 30  # seconds
 
 
-def search_and_replace(question, new_url, old_url):
-    # pprint(question)
-    for key, value in question.items():
-        if isinstance(value, dict):
-            search_and_replace(value, new_url, old_url)
-        else:
-            if old_url in str(value):
-                question[key] = str(value).replace(old_url, new_url)
-                # pprint(question)
-    return question
+def search_and_replace(data, new_url, old_url):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, (dict, list)):
+                search_and_replace(value, new_url, old_url)
+            else:
+                if value is not None and old_url in str(value):
+                    data[key] = str(value).replace(old_url, new_url)
+    elif isinstance(data, list):
+        for idx, item in enumerate(data):
+            if isinstance(item, (dict, list)):
+                search_and_replace(item, new_url, old_url)
+            else:
+                if item is not None and old_url in str(item):
+                    data[idx] = str(item).replace(old_url, new_url)
+    return data
 
 
 def _atomic_write_json(file_path, data, indent=2):
