@@ -311,6 +311,12 @@ class MatchingTransformer:
             }
         if feedback_block:
             qb_payload["outcomeDeclaration"]["feedback"] = feedback_block
+        else :
+            qb_payload["outcomeDeclaration"]["feedback"] = {
+                                                                "correct": {},
+                                                                "incorrect": {},
+                                                                "partial":{}
+                                                            }
 
         if body.get("generalFeedback"):
             qb_payload["outcomeDeclaration"]["seeWhy"] = {
