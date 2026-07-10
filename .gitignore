@@ -239,3 +239,6 @@ report_always
 2156
 947
 
+# Migration temporary lock files
+media_migration.lock
+

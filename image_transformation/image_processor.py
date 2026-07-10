@@ -72,6 +72,14 @@ def build_output_path(category: str, source_filename: str) -> str:
     return os.path.join(output_dir, source_filename)
 
 
+def _is_svg(src: str) -> bool:
+    """Return True if entry is an SVG image."""
+    if not src:
+        return False
+    clean_src = src.split("?")[0]
+    return clean_src.lower().endswith(".svg")
+
+
 def transform_and_save(
     question_id: str,
     category: str,
@@ -218,6 +226,7 @@ def copy_media_and_save(question_id: str, category: str, src: str) -> bool | Non
         return False
     return True
 
+
 def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     """
     Process all images described in one image_resolution_engine result.
@@ -262,6 +271,12 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
         if _is_non_image_media(audit_entry):
             continue
 
+        if src.startswith("data:") or src.startswith("http://") or src.startswith("https://"):
+            continue
+
+        if _is_svg(src):
+            return f"Question contains SVG file: {src}"
+
         if target_width is None or target_height is None:
             log_warning(f"Skipping audit image with missing dimensions: {src}")
             continue
@@ -292,6 +307,10 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
             src = image_entry.get("src")
             if _is_non_image_media(image_entry):
                 continue
+            if src and (src.startswith("data:") or src.startswith("http://") or src.startswith("https://")):
+                continue
+            if _is_svg(src):
+                return f"Question contains SVG file: {src}"
             if question_width is None or question_height is None:
                 log_warning(f"Skipping question image with missing resolution: {src}")
                 continue
@@ -309,6 +328,10 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
             src = image_entry.get("src")
             if _is_non_image_media(image_entry):
                 continue
+            if src and (src.startswith("data:") or src.startswith("http://") or src.startswith("https://")):
+                continue
+            if _is_svg(src):
+                return f"Question contains SVG file: {src}"
             if option_width is None or option_height is None:
                 log_warning(f"Skipping option image with missing resolution: {src}")
                 continue
@@ -330,21 +353,28 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
             log_warning("Skipping images because resolution max_width/max_height is missing.")
         else:
             for image_entry in question_images + option_images:
+                src = image_entry.get("src")
                 if _is_non_image_media(image_entry):
                     continue
+                if src and (src.startswith("data:") or src.startswith("http://") or src.startswith("https://")):
+                    continue
+                if _is_svg(src):
+                    return f"Question contains SVG file: {src}"
                 if transform_and_save(
                     question_id=question_id,
                     category=category,
-                    src=image_entry.get("src"),
+                    src=src,
                     target_width=int(target_width),
                     target_height=int(target_height),
                 ) is None:
-                    return f"local media file not found: {image_entry.get('src')}"
+                    return f"local media file not found: {src}"
 
     # Copy audio and video files without transformation
     for media_entry in (resolution_result.get("question_audios") or []):
         src = media_entry.get("src")
         if not src:
+            continue
+        if src.startswith("data:") or src.startswith("http://") or src.startswith("https://"):
             continue
         if copy_media_and_save(question_id, category, src) is None:
             return f"local media file not found: {src}"
@@ -352,6 +382,8 @@ def process_resolution_output(resolution_result: dict[str, Any]) -> None:
     for media_entry in (resolution_result.get("question_videos") or []):
         src = media_entry.get("src")
         if not src:
+            continue
+        if src.startswith("data:") or src.startswith("http://") or src.startswith("https://"):
             continue
         if copy_media_and_save(question_id, category, src) is None:
             return f"local media file not found: {src}"

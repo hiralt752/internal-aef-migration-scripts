@@ -142,7 +142,11 @@ WIDGET_LAYOUT_MAP = {
         "max_height": 450,
         "ratio": "4:3",
         "main_image_width": 252,
-        "main_image_height": 189
+        "main_image_height": 189,
+        "option_width": 120,
+        "option_height": 120,
+        "option_ratio": "1:1"
+ 
     },
     "Matching (2imageoptions)": {
         "max_width": 224,
