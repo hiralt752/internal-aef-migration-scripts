@@ -1,9 +1,16 @@
 import re
 
 
+SCIENCE_CURRICULUM_SUBJECT = "science"
+MATH_CURRICULUM_SUBJECT = "math"
+
 CURRICULUM_SUBJECTS = {
-    "science"
+    SCIENCE_CURRICULUM_SUBJECT,
+    MATH_CURRICULUM_SUBJECT
 }
+
+MATH_CURRICULUM_MIN_GRADE = 5
+MATH_CURRICULUM_MAX_GRADE = 8
 
 
 def normalize_subject_for_curriculum(subject):
@@ -21,9 +28,41 @@ def normalize_subject_for_curriculum(subject):
         "PHYSICS",
         "PHYSICS_EN"
     ]:
-        return "science"
+        return SCIENCE_CURRICULUM_SUBJECT
+
+    if subject in [
+        "MATH",
+        "MATH_EN"
+    ]:
+        return MATH_CURRICULUM_SUBJECT
 
     return None
+
+
+def curriculum_enabled_for_subject_and_grade(
+    subject,
+    grade
+):
+    normalized_subject = normalize_subject_for_curriculum(
+        subject
+    )
+
+    if normalized_subject == SCIENCE_CURRICULUM_SUBJECT:
+        return True
+
+    if normalized_subject != MATH_CURRICULUM_SUBJECT:
+        return False
+
+    try:
+        numeric_grade = int(grade)
+    except Exception:
+        return False
+
+    return (
+        MATH_CURRICULUM_MIN_GRADE
+        <= numeric_grade
+        <= MATH_CURRICULUM_MAX_GRADE
+    )
 
 
 def get_grade_window(
@@ -48,6 +87,99 @@ def get_grade_window(
         for item in grades
         if min_grade <= item <= max_grade
     ]
+
+
+def get_curriculum_grades_for_record(
+    subject,
+    grade,
+    min_grade=1,
+    max_grade=12
+):
+    normalized_subject = normalize_subject_for_curriculum(
+        subject
+    )
+
+    try:
+        numeric_grade = int(grade)
+    except Exception:
+        return []
+
+    if normalized_subject == MATH_CURRICULUM_SUBJECT:
+        return (
+            [numeric_grade]
+            if min_grade <= numeric_grade <= max_grade
+            else []
+        )
+
+    return get_grade_window(
+        numeric_grade,
+        min_grade=min_grade,
+        max_grade=max_grade
+    )
+
+
+def get_curriculum_candidates_for_record(
+    uploaded_files,
+    subject,
+    grade,
+    min_grade=1,
+    max_grade=12
+):
+    normalized_subject = normalize_subject_for_curriculum(
+        subject
+    )
+
+    if normalized_subject not in CURRICULUM_SUBJECTS:
+        return []
+
+    if not curriculum_enabled_for_subject_and_grade(
+        subject,
+        grade
+    ):
+        return []
+
+    candidates = build_curriculum_file_candidates(
+        uploaded_files,
+        normalized_subject
+    )
+
+    if normalized_subject == MATH_CURRICULUM_SUBJECT:
+        return candidates
+
+    resolved = []
+    seen_file_keys = set()
+
+    for item_grade in get_curriculum_grades_for_record(
+        subject,
+        grade,
+        min_grade=min_grade,
+        max_grade=max_grade
+    ):
+        candidate = find_curriculum_file_for_grade(
+            uploaded_files,
+            candidates,
+            normalized_subject,
+            item_grade
+        )
+
+        if not candidate:
+            continue
+
+        file_key = str(
+            candidate["file_key"]
+        )
+
+        if file_key in seen_file_keys:
+            continue
+
+        seen_file_keys.add(
+            file_key
+        )
+        resolved.append(
+            candidate
+        )
+
+    return resolved
 
 
 def build_curriculum_file_key(
@@ -185,42 +317,120 @@ def resolve_curriculum_files_for_record(
 
     base_grade = record.get("grade")
 
-    grade_window = get_grade_window(
-        base_grade,
-        min_grade=min_grade,
-        max_grade=max_grade
-    )
+    if not curriculum_enabled_for_subject_and_grade(
+        folder_subject,
+        base_grade
+    ):
+        return {
+            "enabled": False,
+            "reason": "curriculum_outcome_not_required_for_grade",
+            "subject": folder_subject,
+            "base_grade": base_grade,
+            "grade_window": [],
+            "files": [],
+            "missing_files": []
+        }
 
     resolved_files = []
     missing_files = []
     resolved_file_keys = set()
-    candidates = build_curriculum_file_candidates(
-        uploaded_files,
-        normalized_subject
-    )
-
-    for grade in grade_window:
-        expected_file_key = build_curriculum_file_key(
-            normalized_subject,
-            grade
+    if normalized_subject == MATH_CURRICULUM_SUBJECT:
+        selected_candidates = get_curriculum_candidates_for_record(
+            uploaded_files=uploaded_files,
+            subject=folder_subject,
+            grade=base_grade,
+            min_grade=min_grade,
+            max_grade=max_grade
+        )
+        grade_window = get_curriculum_grades_for_record(
+            folder_subject,
+            base_grade,
+            min_grade=min_grade,
+            max_grade=max_grade
         )
 
-        candidate = find_curriculum_file_for_grade(
-            uploaded_files,
-            candidates,
-            normalized_subject,
-            grade
-        )
-
-        if not candidate:
+        if not selected_candidates:
             missing_files.append(
                 {
-                    "grade": grade,
-                    "file_key": expected_file_key,
+                    "grade": base_grade,
+                    "file_key": f"{normalized_subject}-curriculum-outcome-grade-*",
                     "status": "missing_in_uploaded_files_cache"
                 }
             )
-            continue
+    else:
+        selected_candidates = []
+        grade_window = get_curriculum_grades_for_record(
+            folder_subject,
+            base_grade,
+            min_grade=min_grade,
+            max_grade=max_grade
+        )
+
+        candidates = build_curriculum_file_candidates(
+            uploaded_files,
+            normalized_subject
+        )
+
+        for grade in grade_window:
+            expected_file_key = build_curriculum_file_key(
+                normalized_subject,
+                grade
+            )
+
+            candidate = find_curriculum_file_for_grade(
+                uploaded_files,
+                candidates,
+                normalized_subject,
+                grade
+            )
+
+            if not candidate:
+                missing_files.append(
+                    {
+                        "grade": grade,
+                        "file_key": expected_file_key,
+                        "status": "missing_in_uploaded_files_cache"
+                    }
+                )
+                continue
+
+            file_key = str(
+                candidate["file_key"]
+            )
+
+            if file_key in resolved_file_keys:
+                for item in resolved_files:
+                    if item.get("file_key") == file_key:
+                        item.setdefault(
+                            "grades",
+                            []
+                        ).append(
+                            grade
+                        )
+                        break
+
+                continue
+
+            selected_candidates.append(
+                candidate
+            )
+
+    for candidate in selected_candidates:
+        if normalized_subject == MATH_CURRICULUM_SUBJECT:
+            covered_grades = list(
+                range(
+                    candidate["start_grade"],
+                    candidate["end_grade"] + 1
+                )
+            )
+            grade = base_grade
+        else:
+            covered_grades = [
+                item
+                for item in grade_window
+                if candidate["start_grade"] <= item <= candidate["end_grade"]
+            ]
+            grade = covered_grades[0] if covered_grades else base_grade
 
         file_key = candidate["file_key"]
         file_info = candidate["file_info"]
@@ -230,16 +440,6 @@ def resolve_curriculum_files_for_record(
         ]
 
         if file_key in resolved_file_keys:
-            for item in resolved_files:
-                if item.get("file_key") == file_key:
-                    item.setdefault(
-                        "grades",
-                        []
-                    ).append(
-                        grade
-                    )
-                    break
-
             continue
 
         try:
@@ -254,12 +454,17 @@ def resolve_curriculum_files_for_record(
             resolved_files.append(
                 {
                     "grade": grade,
-                    "grades": [
-                        grade
-                    ],
+                    "grades": covered_grades or [grade],
                     "grade_range": grade_range,
                     "file_key": file_key,
-                    "requested_file_key": expected_file_key,
+                    "requested_file_key": (
+                        build_curriculum_file_key(
+                            normalized_subject,
+                            grade
+                        )
+                        if normalized_subject != MATH_CURRICULUM_SUBJECT
+                        else file_key
+                    ),
                     "file_name": file_info.get("file_name"),
                     "gemini_file_name": file_info.get("gemini_file_name"),
                     "gemini_file": gemini_file,
@@ -273,7 +478,14 @@ def resolve_curriculum_files_for_record(
                     "grade": grade,
                     "grade_range": grade_range,
                     "file_key": file_key,
-                    "requested_file_key": expected_file_key,
+                    "requested_file_key": (
+                        build_curriculum_file_key(
+                            normalized_subject,
+                            grade
+                        )
+                        if normalized_subject != MATH_CURRICULUM_SUBJECT
+                        else file_key
+                    ),
                     "file_name": file_info.get("file_name"),
                     "gemini_file_name": file_info.get("gemini_file_name"),
                     "status": "gemini_file_get_failed",

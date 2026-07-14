@@ -514,7 +514,8 @@ def estimate_batch_prompt_tokens_locally(
     )
     instruction_text = build_batch_instruction(
         subject,
-        question_ids
+        question_ids,
+        grade=first_record.get("grade")
     )
     image_count = sum(
         count_resolved_images_for_estimate(record)
@@ -2288,7 +2289,8 @@ def write_assembled_request_previews(
                 "===== BATCH INSTRUCTION =====",
                 build_batch_instruction(
                     get_batch_subject(first_record),
-                    question_ids
+                    question_ids,
+                    grade=first_record.get("grade")
                 ),
                 ""
             ]
@@ -3220,6 +3222,7 @@ def call_gemini_with_model_switch(
                 validation = assess_gemini_response(
                     response=parsed_response,
                     subject=subject,
+                    grade=record.get("grade"),
                     allowed_outcome_keys=(
                         allowed_outcome_keys
                         if curriculum_references.get("enabled")
@@ -3719,7 +3722,8 @@ def build_batch_contents(
     contents.append(
         build_batch_instruction(
             subject,
-            question_ids
+            question_ids,
+            grade=first_record.get("grade")
         )
     )
 
@@ -5074,6 +5078,8 @@ def main():
         },
         "curriculum_rule": {
             "enabled_subjects": [
+                "MATH",
+                "MATH_EN",
                 "SCIENCE",
                 "SCIENCE_EN",
                 "BIOLOGY",
@@ -5087,6 +5093,10 @@ def main():
                 "grade - 1",
                 "grade",
                 "grade + 1"
+            ],
+            "math_grade_gate": [
+                5,
+                8
             ]
         },
         "lesson_context": {

@@ -15,9 +15,14 @@ from prompts.templates.dropdown import build_dropdown_prompt
 from prompts.templates.dnd import build_dnd_prompt
 from prompts.templates.matching import build_matching_prompt
 from prompts.templates.generic import build_generic_prompt
+from services.curriculum_file_resolver import (
+    curriculum_enabled_for_subject_and_grade
+)
 
 
 CURRICULUM_SUBJECTS = {
+    "MATH",
+    "MATH_EN",
     "SCIENCE",
     "SCIENCE_EN",
     "BIOLOGY",
@@ -55,12 +60,18 @@ TEMPLATE_MAP = {
 }
 
 
-def get_output_schema(folder_subject):
+def get_output_schema(
+    folder_subject,
+    grade=None
+):
     folder_subject = str(
         folder_subject or ""
     ).strip().upper()
 
-    if folder_subject in CURRICULUM_SUBJECTS:
+    if curriculum_enabled_for_subject_and_grade(
+        folder_subject,
+        grade
+    ):
         return MATH_SCIENCE_OUTPUT_SCHEMA
 
     if folder_subject in ISLAMIC_SUBJECTS:
@@ -112,7 +123,10 @@ def build_prompt(data):
 
     prompt_parts.extend(
         [
-            get_output_schema(folder_subject).strip(),
+            get_output_schema(
+                folder_subject,
+                data.get("grade")
+            ).strip(),
             question_prompt.strip()
         ]
     )

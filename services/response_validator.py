@@ -21,8 +21,14 @@ VALID_DIFFICULTY = {
     "EXTENSION"
 }
 
+from services.curriculum_file_resolver import (
+    curriculum_enabled_for_subject_and_grade
+)
+
 
 CURRICULUM_SUBJECTS = {
+    "MATH",
+    "MATH_EN",
     "SCIENCE",
     "SCIENCE_EN",
     "BIOLOGY",
@@ -300,13 +306,17 @@ def validate_general_response(
 
 def validate_gemini_response(
     response,
-    subject
+    subject,
+    grade=None
 ):
     subject = normalize_subject(
         subject
     )
 
-    if subject in CURRICULUM_SUBJECTS:
+    if curriculum_enabled_for_subject_and_grade(
+        subject,
+        grade
+    ):
         return validate_math_science_response(
             response
         )
@@ -361,12 +371,14 @@ def validate_allowed_outcome_keys(
 def assess_gemini_response(
     response,
     subject,
+    grade=None,
     allowed_outcome_keys=None,
     min_confidence=0.8
 ):
     validation = validate_gemini_response(
         response,
-        subject
+        subject,
+        grade=grade
     )
     errors = list(
         validation.get("errors", [])
@@ -375,7 +387,10 @@ def assess_gemini_response(
         subject
     )
 
-    if subject in CURRICULUM_SUBJECTS:
+    if curriculum_enabled_for_subject_and_grade(
+        subject,
+        grade
+    ):
         validate_allowed_outcome_keys(
             response=response,
             errors=errors,

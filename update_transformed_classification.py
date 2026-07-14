@@ -7,6 +7,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
+from services.curriculum_file_resolver import (
+    curriculum_enabled_for_subject_and_grade,
+    normalize_subject_for_curriculum,
+)
+
 
 MATH_SUBJECTS = {
     "MATH",
@@ -77,7 +82,7 @@ CONGNITIVE_DIMENSION = {
 
 
 REPORT_LIMIT = 100
-INPUT_DIR_NAME = "test"
+INPUT_DIR_NAME = "input"
 
 
 def resolve_project_root():
@@ -183,11 +188,59 @@ def display_subject(subject):
     )
 
 
-def curriculum_name_for_subject(subject):
-    subject = normalize_subject(subject)
+def resolve_canonical_subject(*candidates):
+    normalized_pairs = []
 
-    if subject in SCIENCE_SUBJECTS:
+    for candidate in candidates:
+        if candidate is None:
+            continue
+
+        raw_value = str(candidate).strip()
+
+        if not raw_value:
+            continue
+
+        normalized_pairs.append(
+            (
+                raw_value,
+                normalize_subject(raw_value)
+            )
+        )
+
+    for raw_value, normalized_value in normalized_pairs:
+        if normalize_subject_for_curriculum(
+            normalized_value
+        ):
+            return normalized_value
+
+    for raw_value, normalized_value in normalized_pairs:
+        if normalized_value in (
+            MATH_SUBJECTS
+            | SCIENCE_SUBJECTS
+            | FIXED_DOK1_SUBJECTS
+            | ISLAMIC_SUBJECTS
+        ):
+            return normalized_value
+
+    return normalized_pairs[0][0] if normalized_pairs else ""
+
+
+def curriculum_name_for_subject(subject, grade=None):
+    if not curriculum_enabled_for_subject_and_grade(
+        subject,
+        grade
+    ):
+        return None
+
+    normalized_subject = normalize_subject_for_curriculum(
+        subject
+    )
+
+    if normalized_subject == "science":
         return "NGSS"
+
+    if normalized_subject == "math":
+        return "CCSS"
 
     return None
 
@@ -293,30 +346,28 @@ def get_record_subject(record, response=None, file_path=None, lookup_meta=None):
         .get("classification", {})
     )
 
-    value = (
-        classification.get("subject")
-        if isinstance(classification, dict)
-        else None
-    )
-
     metadata = record.get(
         "metadata",
         {}
     )
 
-    if value is None and isinstance(metadata, dict):
-        value = (
+    value = resolve_canonical_subject(
+        (lookup_meta.get("folder_subject") if lookup_meta else None),
+        (lookup_meta.get("subject") if lookup_meta else None),
+        (
+            classification.get("subject")
+            if isinstance(classification, dict)
+            else None
+        ),
+        (
             metadata.get("subject")
             or metadata.get("general", {}).get("subject")
-        )
-
-    value = (
-        value
-        or (lookup_meta.get("folder_subject") if lookup_meta else None)
-        or (lookup_meta.get("subject") if lookup_meta else None)
-        or record.get("folder_subject")
-        or record.get("subject")
-        or (response.get("subject") if response else None)
+            if isinstance(metadata, dict)
+            else None
+        ),
+        record.get("folder_subject"),
+        record.get("subject"),
+        (response.get("subject") if response else None)
     )
 
     if not value and file_path:
@@ -422,8 +473,7 @@ def load_question_lookup_index(question_lookup_root):
 
 
 def iter_response_chunk_files(reports_root, run_id=None):
-    reports_root = Path(reports_root)
-
+    reports_root =Path(reports_root)
     if run_id:
         run_root = reports_root / "gemini_runs" / run_id
         return sorted(
@@ -535,7 +585,8 @@ def build_curriculum_outcome(
         return None, "curriculum_outcome_not_found"
 
     curriculum = curriculum_name_for_subject(
-        subject
+        subject,
+        grade
     )
 
     return {
@@ -575,7 +626,8 @@ def build_classification(
     )
 
     curriculum = curriculum_name_for_subject(
-        subject
+        subject,
+        grade
     )
 
     metadata = record.setdefault(
@@ -673,6 +725,97 @@ def build_classification(
     return classification, None
 
 
+def repair_existing_classification(record, lookup_meta=None):
+    metadata = record.get(
+        "metadata",
+        {}
+    )
+
+    classification = metadata.get(
+        "classification"
+    )
+
+    if not isinstance(classification, dict):
+        return False
+
+    outcomes = classification.get(
+        "curriculumOutcomes"
+    )
+
+    if not isinstance(outcomes, list) or not outcomes:
+        return False
+
+    grade = get_record_grade(
+        record,
+        lookup_meta=lookup_meta
+    )
+
+    subject = get_record_subject(
+        record,
+        lookup_meta=lookup_meta
+    )
+
+    desired_curriculum = curriculum_name_for_subject(
+        subject,
+        grade
+    )
+
+    outcome_curricula = {
+        str(item.get("curriculum")).strip()
+        for item in outcomes
+        if isinstance(item, dict) and item.get("curriculum")
+    }
+
+    if not desired_curriculum:
+        if "NGSS" in outcome_curricula:
+            desired_curriculum = "NGSS"
+        elif "CCSS" in outcome_curricula:
+            desired_curriculum = "CCSS"
+
+    changed = False
+    display_value = display_subject(
+        subject
+    )
+
+    if display_value and classification.get("subject") != display_value:
+        classification["subject"] = display_value
+        changed = True
+
+    if grade and str(classification.get("grade")) != str(grade):
+        classification["grade"] = str(
+            grade
+        )
+        changed = True
+
+    if (
+        desired_curriculum
+        and classification.get("curriculum") != desired_curriculum
+    ):
+        classification["curriculum"] = desired_curriculum
+        changed = True
+
+    if desired_curriculum:
+        for item in outcomes:
+            if not isinstance(item, dict):
+                continue
+
+            if item.get("curriculum") != desired_curriculum:
+                item["curriculum"] = desired_curriculum
+                changed = True
+
+            if grade and str(item.get("grade")) != str(grade):
+                item["grade"] = str(
+                    grade
+                )
+                changed = True
+
+            if display_value and item.get("subject") != display_value:
+                item["subject"] = display_value
+                changed = True
+
+    return changed
+
+
 def process_file(
     file_path,
     response_index,
@@ -746,7 +889,22 @@ def process_file(
         )
 
         if not response:
-            result["missing_response"] += 1
+            lookup_meta = question_lookup_index.get(
+                question_id,
+                {}
+            )
+
+            if repair_existing_classification(
+                record,
+                lookup_meta=lookup_meta
+            ):
+                changed = True
+                result["updated"] += 1
+                result["success_question_ids"].append(
+                    question_id
+                )
+            else:
+                result["missing_response"] += 1
             continue
 
         try:

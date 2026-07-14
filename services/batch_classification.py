@@ -10,8 +10,10 @@ from prompts.dok_rules import DOK_RULES, ISLAMIC_DOK_RULES
 from services.curriculum_file_resolver import (
     CURRICULUM_SUBJECTS,
     build_curriculum_file_candidates,
+    curriculum_enabled_for_subject_and_grade,
     find_curriculum_file_for_grade,
-    get_grade_window,
+    get_curriculum_candidates_for_record,
+    get_curriculum_grades_for_record,
     normalize_subject_for_curriculum
 )
 from services.lesson_context_resolver import (
@@ -19,7 +21,6 @@ from services.lesson_context_resolver import (
 )
 from services.prompt_builder import (
     BLOOM_ONLY_SUBJECTS,
-    CURRICULUM_SUBJECTS as PROMPT_CURRICULUM_SUBJECTS,
     ISLAMIC_SUBJECTS,
     build_question_prompt
 )
@@ -108,15 +109,46 @@ def curriculum_signature_for_record(
     if normalized_subject not in CURRICULUM_SUBJECTS:
         return (), ()
 
+    if not curriculum_enabled_for_subject_and_grade(
+        subject,
+        get_record_grade(record)
+    ):
+        return (), ()
+
+    resolved_keys = []
+    missing_keys = []
+
+    if normalized_subject == "math":
+        for candidate in get_curriculum_candidates_for_record(
+            uploaded_files=uploaded_files,
+            subject=subject,
+            grade=get_record_grade(record),
+            min_grade=min_grade,
+            max_grade=max_grade
+        ):
+            file_key = str(
+                candidate["file_key"]
+            )
+
+            if file_key not in resolved_keys:
+                resolved_keys.append(
+                    file_key
+                )
+
+        if not resolved_keys:
+            missing_keys.append(
+                "math-curriculum-outcome-grade-*"
+            )
+
+        return tuple(resolved_keys), tuple(missing_keys)
+
     candidates = build_curriculum_file_candidates(
         uploaded_files,
         normalized_subject
     )
 
-    resolved_keys = []
-    missing_keys = []
-
-    for grade in get_grade_window(
+    for grade in get_curriculum_grades_for_record(
+        subject,
         get_record_grade(record),
         min_grade=min_grade,
         max_grade=max_grade
@@ -378,12 +410,18 @@ def build_batches(
     return batches
 
 
-def _batch_result_schema(subject):
+def _batch_result_schema(
+    subject,
+    grade=None
+):
     subject = normalize_subject(
         subject
     )
 
-    if subject in PROMPT_CURRICULUM_SUBJECTS:
+    if curriculum_enabled_for_subject_and_grade(
+        subject,
+        grade
+    ):
         return """
 Each result must contain:
 {
@@ -451,7 +489,11 @@ Each result must contain:
 """.strip()
 
 
-def build_batch_instruction(subject, expected_question_ids):
+def build_batch_instruction(
+    subject,
+    expected_question_ids,
+    grade=None
+):
     subject = normalize_subject(
         subject
     )
@@ -477,7 +519,10 @@ def build_batch_instruction(subject, expected_question_ids):
         )
 
     parts.append(
-        _batch_result_schema(subject)
+        _batch_result_schema(
+            subject,
+            grade=grade
+        )
     )
 
     return "\n\n".join(
@@ -599,9 +644,13 @@ def reconcile_batch_response(
         validation = assess_gemini_response(
             response=per_question,
             subject=subject,
+            grade=get_record_grade(expected[question_id]),
             allowed_outcome_keys=(
                 allowed_outcome_keys
-                if subject in PROMPT_CURRICULUM_SUBJECTS
+                if curriculum_enabled_for_subject_and_grade(
+                    subject,
+                    get_record_grade(expected[question_id])
+                )
                 else None
             ),
             min_confidence=min_confidence
