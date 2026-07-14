@@ -13,6 +13,40 @@ from parsers.content_parser import strip_disallowed_tags, parse_html_content, AL
 from helpers.feedback_mapper import map_hints_and_feedback
 from helpers.span_remover import remove_span_texts_from_html
 from builders.itembody_builder import _extract_side_image_from_sentence
+import json
+import os
+import threading
+
+failed_file = "failed.json"
+mixed_asset_file = "text_asset_mixed.json"
+_log_file_lock = threading.Lock()
+
+
+def _append_json_log(file_path: str, payload: Dict, status: str = "failed") -> None:
+    """Append one record to a JSON log file safely across worker threads."""
+    with _log_file_lock:
+        data = {"status": status, "question_ids": []}
+
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, "r", encoding="utf-8") as file:
+                    loaded = json.load(file)
+                if isinstance(loaded, dict):
+                    data["status"] = loaded.get("status", status)
+                    existing = loaded.get("question_ids", [])
+                    if isinstance(existing, list):
+                        data["question_ids"] = existing
+            except (json.JSONDecodeError, OSError):
+                # Recover from empty, partially written, or malformed files.
+                pass
+
+        data["question_ids"].append(payload)
+
+        temp_file = f"{file_path}.tmp"
+        with open(temp_file, "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        os.replace(temp_file, file_path)
+
 
 def dropdown_strict_strip_tags(html_content: str) -> str:
     """Safely unwraps disallowed tags, properly handling nested structures."""
@@ -224,23 +258,50 @@ def parse_choice_content(value_html: str, opt_id: int, question_id=None, lesson=
     if not value_html:
         return {"type": "text", "text": ""}
     parsed_contents = parse_html_content(value_html, question_id, lesson)
-    
-    if parsed_contents:
-        item = parsed_contents[0]
+
+    if len(parsed_contents) > 1:
+        _append_json_log(
+            failed_file,
+            {
+                "question_id": question_id,
+                "option_id": opt_id,
+                "value": parsed_contents,
+            },
+        )
+
+    has_text = any(item.get("type") == "text" for item in parsed_contents)
+    asset_types = [
+        item.get("type")
+        for item in parsed_contents
+        if item.get("type") in ("image", "audio", "video")
+    ]
+    if len(parsed_contents) > 2 or (has_text and asset_types):
+        _append_json_log(
+            mixed_asset_file,
+            {
+                "question_id": question_id,
+                "option_id": opt_id,
+                "asset_types": asset_types,
+                "value_html": value_html,
+                "parsed_contents": parsed_contents,
+            },
+            status="mixed_text_asset",
+        )
+
+    for item in parsed_contents:
+        if item.get("type") == "image":
+            return {
+                "type": "image",
+                "image": item.get("image"),
+                "text":""
+            }
+
         if item.get("type") == "text":
             # Target API completely rejects HTML tags in Dropdown options.
             # We use BeautifulSoup get_text() to strip all tags (like <p>, <span>)
             # but this correctly preserves LaTeX strings like "\( ... \)" which have no tags.
-            from bs4 import BeautifulSoup
-            clean_text = BeautifulSoup(item.get("text", ""), "html.parser").get_text().strip()
-            return {"type": "text", "text": clean_text}
-        elif item.get("type") == "image":
-            return {
-                "type": "image", 
-                "text": "",  # Intentionally blank to flag missing alt-text or data loss in QA
-                "image": item.get("image")
-            }
-            
+                return {"type": "text", "text": item.get("text", "")}
+
     return {"type": "text", "text": ""}
 
 
@@ -295,7 +356,7 @@ def run_hint_mapper(wrong_answer_feedback_html: str, hints_html: List[str]) -> T
     return incorrect, (need_help if need_help else None)
 
 
-def build_item_body(body: Dict) -> Dict:
+def build_item_body(body: Dict,qid:str) -> Dict:
     """
     Builds the main itemBody structure for a Dropdown question, handling options and weights.
     
@@ -339,7 +400,7 @@ def build_item_body(body: Dict) -> Dict:
 
             options.append({
                 "id": opt_id,
-                "content": parse_choice_content(choice.get("value", ""), opt_id),
+                "content": parse_choice_content(choice.get("value", ""), opt_id,qid),
                 "feedback": fb_final,
             })
 
@@ -548,7 +609,7 @@ class DropdownTransformer:
             "type": "DROPDOWN",
             "subType": "DROPDOWN_SENTENCE",
             "metadata": build_metadata(q),
-            "itemBody": build_item_body(body),
+            "itemBody": build_item_body(body,self.qid),
             "responseDeclaration": {"maxAttempts": 1},
             "outcomeDeclaration": build_outcome_declaration(body, validation, blank_ids_ordered),
         }

@@ -127,8 +127,23 @@ def build_outcome_declaration(raw, question_id, lesson, question_type=None, fib_
 
     correct = body.get("correctAnswerFeedback", "")
     if correct.strip():
+        correct_items = parse_html_content(
+            correct,
+            question_id,
+            lesson
+        )
+
+        normalized_correct_items = []
+        for item in correct_items:
+            if item.get("type") == "image":
+                normalized_item = dict(item)
+                normalized_item["text"] = ""
+                normalized_correct_items.append(normalized_item)
+            else:
+                normalized_correct_items.append(item)
+
         feedback["correct"] = {
-            "content": parse_html_content(correct, question_id, lesson)
+            "content": normalized_correct_items
         }
 
     if feedback_mapping["incorrect"]:

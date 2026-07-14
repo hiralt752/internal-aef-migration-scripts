@@ -26,6 +26,23 @@ ALLOWED_TAGS = {
     "b", "i", "u", "em", "strong", "p", "ul", "span",
 }
 
+def has_meaningful_html(html_content: str) -> bool:
+    soup = BeautifulSoup(html_content or "", "html.parser")
+
+    # Remove empty tags repeatedly, including nested empty tags
+    for tag in soup.find_all():
+        # Ignore <br> as meaningful content
+        if tag.name == "br":
+            tag.decompose()
+            continue
+
+        # If tag has no text and no meaningful child, remove it
+        if not tag.get_text(strip=True) and not tag.find():
+            tag.decompose()
+
+    # Check again after removing empty tags
+    return bool(soup.get_text(strip=True))
+
 def normalize_math_words(latex: str) -> str:
     if not latex:
         return ""
@@ -593,13 +610,26 @@ def parse_html_content(html_content,question_id,lesson):
         lesson
     )
 
+    clean_soup = BeautifulSoup(sanitized_html, "html.parser")
+
+    for tag in clean_soup.find_all():
+        text = tag.get_text(strip=True)
+
+        # If tag has no text and no meaningful child, remove it
+        if not text and not tag.find():
+            tag.decompose()
 
     remaining_html = re.sub(
-        r">\s*\n\s*<", "><", sanitized_html
+        r">\s*\n\s*<",
+        "><",
+        str(clean_soup)
     ).strip()
     remaining_html = re.sub(r" {2,}", " ", remaining_html)
 
-    if remaining_html:
+    # Final check: ignore if only empty HTML remains
+    plain_text = BeautifulSoup(remaining_html, "html.parser").get_text(strip=True)
+
+    if remaining_html and has_meaningful_html(remaining_html):
         contents.insert(0, {
             "type": "text",
             "text": remaining_html

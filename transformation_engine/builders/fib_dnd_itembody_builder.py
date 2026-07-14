@@ -292,20 +292,28 @@ def build_fib_options(choice_items, question_id, lesson, file_path=None):
             lesson
         )
 
-        text = ""
-
         for item in parsed_content:
+            if item.get("type") == "image":
+                options.append({
+                    "id": index,
+                    "content": {
+                        "type": "image",
+                        "image": item.get("image")
+                    }
+                })
+                break
 
             if item.get("type") == "text":
-                text += item.get("text", "")
-
-        options.append({
-            "id": index,
-            "content": {
-                "type": "text",
-                "text": text
-            }
-        })
+                clean_text = html_to_text(item.get("text", ""))
+                if clean_text:
+                    options.append({
+                        "id": index,
+                        "content": {
+                            "type": "text",
+                            "text": clean_text
+                        }
+                    })
+                    break
 
     return options
  

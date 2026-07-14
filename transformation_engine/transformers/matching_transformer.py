@@ -39,6 +39,40 @@ def _process_html_preserving_tags(html_content, question_id=None, lesson=None):
     return ""
 
 
+def _parse_matching_content(html_content, question_id=None, lesson=None):
+    if not html_content:
+        return {
+            "type": "text",
+            "text": ""
+        }
+
+    parsed_contents = parse_html_content(
+        html_content,
+        question_id,
+        lesson
+    )
+
+    for content in parsed_contents:
+        if content.get("type") == "image":
+            return {
+                "type": "image",
+                "image": content.get("image"),
+                "text":""
+            }
+
+        if content.get("type") == "text":
+            if content.get("text", ""):
+                return {
+                    "type": "text",
+                    "text": content.get("text", "")
+                }
+
+    return {
+        "type": "text",
+        "text": ""
+    }
+
+
 def _detect_html_modalities(html_content):
     soup = BeautifulSoup(html_content or "", "html.parser")
 
@@ -221,12 +255,9 @@ class MatchingTransformer:
                     {
                         "id": item.get("id"),
                         "weight": item.get("weight", 1.0),
-                        "content": {
-                            "type": "text",
-                            "text": _process_html_preserving_tags(
-                                item.get("value", ""), self.question_id, self.lesson
-                            ),
-                        },
+                        "content": _parse_matching_content(
+                            item.get("value", ""), self.question_id, self.lesson
+                        ),
                         "feedback": (
                             _process_html_preserving_tags(
                                 item.get("feedback", ""), self.question_id, self.lesson
@@ -240,12 +271,9 @@ class MatchingTransformer:
                 "options": [
                     {
                         "id": item.get("id"),
-                        "content": {
-                            "type": "text",
-                            "text": _process_html_preserving_tags(
-                                item.get("value", ""), self.question_id, self.lesson
-                            ),
-                        },
+                        "content": _parse_matching_content(
+                            item.get("value", ""), self.question_id, self.lesson
+                        ),
                     }
                     for item in body.get("matchers", {}).get("answers", [])
                 ],
@@ -264,50 +292,46 @@ class MatchingTransformer:
         }
 
         if body.get("prompt"):
+            statement = parse_html_content(body.get("prompt"), self.question_id, self.lesson)
+            statement = [
+                {**item, "text": ""}
+                for item in statement
+                if item.get("type") in ["image", "video", "audio"]
+            ]
             qb_payload["itemBody"]["statement"] = {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": _process_html_preserving_tags(
-                            body.get("prompt"), self.question_id, self.lesson
-                        ),
-                    }
-                ]
+                "content": statement
             }
 
         feedback_block = {}
         if body.get("correctAnswerFeedback"):
+            correct = parse_html_content(body.get("correctAnswerFeedback"), self.question_id, self.lesson)
+            correct = [
+                {**item, "text": ""}
+                for item in statement
+                if item.get("type") in ["image", "video", "audio"]
+            ]
             feedback_block["correct"] = {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": _process_html_preserving_tags(
-                            body.get("correctAnswerFeedback"), self.question_id, self.lesson
-                        ),
-                    }
-                ]
+                "content":correct
             }
         if body.get("wrongAnswerFeedback"):
+            incorrect = parse_html_content(body.get("incorrect"), self.question_id, self.lesson)
+            incorrect = [
+                {**item, "text": ""}
+                for item in statement
+                if item.get("type") in ["image", "video", "audio"]
+            ]
             feedback_block["incorrect"] = {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": _process_html_preserving_tags(
-                            body.get("wrongAnswerFeedback"), self.question_id, self.lesson
-                        ),
-                    }
-                ]
+                "content":incorrect
             }
         if body.get("partialAnswerFeedback"):
+            partial = parse_html_content(body.get("partialAnswerFeedback"), self.question_id, self.lesson)
+            partial = [
+                {**item, "text": ""}
+                for item in statement
+                if item.get("type") in ["image", "video", "audio"]
+            ]
             feedback_block["partial"] = {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": _process_html_preserving_tags(
-                            body.get("partialAnswerFeedback"), self.question_id, self.lesson
-                        ),
-                    }
-                ]
+                "content":partial
             }
         if feedback_block:
             qb_payload["outcomeDeclaration"]["feedback"] = feedback_block
@@ -319,16 +343,18 @@ class MatchingTransformer:
                                                             }
 
         if body.get("generalFeedback"):
+            generalFeedback = parse_html_content(body.get("generalFeedback"), self.question_id, self.lesson)
+            generalFeedback = [
+                {**item, "text": ""}
+                for item in statement
+                if item.get("type") in ["image", "video", "audio"]
+            ]
+            feedback_block["partial"] = {
+                "content":generalFeedback
+            }
             qb_payload["outcomeDeclaration"]["seeWhy"] = {
                 "layout": "TEXT",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": _process_html_preserving_tags(
-                            body.get("generalFeedback"), self.question_id, self.lesson
-                        ),
-                    }
-                ],
+                "content":generalFeedback,
                 "audio": None,
             }
 
