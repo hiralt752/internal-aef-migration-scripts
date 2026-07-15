@@ -73,6 +73,31 @@ def _parse_matching_content(html_content, question_id=None, lesson=None):
     }
 
 
+def _parse_rich_content(html_content, question_id=None, lesson=None):
+    if not html_content:
+        return []
+
+    parsed_contents = parse_html_content(
+        html_content,
+        question_id,
+        lesson
+    )
+
+    rich_content = []
+    for content in parsed_contents:
+        content_type = content.get("type")
+        if content_type not in ["text", "image", "video", "audio"]:
+            continue
+
+        normalized_content = dict(content)
+        if content_type in ["image", "video", "audio"]:
+            normalized_content["text"] = normalized_content.get("text", "") or ""
+
+        rich_content.append(normalized_content)
+
+    return rich_content
+
+
 def _detect_html_modalities(html_content):
     soup = BeautifulSoup(html_content or "", "html.parser")
 
@@ -99,24 +124,6 @@ def _detect_html_modalities(html_content):
 
 def check_sub_type(body):
     html_fragments = []
-
-    prompt = body.get("prompt")
-    if prompt:
-        html_fragments.append(prompt)
-
-    for field_name in (
-        "generalFeedback",
-        "correctAnswerFeedback",
-        "wrongAnswerFeedback",
-        "partialAnswerFeedback",
-    ):
-        value = body.get(field_name)
-        if value:
-            html_fragments.append(value)
-
-    for hint in body.get("hints", []) or []:
-        if hint:
-            html_fragments.append(hint)
 
     matchers = body.get("matchers") or {}
     for item in matchers.get("choices", []) or []:
@@ -292,44 +299,32 @@ class MatchingTransformer:
         }
 
         if body.get("prompt"):
-            statement = parse_html_content(body.get("prompt"), self.question_id, self.lesson)
-            statement = [
-                {**item, "text": ""}
-                for item in statement
-                if item.get("type") in ["image", "video", "audio"]
-            ]
+            statement = _parse_rich_content(
+                body.get("prompt"), self.question_id, self.lesson
+            )
             qb_payload["itemBody"]["statement"] = {
                 "content": statement
             }
 
         feedback_block = {}
         if body.get("correctAnswerFeedback"):
-            correct = parse_html_content(body.get("correctAnswerFeedback"), self.question_id, self.lesson)
-            correct = [
-                {**item, "text": ""}
-                for item in statement
-                if item.get("type") in ["image", "video", "audio"]
-            ]
+            correct = _parse_rich_content(
+                body.get("correctAnswerFeedback"), self.question_id, self.lesson
+            )
             feedback_block["correct"] = {
                 "content":correct
             }
         if body.get("wrongAnswerFeedback"):
-            incorrect = parse_html_content(body.get("incorrect"), self.question_id, self.lesson)
-            incorrect = [
-                {**item, "text": ""}
-                for item in statement
-                if item.get("type") in ["image", "video", "audio"]
-            ]
+            incorrect = _parse_rich_content(
+                body.get("wrongAnswerFeedback"), self.question_id, self.lesson
+            )
             feedback_block["incorrect"] = {
                 "content":incorrect
             }
         if body.get("partialAnswerFeedback"):
-            partial = parse_html_content(body.get("partialAnswerFeedback"), self.question_id, self.lesson)
-            partial = [
-                {**item, "text": ""}
-                for item in statement
-                if item.get("type") in ["image", "video", "audio"]
-            ]
+            partial = _parse_rich_content(
+                body.get("partialAnswerFeedback"), self.question_id, self.lesson
+            )
             feedback_block["partial"] = {
                 "content":partial
             }
@@ -343,12 +338,9 @@ class MatchingTransformer:
                                                             }
 
         if body.get("generalFeedback"):
-            generalFeedback = parse_html_content(body.get("generalFeedback"), self.question_id, self.lesson)
-            generalFeedback = [
-                {**item, "text": ""}
-                for item in statement
-                if item.get("type") in ["image", "video", "audio"]
-            ]
+            generalFeedback = _parse_rich_content(
+                body.get("generalFeedback"), self.question_id, self.lesson
+            )
             feedback_block["partial"] = {
                 "content":generalFeedback
             }
