@@ -199,9 +199,15 @@ def _sort_option_content(contents):
 def build_fib_item_body(raw,fib_data, question_id, lesson):
     body = raw.get("body", {})
     prompt = body.get("prompt", "")
-    sentence_text = parse_html_content(prompt, question_id, lesson)
+    transformed_prompt = (
+        fib_data.get("sentence_text")
+        if fib_data and fib_data.get("sentence_text") is not None
+        else prompt
+    )
 
-    _, image = _extract_side_image_from_sentence(prompt)
+    sentence_text = parse_html_content(transformed_prompt, question_id, lesson)
+
+    _, image = _extract_side_image_from_sentence(transformed_prompt)
 
     sideImage = {
         "url" : image["url"] if image else ""
@@ -232,8 +238,8 @@ def build_fib_item_body(raw,fib_data, question_id, lesson):
             }
         },
         "sentence": {
-            "type": sentence_text[0]["type"],
-            "text": sentence_text[0]["text"]
+            "type": sentence_text[0]["type"] if sentence_text else "text",
+            "text": sentence_text[0]["text"] if sentence_text else ""
         },
         "items": fib_data["items"],
         "variables": []
