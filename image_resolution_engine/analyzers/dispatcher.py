@@ -1,8 +1,8 @@
-from analyzers.mcq import analyze_mcq
-from analyzers.fib import analyze_fib
-from analyzers.dropdown import analyze_dropdown
-from analyzers.dnd import analyze_dnd
-from analyzers.matching import analyze_matching
+from image_resolution_engine.analyzers.mcq import analyze_mcq
+from image_resolution_engine.analyzers.fib import analyze_fib
+from image_resolution_engine.analyzers.dropdown import analyze_dropdown
+from image_resolution_engine.analyzers.dnd import analyze_dnd
+from image_resolution_engine.analyzers.matching import analyze_matching
 # Fast dict lookup instead of if-elif chain
 _ROUTER = {
     "MULTIPLE_CHOICE": analyze_mcq,
@@ -17,4 +17,45 @@ _ROUTER = {
 
 def analyze_question(data, q_type, category):
     fn = _ROUTER.get(q_type)
-    return fn(data, q_type, category) if fn else None   
+    if not fn:
+        return None
+        
+    res = fn(data, q_type, category)
+    if not res:
+        return None
+        
+    audios = []
+    videos = []
+    
+    seen_audios = set()
+    seen_videos = set()
+    seen_images = set()
+    
+    for list_key in ("question_images", "option_images", "image_audit"):
+        items = res.get(list_key) or []
+        filtered_items = []
+        for item in items:
+            src = item.get("src")
+            if not src:
+                continue
+            content_type = item.get("content_type", "IMAGE")
+            if content_type == "AUDIO":
+                item.pop("width", None)
+                item.pop("height", None)
+                if src not in seen_audios:
+                    seen_audios.add(src)
+                    audios.append(item)
+            elif content_type == "VIDEO":
+                if src not in seen_videos:
+                    seen_videos.add(src)
+                    videos.append(item)
+            else:
+                if src not in seen_images:
+                    seen_images.add(src)
+                    filtered_items.append(item)
+        res[list_key] = filtered_items
+        
+    res["question_audios"] = audios
+    res["question_videos"] = videos
+    
+    return res

@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
-from helpers.image_scanner import scan_json
-from helpers.generic import get_see_why_widget_type
-from WIDGET_LAYOUT_MAP import get_widget_resolution
+from image_resolution_engine.helpers.image_scanner import scan_json
+from image_resolution_engine.helpers.generic import get_see_why_widget_type
+from image_resolution_engine.WIDGET_LAYOUT_MAP import get_widget_resolution
 import re
 
 
@@ -46,6 +46,7 @@ def _build_audit_entry(img, image_role, widget_type, resolution, section=None, c
         "section": section,
         "content_index": content_index,
         "src": img.get("src"),
+        "content_type": img.get("content_type", "IMAGE"),
         "width": img.get("width"),
         "height": img.get("height"),
         "key": img.get("key"),
@@ -65,10 +66,7 @@ def _get_html_audit_entries(html_content, image_role, section=None, content_inde
     if not images:
         return []
 
-    widget_type = get_see_why_widget_type(html_content)
-    if not widget_type:
-        return []
-
+    widget_type = get_see_why_widget_type(html_content) or "See Why/Need Help (mainimage)"
     resolution = get_widget_resolution(widget_type)
 
     return [
@@ -192,6 +190,18 @@ def analyze_fib(data, q_type, category):
                 image_role="hint",
                 section="hints",
                 content_index=idx
+            )
+        )
+
+    # passage audit
+    passage = body.get("passage")
+    if isinstance(passage, dict):
+        passage_content = passage.get("content", "")
+        image_audit.extend(
+            _get_html_audit_entries(
+                passage_content,
+                image_role="passage",
+                section="passage"
             )
         )
 

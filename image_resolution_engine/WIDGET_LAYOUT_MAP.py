@@ -133,8 +133,8 @@ WIDGET_LAYOUT_MAP = {
         "ratio": "16:9",
         "main_image_width": 560,
         "main_image_height": 315,
-        "option_image_width": 120,
-        "option_image_height": 120,
+        "option_width": 120,
+        "option_height": 120,
         "option_ratio": "1:1"
     },
     "Drag and Drop (SplitScreenImage)": {
@@ -142,7 +142,11 @@ WIDGET_LAYOUT_MAP = {
         "max_height": 450,
         "ratio": "4:3",
         "main_image_width": 252,
-        "main_image_height": 189
+        "main_image_height": 189,
+        "option_width": 120,
+        "option_height": 120,
+        "option_ratio": "1:1"
+ 
     },
     "Matching (2imageoptions)": {
         "max_width": 224,
@@ -187,5 +191,7 @@ def get_widget_resolution(widget_type: str):
     return WIDGET_LAYOUT_MAP.get(widget_type, {
         "max_width": 600,
         "max_height": 338,
+        "option_width":600,
+        "option_height": 338,
         "ratio": "fallback"
     })

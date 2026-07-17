@@ -1,6 +1,6 @@
-from helpers.image_scanner import scan_json
-from constants.qtype_map import normalize_qtype
-from WIDGET_LAYOUT_MAP import get_widget_resolution
+from image_resolution_engine.helpers.image_scanner import scan_json
+from image_resolution_engine.constants.qtype_map import normalize_qtype
+from image_resolution_engine.WIDGET_LAYOUT_MAP import get_widget_resolution
 
 
 # --------------------------------------------------
@@ -39,6 +39,7 @@ def _safe_scan(source, seen):
         unique.append({
             "src": src,
             "key": img.get("key"),
+            "content_type": img.get("content_type", "IMAGE"),
             "width": img.get("width"),
             "height": img.get("height")
         })
@@ -62,6 +63,7 @@ def _build_audit_entries(images, image_role, widget_type, resolution,
             "section": section,
             "content_index": content_index,
             "src": img["src"],   # ONLY reference
+            "content_type": img.get("content_type", "IMAGE"),
             "widget_type": widget_type,
             "max_width": resolution.get("max_width"),
             "max_height": resolution.get("max_height"),
@@ -149,6 +151,17 @@ def analyze_mcq(data, q_type, category):
             resolution,
             section="hints",
             content_index=idx
+        )
+
+    passage = body.get("passage")
+    if isinstance(passage, dict):
+        passage_content = passage.get("content", "")
+        image_audit += _build_audit_entries(
+            _safe_scan({"passage": passage_content}, seen),
+            "passage",
+            widget_type,
+            resolution,
+            section="passage"
         )
 
     # --------------------------------------------------
