@@ -1,4 +1,4 @@
-"""Repair reversible Windows-1252/UTF-8 mojibake in Arabic questions."""
+"""Repair reversible Windows-1252/UTF-8 mojibake in question payloads."""
 
 import re
 from typing import Any, Optional
@@ -92,17 +92,6 @@ def repair_mojibake_text(text: str) -> str:
     )
 
 
-def _question_language(question: dict[str, Any]) -> str:
-    language = question.get("language")
-
-    if not language:
-        metadata = question.get("metadata") or {}
-        general = metadata.get("general") or {}
-        language = general.get("language")
-
-    return str(language or "").strip().upper()
-
-
 def _repair_value(value: Any) -> Any:
     if isinstance(value, str):
         return repair_mojibake_text(value)
@@ -114,11 +103,8 @@ def _repair_value(value: Any) -> Any:
 
 
 def repair_question_mojibake(question: Any) -> Any:
-    """Repair every string field in an Arabic question payload."""
+    """Repair every string field in a question payload."""
     if not isinstance(question, dict):
-        return question
-
-    if _question_language(question) not in {"AR", "ARABIC"}:
         return question
 
     return _repair_value(question)

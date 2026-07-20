@@ -74,7 +74,7 @@ def sanitize_blocks(blocks: List[Dict]) -> List[Dict]:
                 sanitized.append(b)
         else:
             if b.get("type") == "image" and "text" not in b:
-                b["text"] = "Image"  # Target API requires text field even for images in feedback
+                b["text"] = ""  
             sanitized.append(b)
     return sanitized
 

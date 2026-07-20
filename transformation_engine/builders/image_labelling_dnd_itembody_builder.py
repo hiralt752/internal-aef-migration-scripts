@@ -2,6 +2,31 @@ from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
 
 
+MAIN_IMAGE_LAYOUTS = {
+    "Drag and Drop (mainimage)": {
+        "width": 560,
+        "height": 315,
+    },
+    "Drag and Drop (4imageoptions)": {
+        "width": 560,
+        "height": 315,
+    },
+    "Drag and Drop (SplitScreenImage)": {
+        "width": 252,
+        "height": 189,
+    },
+    "fallback":{
+        "width": 600,
+        "height": 338,
+    }
+}
+
+FALLBACK_IMAGE_LAYOUT = {
+    "width": 600,
+    "height": 338,
+}
+
+
 def _get_media_src(tag):
     if not tag:
         return None
@@ -48,6 +73,77 @@ def _extract_prompt_media(html):
     return audio, video
 
 
+def _has_image_option(choice):
+
+    value = choice.get("value", "")
+    if not value:
+        return False
+
+    soup = BeautifulSoup(value, "html.parser")
+    return soup.find("img") is not None
+
+
+def _resolve_main_image_dimensions(background_image, choice_items):
+
+    option_image_count = sum(
+        1 for choice in choice_items
+        if _has_image_option(choice)
+    )
+
+    widget_type = None
+
+    if background_image:
+        if option_image_count > 0 :
+            if option_image_count == 4:
+                widget_type = "Drag and Drop (4imageoptions)"
+            elif option_image_count <= 2 :
+                widget_type = "Drag and Drop (SplitScreenImage)"
+            elif option_image_count > 0:
+                widget_type = "Drag and Drop (mainimage)"
+            else:
+                widget_type = "fallback"
+        else:
+            widget_type = "Drag and Drop (mainimage)"
+
+    if widget_type in MAIN_IMAGE_LAYOUTS:
+        print("MAIN_IMAGE_LAYOUTS",MAIN_IMAGE_LAYOUTS[widget_type])
+        return MAIN_IMAGE_LAYOUTS[widget_type]
+
+    return FALLBACK_IMAGE_LAYOUT
+
+
+def _scale_coordinate(value, dimension):
+
+    if value is None or dimension is None:
+        return None
+
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError):
+        return None
+
+    return round(numeric_value * dimension)
+
+
+def _build_background_image(background_image, rendered_dimensions):
+
+    if not background_image:
+        return background_image
+
+    transformed_image = dict(background_image)
+
+    if "src" in transformed_image:
+        transformed_image["url"] = transformed_image.pop("src")
+
+    if rendered_dimensions.get("width") is not None:
+        transformed_image["width"] = rendered_dimensions["width"]
+
+    if rendered_dimensions.get("height") is not None:
+        transformed_image["height"] = rendered_dimensions["height"]
+
+    return transformed_image
+
+
 def build_image_labelling_dnd_item_body(raw,question_id,lesson):
 
     body = raw.get("body", {})
@@ -56,8 +152,14 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
     audio, video = _extract_prompt_media(body.get("prompt"))
 
     background_image = body.get("backgroundImage")
-    if background_image and "src" in background_image:
-        background_image["url"] = background_image.pop("src")
+    rendered_dimensions = _resolve_main_image_dimensions(
+        background_image,
+        choices.get("choiceItems", [])
+    )
+    background_image = _build_background_image(
+        background_image,
+        rendered_dimensions
+    )
 
     return {
 
@@ -110,7 +212,8 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
                 body.get(
                     "blanks",
                     []
-                )
+                ),
+                rendered_dimensions
             ),
 
         "options":
@@ -123,7 +226,7 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
     }
 
 
-def build_targets(blanks):
+def build_targets(blanks, rendered_dimensions):
 
     targets = []
 
@@ -149,17 +252,25 @@ def build_targets(blanks):
 
             "position": {
 
-                "Top":
-                    blank.get(
-                        "position",
-                        {}
-                    ).get("y"),
+                "top":
+                    _scale_coordinate(
+                        blank.get(
+                            "position",
+                            {}
+                        ).get("y"),
+                        rendered_dimensions.get("height")
+                    ),
 
-                "Left":
-                    blank.get(
-                        "position",
-                        {}
-                    ).get("x")
+                "left":
+                    _scale_coordinate(
+                        blank.get(
+                            "position",
+                            {}
+                        ).get("x"),
+                        rendered_dimensions.get("width")
+                    ),
+
+                "width": 120,
             }
         })
 
