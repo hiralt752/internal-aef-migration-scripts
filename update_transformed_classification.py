@@ -84,6 +84,14 @@ CONGNITIVE_DIMENSION = {
 REPORT_LIMIT = 100
 INPUT_DIR_NAME = "input"
 
+# Default report folders scanned when --reports-root is not supplied.
+# Add another folder here when its Gemini responses should be included in every
+# classification update. Relative paths are resolved from the project root.
+DEFAULT_REPORT_ROOTS = [
+    "reports",
+    "prev_migration_reports"
+]
+
 
 def resolve_project_root():
     start_points = [
@@ -104,8 +112,7 @@ def resolve_project_root():
 
             markers = [
                 current / "config" / "course_code_mapping.json",
-                current / "curriculum",
-                current / "reports"
+                current / "curriculum"
             ]
 
             if all(marker.exists() for marker in markers):
@@ -117,7 +124,7 @@ def resolve_project_root():
             current = current.parent
 
     raise FileNotFoundError(
-        "Project root not found. Expected config/, curriculum/, and reports/."
+        "Project root not found. Expected config/ and curriculum/."
     )
 
 
@@ -472,24 +479,47 @@ def load_question_lookup_index(question_lookup_root):
     return index
 
 
-def iter_response_chunk_files(reports_root, run_id=None):
-    reports_root =Path(reports_root)
-    if run_id:
-        run_root = reports_root / "gemini_runs" / run_id
-        return sorted(
-            run_root.rglob("success/*_chunk_*.json")
-        )
+def iter_response_chunk_files(reports_roots, run_id=None):
+    """Return response chunks from every supplied reports folder.
 
-    return sorted(
-        reports_root.rglob("success/*_chunk_*.json")
-    )
+    Each reports root is scanned independently so archived report folders can
+    be combined with the current reports folder.  Duplicate paths are removed
+    when a parent and one of its child folders are both supplied.
+    """
+    if isinstance(reports_roots, (str, Path)):
+        reports_roots = [reports_roots]
+
+    chunk_files = []
+    seen = set()
+
+    for reports_root in reports_roots:
+        reports_root = Path(reports_root)
+
+        if run_id:
+            search_root = reports_root / "gemini_runs" / run_id
+        else:
+            search_root = reports_root
+
+        if not search_root.is_dir():
+            continue
+
+        for chunk_file in search_root.rglob("success/*_chunk_*.json"):
+            resolved_path = chunk_file.resolve()
+
+            if resolved_path in seen:
+                continue
+
+            seen.add(resolved_path)
+            chunk_files.append(resolved_path)
+
+    return sorted(chunk_files)
 
 
-def load_gemini_response_index(reports_root, run_id=None):
+def load_gemini_response_index(reports_roots, run_id=None):
     index = {}
 
     for chunk_file in iter_response_chunk_files(
-        reports_root,
+        reports_roots,
         run_id=run_id
     ):
         try:
@@ -1093,8 +1123,13 @@ def parse_args():
 
     parser.add_argument(
         "--reports-root",
-        default=str(PROJECT_ROOT / "reports"),
-        help="Reports root containing gemini_runs."
+        action="append",
+        default=None,
+        metavar="FOLDER",
+        help=(
+            "Report folder to scan. Repeat this option for multiple folders. "
+            "Defaults to the project's reports folder."
+        )
     )
 
     parser.add_argument(
@@ -1148,6 +1183,18 @@ def main():
     started_at = datetime.now().isoformat()
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+    reports_roots = [
+        (
+            Path(folder)
+            if Path(folder).is_absolute()
+            else PROJECT_ROOT / folder
+        )
+        for folder in (
+            args.reports_root
+            or DEFAULT_REPORT_ROOTS
+        )
+    ]
+
     report_dir = (
         Path(args.report_dir)
         if args.report_dir
@@ -1178,6 +1225,15 @@ def main():
         f"Report dir        : {report_dir}",
         flush=True
     )
+    print(
+        f"Reports roots     : {len(reports_roots)}",
+        flush=True
+    )
+    for reports_root in reports_roots:
+        print(
+            f"  - {reports_root}",
+            flush=True
+        )
 
     curriculum_index = load_curriculum_index(
         args.curriculum_root
@@ -1188,7 +1244,7 @@ def main():
     )
 
     response_index = load_gemini_response_index(
-        args.reports_root,
+        reports_roots,
         run_id=args.run_id
     )
 
