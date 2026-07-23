@@ -50,6 +50,19 @@ def extract_feedback_text(feedback_html, question_id, lesson):
     return ""
 
 
+def build_answer_in_widget_format(
+    correct_answer,
+    question_id,
+    lesson
+):
+    """Return the primary FIB answer in the API's accepted scalar format."""
+    return extract_correct_answer_text(
+        correct_answer,
+        question_id,
+        lesson
+    )
+
+
 def is_legacy_blank_marker(tag):
     """Return True for legacy WIRIS images that represent a FIB blank."""
     if tag.name != "img":
@@ -195,15 +208,21 @@ def map_fib_structure(raw, qid, lesson, file_path):
         }
 
         items.append(item)
+        mapped_correct_answer = extract_correct_answer_text(
+            correct_answer,
+            qid,
+            lesson
+        )
+
         correct_answers.append({
             "blankId": sequential_id,
-            "correctAnswer": extract_correct_answer_text(
+            "correctAnswer": mapped_correct_answer,
+            "alternateAnswers": alternate_answers,
+            "answerInWidgetFormat": build_answer_in_widget_format(
                 correct_answer,
                 qid,
                 lesson
-            ),
-            "alternateAnswers": alternate_answers,
-            "answerInWidgetFormat": None
+            )
         })
 
         if blank_marker is not None:

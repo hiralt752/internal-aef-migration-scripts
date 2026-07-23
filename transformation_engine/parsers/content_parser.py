@@ -26,6 +26,81 @@ ALLOWED_TAGS = {
     "b", "i", "u", "em", "strong", "p", "ul", "span",
 }
 
+
+LATEX_TEXT_ESCAPE_MAP = {
+    "\\": r"\textbackslash{}",
+    "{": r"\{",
+    "}": r"\}",
+    "$": r"\$",
+    "&": r"\&",
+    "#": r"\#",
+    "%": r"\%",
+    "_": r"\_",
+}
+
+# Commands that must be explicitly terminated before an alphabetic token.
+# This repairs malformed values such as \timesh, \divx and \pir without
+# changing structural commands such as \frac, \sqrt, \text, etc.
+BOUNDARY_SENSITIVE_COMMANDS = (
+    "times", "div", "cdot", "ast", "pm", "mp",
+    "le", "ge", "ne", "neq", "approx", "equiv", "propto",
+    "infty", "pi", "theta", "alpha", "beta", "gamma", "delta",
+    "lambda", "mu", "sigma", "phi", "omega",
+)
+
+
+def escape_latex_text(value: str) -> str:
+    return "".join(LATEX_TEXT_ESCAPE_MAP.get(char, char) for char in (value or ""))
+
+
+def strip_math_delimiters(value: str) -> str:
+    """Remove existing inline/display wrappers so the caller wraps exactly once."""
+    value = (value or "").strip()
+
+    # Some source fields contain doubled slashes before delimiters. Normalize
+    # only delimiter slashes; never collapse backslashes globally.
+    value = re.sub(r"\\\\(?=[()\[\]])", r"\\", value)
+
+    changed = True
+    while changed and value:
+        changed = False
+        wrappers = (
+            (r"\(", r"\)"),
+            (r"\[", r"\]"),
+            ("$$", "$$"),
+            ("$", "$"),
+        )
+        for opening, closing in wrappers:
+            if value.startswith(opening) and value.endswith(closing):
+                value = value[len(opening):-len(closing)].strip()
+                changed = True
+                break
+
+    return value
+
+
+def repair_latex_command_boundaries(value: str) -> str:
+    if not value:
+        return ""
+
+    commands = "|".join(
+        sorted(BOUNDARY_SENSITIVE_COMMANDS, key=len, reverse=True)
+    )
+
+    # \timesh -> \times{}h, \divx -> \div{}x, \pir -> \pi{}r
+    return re.sub(
+        rf"\\({commands})(?=[A-Za-z])",
+        r"\\\1{}",
+        value,
+    )
+
+
+def clean_existing_latex(value: str) -> str:
+    value = html.unescape(value or "")
+    value = strip_math_delimiters(value)
+    value = repair_latex_command_boundaries(value)
+    return value.strip()
+
 def has_meaningful_html(html_content: str) -> bool:
     soup = BeautifulSoup(html_content or "", "html.parser")
 
@@ -75,10 +150,11 @@ def strip_disallowed_tags(html_content, question_id=None, lesson=None):
 
 
 def sanitize_mathml(mathml: str) -> str:
-    mathml = html.unescape(mathml or "")
+    # Do not html.unescape the complete XML before parsing. Doing so can turn
+    # valid entities such as &lt; into raw XML markup and corrupt the tree.
+    mathml = mathml or ""
 
-    # Raw < and > inside <mo> make XML invalid, so keep them as entities
-    # while parsing. They are converted back to normal LaTeX operators later.
+    # Protect malformed raw comparison operators when they occur in <mo>.
     mathml = re.sub(r"<mo>\s*<\s*</mo>", "<mo>&lt;</mo>", mathml)
     mathml = re.sub(r"<mo>\s*>\s*</mo>", "<mo>&gt;</mo>", mathml)
 
@@ -103,17 +179,17 @@ def normalize_latex_for_preview(latex: str) -> str:
     if not latex:
         return ""
 
-    latex = html.unescape(latex)
+    latex = clean_existing_latex(latex)
 
-    # Keep valid TeX, but normalize spacing so operators don't join variables:
-    # \le x should not become \lex.
-    latex = re.sub(r"(\\\ ){2,}", r"\ ", latex)
+    # Normalize ordinary whitespace only. TeX command boundaries are protected
+    # by explicit empty groups such as \times{}h and \div{}x.
+    latex = re.sub(r"(\\\ ){2,}", r"\\ ", latex)
     latex = re.sub(r"(?<!\\) {2,}", " ", latex)
     latex = re.sub(r"\s*([<>])\s*", r" \1 ", latex)
 
     latex = latex.replace(r"\left\{ ", r"\left\{")
     latex = latex.replace(r" \right\}", r"\right\}")
-    latex = re.sub(r"\\mid\s*", r"\\mid ", latex)
+    latex = repair_latex_command_boundaries(latex)
 
     return latex.strip()
 
@@ -136,11 +212,11 @@ def node_to_latex(node):
             return ""
 
         if value in GREEK_MAP:
+            # Braces terminate the command before any following identifier.
             return f"{{{GREEK_MAP[value]}}}"
 
-
         if len(value) > 1:
-            return rf"\text{{{value}}}"
+            return rf"\text{{{escape_latex_text(value)}}}"
 
         return value
 
@@ -158,13 +234,16 @@ def node_to_latex(node):
         mapping = {
             "<": " < ",
             ">": " > ",
-            "≤": r"\le ",
-            "≥": r"\ge ",
-            "≠": r"\ne ",
-            "±": r"\pm ",
-            "×": r"\times ",
-            "÷": r"\div ",
-            "∞": r"\infty ",
+            "≤": r"\le{}",
+            "≥": r"\ge{}",
+            "≠": r"\ne{}",
+            "±": r"\pm{}",
+            "×": r"\times{}",
+            "÷": r"\div{}",
+            "⋅": r"\cdot{}",
+            "·": r"\cdot{}",
+            "∞": r"\infty{}",
+            "−": "-",
             "=": " = ",
             "+": "+",
             "-": "-",
@@ -178,19 +257,13 @@ def node_to_latex(node):
             ",": ",",
         }
 
-        latex = mapping.get(value, value)
-
-        if latex.startswith("\\") and not latex.endswith(" "):
-            latex += " "
-
-        return latex
+        return mapping.get(value, value)
 
     if tag == "mtext":
         text = (node.text or " ").strip()
         if not text:
             return " "
-        text_escaped = text.replace(" ", r"\ ")
-        return rf" \text{{{text_escaped}}} "
+        return rf" \text{{{escape_latex_text(text)}}} "
 
     if tag == "mspace":
         if node.attrib.get("linebreak") == "newline":
@@ -455,7 +528,11 @@ def mathml_to_latex(mathml,question_id,lesson):
             parser
         )
 
+        if root is None:
+            raise ValueError("MathML parsing produced no root element")
+
         latex = node_to_latex(root)
+        latex = repair_latex_command_boundaries(latex)
 
         # Preserve existing support for old "\ or\" style output.
         latex = re.sub(r"\\\s*or\\?", r"\\text{ or }", latex)
@@ -533,15 +610,14 @@ def parse_html_content(html_content,question_id,lesson):
 
         latex = ""
 
-        if img.get("data-latex"):
-            latex = img.get("data-latex", "").strip()
-
-        if not latex and img.get("data-mathml"):
+        # Prefer MathML because some legacy data-latex values contain already
+        # wrapped delimiters or merged commands such as \timesh and \divx.
+        if img.get("data-mathml"):
             try:
                 mathml = decode_wiris_mathml(
                     img.get("data-mathml", "")
                 )
-                latex = mathml_to_latex(mathml,question_id,lesson)
+                latex = mathml_to_latex(mathml, question_id, lesson)
             except Exception as ex:
                 print(f"[data-mathml conversion failed] {ex}")
                 logger.log(
@@ -555,10 +631,13 @@ def parse_html_content(html_content,question_id,lesson):
         if not latex:
             mathml = extract_mathml_from_svg(src)
             if mathml:
-                latex = mathml_to_latex(mathml,question_id,lesson)
+                latex = mathml_to_latex(mathml, question_id, lesson)
+
+        if not latex and img.get("data-latex"):
+            latex = clean_existing_latex(img.get("data-latex", ""))
 
         if not latex:
-            latex = img.get("alt", "").strip()
+            latex = clean_existing_latex(img.get("alt", ""))
             if logger:
                 logger.log(
                     question_id=question_id,
