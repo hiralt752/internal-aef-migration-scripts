@@ -7,6 +7,18 @@ from helpers.debug_logger import DebugLogger
 
 logger = DebugLogger()
 GREEK_MAP = {
+    "\u03b1": r"\alpha",
+    "\u03b2": r"\beta",
+    "\u03b3": r"\gamma",
+    "\u03b4": r"\delta",
+    "\u03b5": r"\varepsilon",
+    "\u03b8": r"\theta",
+    "\u03bb": r"\lambda",
+    "\u03bc": r"\mu",
+    "\u03c0": r"\pi",
+    "\u03c3": r"\sigma",
+    "\u03c6": r"\phi",
+    "\u03c9": r"\omega",
     "α": r"\alpha",
     "β": r"\beta",
     "γ": r"\gamma",
@@ -162,13 +174,26 @@ def sanitize_mathml(mathml: str) -> str:
 
 
 def decode_wiris_mathml(mathml: str) -> str:
-    return (
-        (mathml or "")
+    mathml = mathml or ""
+
+    # Historical WIRIS payloads use CP1252-ish placeholders for XML markup.
+    mathml = (
+        mathml
+        .replace("Â«", "<")
+        .replace("Â»", ">")
+        .replace("Â¨", '"')
+        .replace("Â§", "&")
         .replace("«", "<")
         .replace("»", ">")
         .replace("¨", '"')
         .replace("§", "&")
     )
+
+    # Some payloads are already literal XML, but every XML delimiter/quote/entity
+    # is prefixed by mojibake NBSP residue: Â<math ... Â" ... Â>.
+    # Removing U+00C2 here is MathML-local and prevents corrupting media <img>
+    # attributes elsewhere in the pipeline.
+    return mathml.replace("\u00c2", "")
 
 
 def has_children(node, expected):
@@ -516,7 +541,7 @@ def mathml_to_latex(mathml,question_id,lesson):
 
     try:
 
-        mathml = sanitize_mathml(mathml)
+        mathml = sanitize_mathml(decode_wiris_mathml(mathml))
 
         parser = etree.XMLParser(
             recover=True,
