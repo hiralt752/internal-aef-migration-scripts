@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from copy import deepcopy
 
 from builders.metadata_builder import build_metadata
+from helpers.span_remover import remove_span_texts_from_html
 
 SCHEMA_VERSION = {"major": 1, "minor": 0, "patch": 0}
 LIFECYCLE_STATUS = "DRAFT"
@@ -151,9 +152,10 @@ def _build_metadata(resp, legacy_status=LIFECYCLE_STATUS):
     }
 
 
-def _process_dnd_prompt(prompt):
+def _process_dnd_prompt(prompt, question_id=None, lesson=None, file_path=None):
     if not prompt or not prompt.strip():
         return None, None, None, None
+    prompt = remove_span_texts_from_html(prompt, question_id, lesson, file_path)
     prompt, audio = _extract_audio(prompt)
     prompt, video = _extract_video(prompt)
     cleaned = re.sub(
@@ -287,7 +289,7 @@ def _build_background_image(bg):
     }
 
 
-def migrate_fill_in_blank_drag_drop(resp, status):
+def migrate_fill_in_blank_drag_drop(resp, status, question_id=None, lesson=None, file_path=None):
     body = resp.get("body", {})
     validation = resp.get("validation", {})
     valid_resp = validation.get("validResponse", {})
@@ -296,7 +298,7 @@ def migrate_fill_in_blank_drag_drop(resp, status):
     blanks = body.get("blanks", [])
     prompt = body.get("prompt", "")
 
-    sentence_text, audio, video, side_image = _process_dnd_prompt(prompt)
+    sentence_text, audio, video, side_image = _process_dnd_prompt(prompt, question_id, lesson, file_path)
     targets = _build_dnd_targets(blanks)
     options = _build_dnd_options(choice_items)
     correct = _build_dnd_correct_answers(valid_resp.get("answerMapping", []), blanks, choice_items)
@@ -348,7 +350,7 @@ def migrate_fill_in_blank_drag_drop(resp, status):
     return doc
 
 
-def migrate_image_labelling(resp, status):
+def migrate_image_labelling(resp, status, question_id=None, lesson=None, file_path=None):
     body = resp.get("body", {})
     validation = resp.get("validation", {})
     valid_resp = validation.get("validResponse", {})
@@ -362,7 +364,11 @@ def migrate_image_labelling(resp, status):
     correct = _build_dnd_correct_answers(valid_resp.get("answerMapping", []), blanks, choice_items)
 
     prompt = body.get("prompt", "")
-    _, audio, video, side_image = _process_dnd_prompt(prompt) if prompt else (None, None, None, None)
+    _, audio, video, side_image = (
+        _process_dnd_prompt(prompt, question_id, lesson, file_path)
+        if prompt
+        else (None, None, None, None)
+    )
     modal_fb = _build_modal_feedback(body)
 
     outcome = {
@@ -425,7 +431,7 @@ def migrate_record(record, status):
     migrator = MIGRATORS.get(aat_type)
     if not migrator:
         raise ValueError(f"Unsupported type {aat_type!r}")
-    return migrator(resp, status)
+    return migrator(resp, status, question_id=question_id)
 
 
 class DNDTransformer:

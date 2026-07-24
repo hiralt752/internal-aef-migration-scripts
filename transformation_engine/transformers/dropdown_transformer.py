@@ -367,6 +367,7 @@ def build_item_body(body: Dict,qid:str) -> Dict:
         Dict: The transformed itemBody JSON structure.
     """
     prompt_html = body.get("prompt", "") or ""
+    prompt_html = remove_span_texts_from_html(prompt_html, qid)
     blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
     blank_ids_ordered = filter_blank_ids_with_options(body, blank_ids_ordered)
     audio_url, video_url = extract_prompt_media(prompt_html)
@@ -591,10 +592,11 @@ class DropdownTransformer:
             Dict: The fully transformed new schema JSON payload.
         """
         q = self.raw.get("response", self.raw)
-        body = q.get("body") or {}
+        body = dict(q.get("body") or {})
         validation = q.get("validation") or {}
         prompt_html = body.get("prompt") or ""
         prompt_html = remove_span_texts_from_html(prompt_html, self.qid, self.lesson, self.file_path)
+        body["prompt"] = prompt_html
         blank_ids_ordered = extract_blank_ids_in_order(prompt_html)
         blank_ids_ordered = filter_blank_ids_with_options(body, blank_ids_ordered)
         feedback_mapping = map_hints_and_feedback(

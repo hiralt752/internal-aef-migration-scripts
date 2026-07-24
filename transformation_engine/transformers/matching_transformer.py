@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 from builders.modal_feedback_builder import build_modal_feedback
 from parsers.content_parser import parse_html_content
+from helpers.span_remover import remove_span_texts_from_html
 
 def _is_wiris_math_image(img_tag):
     src = img_tag.get("src", "") or ""
@@ -299,8 +300,11 @@ class MatchingTransformer:
         }
 
         if body.get("prompt"):
-            statement = _parse_rich_content(
+            prompt = remove_span_texts_from_html(
                 body.get("prompt"), self.question_id, self.lesson
+            )
+            statement = _parse_rich_content(
+                prompt, self.question_id, self.lesson
             )
             qb_payload["itemBody"]["statement"] = {
                 "content": statement
