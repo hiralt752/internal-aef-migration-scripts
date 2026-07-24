@@ -13,6 +13,7 @@ _MOJIBAKE_MARKERS = frozenset({
 })
 
 _C1_CONTROLS = frozenset(chr(value) for value in range(0x80, 0xA0))
+_MOJIBAKE_MARKERS = _MOJIBAKE_MARKERS | frozenset({"\u00e2"})
 _IMG_TAG_PATTERN = re.compile(r"(<img\b[^>]*>)", flags=re.IGNORECASE)
 
 
@@ -30,10 +31,25 @@ def _build_cp1252_reverse_map() -> dict[str, int]:
 
         reverse[character] = value
 
+    for value in range(0x80, 0xA0):
+        reverse.setdefault(chr(value), value)
+
     return reverse
 
 
 _CP1252_REVERSE = _build_cp1252_reverse_map()
+_CP1252_HIGH_CHARS = "".join(
+    character
+    for character, value in _CP1252_REVERSE.items()
+    if value >= 0x80
+)
+_SUSPICIOUS_RUN_MARKERS = "".join(
+    character for character in _MOJIBAKE_MARKERS if character != "\ufffd"
+)
+_SUSPICIOUS_RUN_PATTERN = re.compile(
+    rf"[{re.escape(_SUSPICIOUS_RUN_MARKERS)}]"
+    rf"[{re.escape(_CP1252_HIGH_CHARS)}]*"
+)
 
 
 def _mojibake_score(text: str) -> int:
@@ -60,6 +76,18 @@ def _reverse_cp1252_utf8(text: str) -> Optional[str]:
 
 
 def _repair_plain_text(text: str) -> str:
+    repaired = text
+
+    for _ in range(3):
+        next_repaired = _repair_plain_text_once(repaired)
+        if next_repaired == repaired:
+            return repaired
+        repaired = next_repaired
+
+    return repaired
+
+
+def _repair_plain_text_once(text: str) -> str:
     original_score = _mojibake_score(text)
     if original_score == 0:
         return text
@@ -72,9 +100,41 @@ def _repair_plain_text(text: str) -> str:
     ):
         return repaired
 
+    repaired = _SUSPICIOUS_RUN_PATTERN.sub(_repair_suspicious_run, text)
+    if repaired != text:
+        return repaired
+
     # Handle a common mixed-content artifact where otherwise-valid Unicode
     # contains a double-decoded non-breaking space.
     return text.replace("\u00c2\u00a0", "\u00a0")
+
+
+def _repair_suspicious_run(match: re.Match[str]) -> str:
+    text = match.group(0)
+    repaired = _repair_candidate(text)
+    if repaired is not None:
+        return repaired
+
+    for index in range(len(text) - 1, 0, -1):
+        repaired_prefix = _repair_candidate(text[:index])
+        if repaired_prefix is not None:
+            return repaired_prefix + text[index:]
+
+    return text
+
+
+def _repair_candidate(text: str) -> Optional[str]:
+    original_score = _mojibake_score(text)
+    repaired = _reverse_cp1252_utf8(text)
+
+    if (
+        repaired is not None
+        and repaired != text
+        and _mojibake_score(repaired) < original_score
+    ):
+        return repaired
+
+    return None
 
 
 def repair_mojibake_text(text: str) -> str:
