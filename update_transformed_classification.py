@@ -737,7 +737,11 @@ def build_classification(
         curriculum_index=curriculum_index
     )
 
-    if curriculum and outcome_error:
+    if (
+        curriculum
+        and outcome_error
+        and outcome_error != "missing_outcome_key"
+    ):
         raise ValueError(
             outcome_error
         )
