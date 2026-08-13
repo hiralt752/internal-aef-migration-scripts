@@ -35,7 +35,15 @@ def transform_image(
     without stamping the target dimensions.
     """
     with Image.open(image_path) as img:
-        img = img.convert("RGB")
+        # Check if the image has transparency/alpha channel
+        if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+            # Create a solid white background of the same size
+            white_bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+            # Paste the image on top using its alpha channel as a mask
+            white_bg.alpha_composite(img.convert("RGBA"))
+            img = white_bg.convert("RGB")
+        else:
+            img = img.convert("RGB")
 
         original_width, original_height = img.size
 

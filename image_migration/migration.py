@@ -127,24 +127,27 @@ def migration_step_1(URL, image_data, question_id, content_type, local_path):
 
     final_url=f"{URL}/authoring-content-service/api/assets/presigned-upload-url?"
 
-    # Make a file name for server B
-    src_basename = os.path.basename(image_data.get('src', ''))
-    name_without_ext, ext = os.path.splitext(src_basename)
-    ext = ext.lower().lstrip('.')
-
-    # Normalize webp and jfif to png
-    resolved_content_type = (content_type or image_data.get("content_type", "IMAGE")).upper()
-    if resolved_content_type == "IMAGE" and ext in ("webp", "jfif"):
-        src_basename = f"{name_without_ext}.png"
-        ext = "png"
-
-    file_name = f"{question_id}_{image_data.get('key')}_{src_basename}"
-
     # Locate the local media file (image/audio/video) for this question
     image_path = find_local_media(question_id, image_data.get('src', ''))
     if not image_path:
+        src_basename = os.path.basename(image_data.get('src', ''))
+        file_name = f"{question_id}_{image_data.get('key')}_{src_basename}"
         print(f"Error: media file not found locally for question {question_id}, src {image_data.get('src')}")
         return {file_name: {"status_code": 404, "api_status": "failed", "response": "Local file not found"}}
+
+    # Get actual filename and extension of the local file on disk
+    local_basename = os.path.basename(image_path)
+    _, local_ext = os.path.splitext(local_basename)
+    local_ext = local_ext.lower().lstrip('.')
+
+    # Set src_basename and ext based on the local file on disk
+    src_basename = os.path.basename(image_data.get('src', ''))
+    name_without_ext, _ = os.path.splitext(src_basename)
+    src_basename = f"{name_without_ext}.{local_ext}"
+    ext = local_ext
+
+    file_name = f"{question_id}_{image_data.get('key')}_{src_basename}"
+    resolved_content_type = (content_type or image_data.get("content_type", "IMAGE")).upper()
 
     headers = {
         "X-tenantId": "shared",
@@ -217,25 +220,14 @@ def migration_step_2(step_1_response, image_data, URL, question_id, content_type
         # No early return; continue to locate the file for upload.
 
     # At this point we are dealing with an image
-    src_basename = os.path.basename(image_data.get('src'))
-    name_without_ext, ext = os.path.splitext(src_basename)
-    ext = ext[1:].lower()
-    # Convert webp/jfif to png for legacy handling
-    if ext in ("webp", "jfif"):
-        src_basename = f"{name_without_ext}.png"
-        ext = "png"
-
-    # Find the transformed image on disk (search both global and per‑question dirs)
-    search_paths = (media_path, os.path.join(BASE_DIR, "image_transformation", "image_transformation_output"))
-    image_path = []
-    for path in search_paths:
-        if os.path.isdir(path):
-            image_path = glob(os.path.join(path, "**", f"{question_id}_*_{src_basename}"), recursive=True)
-            if image_path:
-                break
-    if not image_path:
-        # Image not found – signal caller to ignore the whole question
+    # Use the local_path resolved in the parent call
+    if not local_path or not os.path.exists(local_path):
         return {key: {"status_code": 404, "api_status": "failed", "response": "Local file not found"}}
+
+    # Resolve actual extension of the local file
+    actual_basename = os.path.basename(local_path)
+    _, ext = os.path.splitext(actual_basename)
+    ext = ext.lower().lstrip('.')
 
     # Resolve MIME type for upload
     if ext == "jpg":
@@ -264,7 +256,7 @@ def migration_step_2(step_1_response, image_data, URL, question_id, content_type
 
     result = {}
     try:
-        with open(image_path[0], "rb") as f:
+        with open(local_path, "rb") as f:
             response = requests.put(presigned_url, headers=headers, data=f, timeout=REQUEST_TIMEOUT)
         temp_dict = {
             "api_status": "success" if response.status_code == 201 else "failed",
@@ -365,14 +357,6 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
 
     if step_2_response[key].get("status_code") == 201:
 
-        # Resolve filename dynamically, handling webp/jfif conversion to png
-        src_basename = os.path.basename(image_data.get('src'))
-        name_without_ext, ext = os.path.splitext(src_basename)
-        if image_data.get("content_type", "IMAGE") == "IMAGE" and ext.lower() in (".webp", ".jfif"):
-            src_basename = f"{name_without_ext}.png"
-            
-        file_name=f"{question_id}_{image_data.get("key")}_{src_basename}"
-
         final_url = f"{URL}/authoring-content-service/api/assets/create-and-publish"
 
         headers = {
@@ -396,8 +380,6 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
             "tagIds": [],
         }
 
-        # pprint(f"step -3 {payload}\n")
-
         result={}
         try:
             response = requests.post(final_url, headers=headers, json=payload, timeout=REQUEST_TIMEOUT)
@@ -412,14 +394,14 @@ def migration_step_3(URL, step_1_response, question_code, media_count, question_
                 "response": parsed_response
             }
         except requests.exceptions.RequestException as error:
-            print(f"\tstep 3 failed - network/API error for {file_name}: {error}")
+            print(f"\tstep 3 failed - network/API error for {key}: {error}")
             temp_dict = {
                 "api_status": "failed",
                 "status_code": "REQUEST_ERROR",
                 "response": str(error),
             }
 
-        result[file_name]=temp_dict
+        result[key]=temp_dict
         check_json_exists(upload_path,"step_3_response.json",result)
 
         return result
@@ -463,6 +445,10 @@ def image_migration(URL, resolution_list, question_code, question_data, file_nam
             for image in resolution_list.get(key):
                 content_type = image.get("content_type")
                 src = image.get("src")
+
+                # Skip inline base64 data and external HTTP/HTTPS resources
+                if src and (src.startswith("data:") or src.startswith("http://") or src.startswith("https://")):
+                    continue
 
                 local_path = find_local_media(question_id, src)
                 if not local_path:

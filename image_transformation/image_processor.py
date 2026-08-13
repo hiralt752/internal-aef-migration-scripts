@@ -8,6 +8,8 @@ import urllib.error
 import os
 import shutil  # For copying audio/video files without transformation
 from typing import Any
+from PIL import Image
+
 
 from image_transformation.image_transformation import (
     log_error,
@@ -16,7 +18,7 @@ from image_transformation.image_transformation import (
 )
 
 SCRIPTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_ROOT = r"C:\Users\PC\Documents\project_migration\media"
+MEDIA_ROOT = r"D:\media"
 TRANSFORMATION_DIR = os.path.join(SCRIPTS_DIR, "image_transformation")
 TRANSFORMATION_OUTPUT_ROOT = os.path.join(
     TRANSFORMATION_DIR, "image_transformation_output"
@@ -80,6 +82,20 @@ def _is_svg(src: str) -> bool:
     return clean_src.lower().endswith(".svg")
 
 
+def has_transparent_pixels(filepath: str) -> bool:
+    """Check if a PNG image contains actual transparent pixels."""
+    try:
+        with Image.open(filepath) as img:
+            if img.mode not in ('RGBA', 'LA') and not (img.mode == 'P' and 'transparency' in img.info):
+                return False
+            rgba = img.convert("RGBA")
+            alpha = rgba.split()[-1]
+            min_val, max_val = alpha.getextrema()
+            return min_val < 255
+    except Exception:
+        return False
+
+
 def transform_and_save(
     question_id: str,
     category: str,
@@ -108,7 +124,9 @@ def transform_and_save(
 
     out_basename = os.path.basename(image_path)
     name_without_ext, ext = os.path.splitext(out_basename)
-    if ext.lower() in (".webp", ".jfif"):
+    if has_transparent_pixels(image_path):
+        out_basename = f"{name_without_ext}.jpg"
+    elif ext.lower() in (".webp", ".jfif"):
         out_basename = f"{name_without_ext}.png"
     output_path = build_output_path(category, out_basename)
 
