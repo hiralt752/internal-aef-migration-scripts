@@ -6,6 +6,8 @@ from helpers.language_mapper import (
 from bs4 import BeautifulSoup
 import urllib.parse
 from builders.modal_feedback_builder import build_modal_feedback
+from builders.metadata_builder import _normalize_curriculum_outcomes
+from builders.outcome_builder import build_correct_incorrect_feedback
 from parsers.content_parser import parse_html_content
 from helpers.span_remover import remove_span_texts_from_html
 
@@ -23,14 +25,20 @@ def _is_wiris_math_image(img_tag):
 
 
 def _process_html_preserving_tags(html_content, question_id=None, lesson=None):
-    """Return the universal parser's sanitized HTML text block."""
+    """Return the universal parser's sanitized HTML text block.
+
+    Used for itemBody.items[].feedback, a plain string field (not a
+    ContentItem[]) - extract_table=False keeps any table inline instead of
+    pulling it into a separate item that the loop below would then drop.
+    """
     if not html_content:
         return ""
 
     parsed_contents = parse_html_content(
         html_content,
         question_id,
-        lesson
+        lesson,
+        extract_table=False
     )
 
     for content in parsed_contents:
@@ -61,6 +69,20 @@ def _parse_matching_content(html_content, question_id=None, lesson=None):
                 "text":""
             }
 
+        if content.get("type") == "audio":
+                    return {
+                        "type": "audio",
+                        "audio": content.get("audio"),
+                        "text":""
+                    }
+
+        if content.get("type") == "video":
+                    return {
+                        "type": "video",
+                        "video": content.get("video"),
+                        "text":""
+                    }
+        
         if content.get("type") == "text":
             if content.get("text", ""):
                 return {
@@ -74,20 +96,21 @@ def _parse_matching_content(html_content, question_id=None, lesson=None):
     }
 
 
-def _parse_rich_content(html_content, question_id=None, lesson=None):
+def _parse_rich_content(html_content, question_id=None, lesson=None, extract_table=True):
     if not html_content:
         return []
 
     parsed_contents = parse_html_content(
         html_content,
         question_id,
-        lesson
+        lesson,
+        extract_table=extract_table
     )
 
     rich_content = []
     for content in parsed_contents:
         content_type = content.get("type")
-        if content_type not in ["text", "image", "video", "audio"]:
+        if content_type not in ["text", "image", "video", "audio", "table"]:
             continue
 
         normalized_content = dict(content)
@@ -187,7 +210,7 @@ class MatchingTransformer:
 
         source_val = "AAT"
 
-        outcomes = metadata_source.get("curriculumOutcomes", [])
+        outcomes = _normalize_curriculum_outcomes(metadata_source.get("curriculumOutcomes", []))
         first_outcome = outcomes[0] if outcomes else {}
         grade = first_outcome.get("grade", "")
         subject = first_outcome.get("subject", "")
@@ -247,7 +270,7 @@ class MatchingTransformer:
                 "version": "1.0",
                 "title": None,
                 "subTitle": None,
-                "instruction": None,
+                "instruction": {"text": _process_html_preserving_tags(body.get("prompt"), self.question_id, self.lesson)} if body.get("prompt") else None,
                 "audio": None,
                 "video": None,
                 "backgroundLayout": None,
@@ -299,60 +322,43 @@ class MatchingTransformer:
             },
         }
 
-        if body.get("prompt"):
-            prompt = remove_span_texts_from_html(
-                body.get("prompt"), self.question_id, self.lesson
-            )
-            statement = _parse_rich_content(
-                prompt, self.question_id, self.lesson
-            )
-            qb_payload["itemBody"]["statement"] = {
-                "content": statement
-            }
 
-        feedback_block = {}
-        if body.get("correctAnswerFeedback"):
-            correct = _parse_rich_content(
-                body.get("correctAnswerFeedback"), self.question_id, self.lesson
-            )
-            feedback_block["correct"] = {
-                "content":correct
-            }
-        if body.get("wrongAnswerFeedback"):
-            incorrect = _parse_rich_content(
-                body.get("wrongAnswerFeedback"), self.question_id, self.lesson
-            )
-            feedback_block["incorrect"] = {
-                "content":incorrect
-            }
+
+        # correct/incorrect follow the same MCQ-derived pattern as the other
+        # question types (correctAnswerFeedback -> "correct",
+        # wrongAnswerFeedback/hints -> "incorrect", placeholder fallback).
+        feedback_mapping = map_hints_and_feedback(
+            body.get("hints", []),
+            body.get("wrongAnswerFeedback", ""), self.question_id, self.lesson
+        )
+
+        feedback_block = build_correct_incorrect_feedback(
+            body, self.question_id, self.lesson, feedback_mapping=feedback_mapping
+        )
+
+        # feedback.*.content is Html[] (text-only, no "table" field, unlike
+        # statement/seeWhy's ContentItem[]) - keep any table inline.
         if body.get("partialAnswerFeedback"):
             partial = _parse_rich_content(
-                body.get("partialAnswerFeedback"), self.question_id, self.lesson
+                body.get("partialAnswerFeedback"), self.question_id, self.lesson,
+                extract_table=False
             )
             feedback_block["partial"] = {
                 "content":partial
             }
-        if feedback_block:
-            qb_payload["outcomeDeclaration"]["feedback"] = feedback_block
-        else :
-            qb_payload["outcomeDeclaration"]["feedback"] = {
-                                                                "correct": {},
-                                                                "incorrect": {},
-                                                                "partial":{}
-                                                            }
 
         if body.get("generalFeedback"):
             generalFeedback = _parse_rich_content(
                 body.get("generalFeedback"), self.question_id, self.lesson
             )
-            feedback_block["partial"] = {
-                "content":generalFeedback
-            }
             qb_payload["outcomeDeclaration"]["seeWhy"] = {
                 "layout": "TEXT",
                 "content":generalFeedback,
                 "audio": None,
             }
+
+        if feedback_block:
+            qb_payload["outcomeDeclaration"]["feedback"] = feedback_block
 
         valid_resp = validation.get("validResponse")
         if valid_resp and valid_resp.get("answerMapping"):
@@ -366,10 +372,6 @@ class MatchingTransformer:
                 ],
             }
 
-        feedback_mapping = map_hints_and_feedback(
-            body.get("hints", []),
-            body.get("wrongAnswerFeedback", ""),self.question_id,self.lesson
-        )
         modal_feedback = build_modal_feedback(
             self.raw,
             feedback_mapping

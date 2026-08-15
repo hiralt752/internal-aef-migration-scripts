@@ -4,13 +4,43 @@ from helpers.annotation_mapper import (
 from helpers.language_mapper import (
     languageMapper
 )
+def _normalize_curriculum_outcomes(outcomes):
+    """Every CurriculumOutcome field (type/id/name/description/curriculum/
+    grade/subject) is a required, non-null string per schema, but legacy
+    source data sometimes leaves individual outcome entries blank. Backfill
+    each blank field from the first outcome that does have it, so a gap in
+    one entry doesn't reject the whole record.
+    """
+    required_fields = ("type", "id", "name", "description", "curriculum", "grade", "subject")
+
+    fallback = {
+        field: next(
+            (o.get(field) for o in outcomes if o.get(field)),
+            ""
+        )
+        for field in required_fields
+    }
+
+    normalized = []
+    for outcome in outcomes:
+        item = dict(outcome)
+        for field in required_fields:
+            if not item.get(field):
+                item[field] = fallback[field]
+        normalized.append(item)
+
+    return normalized
+
+
 def build_metadata(raw):
 
     metadata = raw.get("metadata", {})
 
-    outcomes = metadata.get(
-        "curriculumOutcomes",
-        []
+    outcomes = _normalize_curriculum_outcomes(
+        metadata.get(
+            "curriculumOutcomes",
+            []
+        )
     )
 
     first = outcomes[0] if outcomes else {}

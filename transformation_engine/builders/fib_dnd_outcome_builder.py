@@ -1,4 +1,9 @@
-def build_dnd_outcome_declaration(raw):
+from parsers.content_parser import parse_html_content
+from helpers.feedback_mapper import map_hints_and_feedback
+from builders.outcome_builder import build_correct_incorrect_feedback
+
+
+def build_dnd_outcome_declaration(raw, question_id=None, lesson=None):
 
     body = raw.get("body", {})
 
@@ -76,7 +81,7 @@ def build_dnd_outcome_declaration(raw):
         if not correct_answers:
             raise ValueError("outcomeDeclaration.validResponse.correctAnswers: correctAnswers cannot be empty")
 
-    return {
+    outcome = {
 
         "scoringType":
             validation.get(
@@ -99,3 +104,41 @@ def build_dnd_outcome_declaration(raw):
                 correct_answers
         }
     }
+
+    # =========================================================
+    # SEE WHY
+    # =========================================================
+    general_feedback = parse_html_content(
+        body.get("generalFeedback", ""),
+        question_id,
+        lesson
+    )
+
+    if general_feedback:
+        outcome["seeWhy"] = {
+            "layout": "TEXT",
+            "content": general_feedback
+        }
+
+    # =========================================================
+    # FEEDBACK
+    # =========================================================
+    feedback_mapping = map_hints_and_feedback(
+        body.get("hints", []),
+        body.get("wrongAnswerFeedback", ""),
+        question_id,
+        lesson
+    )
+
+    feedback = build_correct_incorrect_feedback(
+        body,
+        question_id,
+        lesson,
+        feedback_mapping=feedback_mapping,
+        include_incorrect_audio=True,
+    )
+
+    if feedback:
+        outcome["feedback"] = feedback
+
+    return outcome

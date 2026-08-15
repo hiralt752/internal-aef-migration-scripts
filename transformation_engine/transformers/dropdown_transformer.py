@@ -7,12 +7,18 @@ import re
 from html.parser import HTMLParser
 from typing import Dict, List, Optional, Tuple
 from bs4 import BeautifulSoup
+from urllib.parse import unquote
 from builders.metadata_builder import build_metadata
 from builders.modal_feedback_builder import build_modal_feedback as build_shared_modal_feedback
-from parsers.content_parser import strip_disallowed_tags, parse_html_content, ALLOWED_TAGS
+from parsers.content_parser import (
+    strip_disallowed_tags,
+    parse_html_content,
+    ALLOWED_TAGS,
+    convert_sup_sub_to_latex,
+)
 from helpers.feedback_mapper import map_hints_and_feedback
 from helpers.span_remover import remove_span_texts_from_html
-from builders.itembody_builder import _extract_side_image_from_sentence
+from builders.outcome_builder import build_correct_feedback, _has_feedback_text, _placeholder_feedback
 import json
 import os
 import threading
@@ -53,6 +59,7 @@ def dropdown_strict_strip_tags(html_content: str) -> str:
     if not html_content:
         return ""
     soup = BeautifulSoup(html_content, "html.parser")
+    convert_sup_sub_to_latex(soup)
     while True:
         disallowed_tags = [tag for tag in soup.find_all(True) if tag.name not in ALLOWED_TAGS]
         if not disallowed_tags:
@@ -248,6 +255,49 @@ def replace_blank_fields_with_placeholder(prompt_html: str) -> Optional[str]:
     return result if result else None
 
 
+def _is_wiris_math_image(img) -> bool:
+    """Return True for WIRIS/math formula images that must stay in sentence text."""
+    src = img.get("src", "") or ""
+    classes = img.get("class") or []
+    class_text = " ".join(classes) if isinstance(classes, list) else str(classes)
+    decoded_src = unquote(src)
+
+    return (
+        "Wirisformula" in class_text
+        or bool(img.get("data-mathml"))
+        or (
+            src.startswith("data:image/svg+xml")
+            and (
+                "mathml" in decoded_src.casefold()
+                or "<math" in decoded_src.casefold()
+            )
+        )
+    )
+
+
+def extract_dropdown_side_image_from_sentence(sentence_html: Optional[str]) -> Tuple[Optional[str], Optional[Dict]]:
+    """
+    Move the first non-math prompt image to sideImage and return cleaned sentence HTML.
+
+    WIRIS math is represented as <img> in legacy HTML, but it is content, not a
+    side image. Keeping it here lets parse_html_content convert it to LaTeX.
+    """
+    if not sentence_html:
+        return sentence_html, None
+
+    soup = BeautifulSoup(sentence_html, "html.parser")
+    for img in soup.find_all("img"):
+        if _is_wiris_math_image(img):
+            continue
+
+        url = img.get("src")
+        img.decompose()
+        cleaned = strip_disallowed_tags(str(soup).strip())
+        return cleaned, {"url": url} if url else None
+
+    return sentence_html, None
+
+
 def parse_choice_content(value_html: str, opt_id: int, question_id=None, lesson=None) -> Dict:
     """
     Parses choice content into structured text or image objects.
@@ -309,7 +359,7 @@ class _ParsedHint:
     def __init__(self, items):
         self.items = items
     def has_media(self) -> bool:
-        return any(i["type"] in ("image", "audio", "video") for i in self.items)
+        return any(i["type"] in ("image", "audio", "video", "table") for i in self.items)
     def text_only_items(self) -> List[Dict]:
         return [i for i in self.items if i["type"] == "text"]
     def media_only_items(self) -> List[Dict]:
@@ -319,7 +369,12 @@ def run_hint_mapper(wrong_answer_feedback_html: str, hints_html: List[str]) -> T
     """
     Maps legacy hints and wrongAnswerFeedback into structured target API JSON blocks.
     """
-    waf_items = sanitize_blocks(parse_html_content(wrong_answer_feedback_html or "", None, None))
+    # wrongAnswerFeedback feeds outcomeDeclaration.feedback.incorrect, which is
+    # Html[] (text-only, no "table" field) - keep any table inline instead of
+    # extracting it into a separate table content item.
+    waf_items = sanitize_blocks(
+        parse_html_content(wrong_answer_feedback_html or "", None, None, extract_table=False)
+    )
     has_waf = bool(waf_items)
 
     parsed_hints = []
@@ -372,6 +427,7 @@ def build_item_body(body: Dict,qid:str) -> Dict:
     blank_ids_ordered = filter_blank_ids_with_options(body, blank_ids_ordered)
     audio_url, video_url = extract_prompt_media(prompt_html)
     sentence_text = replace_blank_fields_with_placeholder(prompt_html)
+    sentence_text, side_image = extract_dropdown_side_image_from_sentence(sentence_text)
 
     blanks_obj = body.get("blanks") or {}
     shuffled = blanks_obj.get("shuffle", True)
@@ -395,7 +451,10 @@ def build_item_body(body: Dict,qid:str) -> Dict:
         options = []
         for opt_id, choice in enumerate(choices, start=1):
             raw_feedback = choice.get("feedback", "")
-            parsed_fb = parse_html_content(raw_feedback, None, None)
+            # option feedback is a plain string field, not a ContentItem[] -
+            # extract_table=False keeps any table inline instead of pulling
+            # it into a separate item that then gets filtered out below.
+            parsed_fb = parse_html_content(raw_feedback, None, None, extract_table=False)
             fb_text = "".join([b["text"] for b in parsed_fb if b.get("type") == "text"]).strip()
             fb_final = dropdown_strict_strip_tags(fb_text)
 
@@ -420,7 +479,11 @@ def build_item_body(body: Dict,qid:str) -> Dict:
             diff = 1.0 - total_weight
             items[0]["weight"] = round(items[0]["weight"] + diff, 4)
 
-    parsed_sentence = parse_html_content(sentence_text, None, None)
+    # sentence is a plain string field, not a ContentItem[], so a <table>
+    # can never become a structured "table" object here. extract_table=False
+    # keeps it as raw inline HTML inside the text instead of being pulled
+    # into a separate item that the join below would then drop.
+    parsed_sentence = parse_html_content(sentence_text, None, None, extract_table=False)
     sentence_raw = "".join([b["text"] for b in parsed_sentence if b.get("type") == "text"]).strip()
     sentence_final = dropdown_strict_strip_tags(sentence_raw)
 
@@ -434,9 +497,13 @@ def build_item_body(body: Dict,qid:str) -> Dict:
         "backgroundLayout": None,
         "timeSpentConfig": None,
         "splitContent": None,
-        "sideImage": None,
+        "sideImage": side_image,
         "shuffled": shuffled,
-        "statement": None,
+        "statement": {
+            "content": {
+                "type": "text",
+                "text": "<p></p>"
+            },},
         "sentence": {"text": sentence_final},
         "items": items,
     }
@@ -491,17 +558,32 @@ def build_outcome_declaration(body: Dict, validation: Dict, blank_ids_ordered: L
     )
 
     feedback: Dict = {}
-    correct_html = body.get("correctAnswerFeedback") or ""
-    correct_text = dropdown_strict_strip_tags(correct_html).strip()
-    if correct_text:
-        feedback["correct"] = {"content": [{"type": "text", "text": correct_text}]}
+    correct_feedback = build_correct_feedback(body.get("correctAnswerFeedback"), None, None)
+    if correct_feedback:
+        feedback["correct"] = correct_feedback
 
     if incorrect_items:
         feedback["incorrect"] = {"content": incorrect_items}
 
-    partial_items = sanitize_blocks(parse_html_content(body.get("partialAnswerFeedback") or "", None, None))
+    # outcomeDeclaration.feedback.partial is Html[] (text-only, no "table"
+    # field) too - keep any table inline, matching correct/incorrect above.
+    partial_items = sanitize_blocks(
+        parse_html_content(body.get("partialAnswerFeedback") or "", None, None, extract_table=False)
+    )
     if partial_items:
         feedback["partial"] = {"content": partial_items}
+
+    # The API requires outcomeDeclaration.feedback to always carry real
+    # "correct" and "incorrect" text, regardless of whether seeWhy is
+    # present. The source data does not always provide dedicated
+    # correctAnswerFeedback/wrongAnswerFeedback text, so hard-code a
+    # placeholder for whichever side is missing to keep the outcome valid.
+    # _has_feedback_text (same check MCQ uses) also catches an image/audio-only
+    # entry, which satisfies the schema but is functionally blank.
+    if not _has_feedback_text(feedback.get("correct")):
+        feedback["correct"] = _placeholder_feedback("correct")
+    if not _has_feedback_text(feedback.get("incorrect")):
+        feedback["incorrect"] = _placeholder_feedback("incorrect")
 
     outcome: Dict = {
         "scoringType": scoring_type,

@@ -20,16 +20,18 @@ PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
 TRANSFORM_DIR = os.path.join(PROJECT_ROOT, "transformation_engine")
 INPUT_DIRS = [
-    # os.path.join(TRANSFORM_DIR, "validation_error_fix_DND"),
-    # os.path.join(TRANSFORM_DIR, "transformation_output_not_in_raw_data"),
-    os.path.join(TRANSFORM_DIR, "test")
+    os.path.join(TRANSFORM_DIR, "Priority POOL DATA 14 Aug_transformed_migration_ready")
+    # os.path.join(TRANSFORM_DIR, "TEST_FOR_DROPDOWN")
 ]
 MAPPING_FILE = os.path.join(
     PROJECT_ROOT,
     "migration_id_mapping",
     "question_id_mapping.json"
 )
-REPORT_DIR = os.path.join(BASE_DIR, "api_report_02_07_2026_PROD")
+REPORT_DIR = os.path.join(BASE_DIR, "Priority POOL DATA 14 Aug_transformed_migration_ready_report")
+
+# REPORT_DIR = os.path.join(BASE_DIR, "TEST_FOR_DROPDOWN_API_REPORT")
+
 
 CONCURRENCY = 10
 REQUESTS_PER_SECOND = 10

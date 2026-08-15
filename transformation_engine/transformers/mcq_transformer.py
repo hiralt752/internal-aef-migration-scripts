@@ -26,6 +26,15 @@ class MCQTransformer:
             self.question_id,self.lesson
         )
 
+        item_body = build_item_body(
+            self.raw, question_id=self.question_id, lesson=self.lesson, file_path=self.file_path
+        )
+
+        sub_type = detect_subtype(
+            body.get("choices", {})
+            .get("choiceItems", []), self.question_id, self.lesson
+        )
+
         payload = {
 
             "schemaVersion": {
@@ -36,16 +45,12 @@ class MCQTransformer:
 
             "type": "MULTIPLE_CHOICE",
 
-            "subType": detect_subtype(
-                body.get("choices", {})
-                .get("choiceItems", []),self.question_id,self.lesson
-            ),
+            "subType": sub_type,
 
             "metadata":
                 build_metadata(self.raw),
 
-            "itemBody":
-                build_item_body(self.raw, question_id=self.question_id, lesson=self.lesson,file_path=self.file_path),
+            "itemBody": item_body,
 
             "responseDeclaration":
                 build_response_declaration(

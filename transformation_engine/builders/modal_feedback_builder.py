@@ -58,7 +58,8 @@ def build_modal_feedback(
         }
 
     passage = build_passage(body.get("passage"))
-    modal["needHelpStrategy"] ="SCAFFOLDED"   
+    if need_help:
+        modal["needHelpStrategy"] ="SCAFFOLDED"   
     if passage:
         modal["passage"] = passage
 

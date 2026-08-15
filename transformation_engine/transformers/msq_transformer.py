@@ -37,7 +37,7 @@ class MSQTransformer:
 
             "subType": detect_subtype(
                 body.get("choices", {})
-                .get("choiceItems", []),self.question_id,self.lesson
+                .get("choiceItems", []), self.question_id, self.lesson
             ),
 
             "metadata":

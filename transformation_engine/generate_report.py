@@ -1,11 +1,12 @@
 import os
 import re
 import json
+import argparse
 from datetime import datetime
 from collections import defaultdict, Counter
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-REPORT_DIR = os.path.join(BASE_DIR, "api_reports")
+DEFAULT_REPORT_DIR = os.path.join(BASE_DIR, "FINAL_MCQ_FIXES_PUBLISHED_API_REPORT")
 
 PART_RE = re.compile(r"^(\d+)_part\d+\.json$")
 
@@ -30,15 +31,26 @@ def is_success(code):
     return (200 <= code < 300) or code == 409
 
 
-def list_part_files():
+def list_part_files(report_dir, recursive=False):
     out = []
-    if not os.path.isdir(REPORT_DIR):
+    if not os.path.isdir(report_dir):
         return out
-    for name in sorted(os.listdir(REPORT_DIR)):
-        m = PART_RE.match(name)
-        if m and os.path.isfile(os.path.join(REPORT_DIR, name)):
-            out.append((int(m.group(1)), os.path.join(REPORT_DIR, name)))
-    return out
+
+    if recursive:
+        for root, _, filenames in os.walk(report_dir):
+            for name in sorted(filenames):
+                m = PART_RE.match(name)
+                path = os.path.join(root, name)
+                if m and os.path.isfile(path):
+                    out.append((int(m.group(1)), path))
+    else:
+        for name in sorted(os.listdir(report_dir)):
+            m = PART_RE.match(name)
+            path = os.path.join(report_dir, name)
+            if m and os.path.isfile(path):
+                out.append((int(m.group(1)), path))
+
+    return sorted(out, key=lambda item: item[1])
 
 
 def read_records(path):
@@ -54,22 +66,48 @@ def is_pending(code, qtype):
     return code == 400 and norm_type(qtype).upper() in QB_NOT_READY_TYPES
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate an aggregate API migration report from NNN_part*.json files."
+    )
+    parser.add_argument(
+        "report_dir",
+        nargs="?",
+        default=DEFAULT_REPORT_DIR,
+        help="Folder containing API report part files.",
+    )
+    parser.add_argument(
+        "--recursive",
+        action="store_true",
+        help="Scan nested batch folders under report_dir.",
+    )
+    return parser.parse_args()
+
+
 def main():
-    part_files = list_part_files()
+    args = parse_args()
+    report_dir = os.path.abspath(args.report_dir)
+    part_files = list_part_files(report_dir, recursive=args.recursive)
     if not part_files:
-        print(f"[ERROR] No NNN_part*.json files found in {REPORT_DIR}")
+        print(f"[ERROR] No NNN_part*.json files found in {report_dir}")
         return
 
     raw_records = 0
     files_scanned = 0
     best = {} 
+    batch_stats = defaultdict(lambda: Counter({"files": 0, "raw_records": 0}))
 
     for code, path in part_files:
         files_scanned += 1
+        batch_name = os.path.relpath(os.path.dirname(path), report_dir)
+        if batch_name == ".":
+            batch_name = os.path.basename(report_dir)
+        batch_stats[batch_name]["files"] += 1
         for rec in read_records(path):
             if not isinstance(rec, dict):
                 continue
             raw_records += 1
+            batch_stats[batch_name]["raw_records"] += 1
             qid = rec.get("question_id")
             if not qid:
                 continue
@@ -117,6 +155,8 @@ def main():
     L = []
     L += ["=" * 72, "API MIGRATION REPORT  (aggregate of all report files)", "=" * 72]
     L.append(f"Generated : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    L.append(f"Report dir: {report_dir}")
+    L.append(f"Recursive : {args.recursive}")
     L.append(f"Scanned   : {files_scanned} part files | {raw_records:,} records")
     L.append(f"Distinct question ids : {distinct:,}")
     if dup_collapsed:
@@ -143,6 +183,14 @@ def main():
     for code in sorted(status_final):
         note = "  <- includes pending QB types" if code == 400 and pending else ""
         L.append(f"{code:<4} {label(code):<20}: {status_final[code]:,}{note}")
+    if len(batch_stats) > 1:
+        L += ["", "-" * 72, "SOURCE BATCHES (raw records before duplicate collapse)", "-" * 72]
+        batch_w = max(len(name) for name in batch_stats)
+        for batch_name in sorted(batch_stats):
+            stats = batch_stats[batch_name]
+            L.append(
+                f"{batch_name:<{batch_w}} : files {stats['files']:<3,} records {stats['raw_records']:,}"
+            )
     L += ["", "-" * 72, "PER QUESTION TYPE   (T total | S success | F failure | P pending)", "-" * 72]
     name_w = max((len(t) for t in type_stats), default=12)
     name_w = max(name_w, 12)
@@ -173,7 +221,7 @@ def main():
 
     report_text = "\n".join(L)
     out_path = os.path.join(
-        REPORT_DIR, f"aggregate_report_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.txt")
+        report_dir, f"aggregate_report_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.txt")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(report_text)
 

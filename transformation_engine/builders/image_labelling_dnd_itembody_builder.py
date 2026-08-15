@@ -1,5 +1,6 @@
 from parsers.content_parser import parse_html_content
 from bs4 import BeautifulSoup
+from helpers.dnd_position_scaler import calculate_imd_dnd_target_position
 
 
 MAIN_IMAGE_LAYOUTS = {
@@ -175,7 +176,12 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
 
         "video": video,
 
-        "statement": None,
+        "statement": {
+            "content": {
+                "type": "text",
+                "text": "<p></p>"
+            }
+            },
 
         "sentence": None,
 
@@ -213,7 +219,8 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
                     "blanks",
                     []
                 ),
-                rendered_dimensions
+                rendered_dimensions,
+                raw_bg_image=body.get("backgroundImage")
             ),
 
         "options":
@@ -226,11 +233,29 @@ def build_image_labelling_dnd_item_body(raw,question_id,lesson):
     }
 
 
-def build_targets(blanks, rendered_dimensions):
+def build_targets(blanks, rendered_dimensions, raw_bg_image=None):
+
+    raw_bg_w = raw_bg_image.get("width") if raw_bg_image else None
+    raw_bg_h = raw_bg_image.get("height") if raw_bg_image else None
+    target_vw = rendered_dimensions.get("width", 560)
+    target_vh = rendered_dimensions.get("height", 315)
 
     targets = []
 
     for index, blank in enumerate(blanks, start=1):
+        pos = blank.get("position", {}) or {}
+        x_dec = pos.get("x")
+        y_dec = pos.get("y")
+
+        scaled_pos = calculate_imd_dnd_target_position(
+            x_decimal=x_dec,
+            y_decimal=y_dec,
+            raw_bg_width=raw_bg_w,
+            raw_bg_height=raw_bg_h,
+            target_viewport_width=target_vw,
+            target_viewport_height=target_vh,
+            target_box_width=120
+        )
 
         targets.append({
 
@@ -250,28 +275,7 @@ def build_targets(blanks, rendered_dimensions):
 
             "swapGroupId": 0,
 
-            "position": {
-
-                "top":
-                    _scale_coordinate(
-                        blank.get(
-                            "position",
-                            {}
-                        ).get("y"),
-                        rendered_dimensions.get("height")
-                    ),
-
-                "left":
-                    _scale_coordinate(
-                        blank.get(
-                            "position",
-                            {}
-                        ).get("x"),
-                        rendered_dimensions.get("width")
-                    ),
-
-                "width": 120,
-            }
+            "position": scaled_pos
         })
 
     if targets:

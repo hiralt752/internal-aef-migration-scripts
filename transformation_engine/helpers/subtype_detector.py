@@ -4,7 +4,7 @@ from parsers.content_parser import parse_html_content
 def detect_subtype(choice_items,question_id,lesson):
 
     has_text = False
-    has_image = False
+    total_image_count = 0
 
     for choice in choice_items:
 
@@ -18,12 +18,18 @@ def detect_subtype(choice_items,question_id,lesson):
                 has_text = True
 
             if item["type"] == "image":
-                has_image = True
+                total_image_count += 1
 
-    if has_image and has_text:
+    # More than one image across the options (e.g. one image per option)
+    # renders as an image grid alongside text, not a single hero image, so
+    # it needs IMAGE_TEXT rather than IMAGE.
+    if total_image_count > 1:
         return "IMAGE_TEXT"
 
-    if has_image:
+    if total_image_count == 1 and has_text:
+        return "IMAGE_TEXT"
+
+    if total_image_count == 1:
         return "IMAGE"
 
     return "TEXT"

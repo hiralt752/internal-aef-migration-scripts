@@ -170,15 +170,23 @@ def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
     replaced = replace_blank_fields(prompt)
     cleaned_prompt, side_image = _extract_side_image_from_prompt(replaced)
 
+    # sentence is Sentence (schema: {"text": string}) - a plain string field,
+    # not a ContentItem[], so a <table> can never become a structured "table"
+    # object here. extract_table=False keeps it as raw inline HTML inside the
+    # text instead of being pulled into a separate tableless first item.
     parsed_content = parse_html_content(
         cleaned_prompt,
         question_id,
-        lesson
+        lesson,
+        extract_table=False
     )
 
-    # keep first content item as sentence (fallback to text if parser returned empty)
+    # keep first content item as sentence (fallback to text if parser returned empty).
+    # Non-text content blocks (image/audio/video) don't carry a "text" key,
+    # but the API schema requires sentence.text to always be present and non-null.
     if parsed_content:
-        sentence_val = parsed_content[0]
+        sentence_val = dict(parsed_content[0])
+        sentence_val.setdefault("text", "")
     else:
         sentence_val = {"type": "text", "text": html_to_text(cleaned_prompt)}
 
@@ -224,7 +232,12 @@ def build_fib_dnd_item_body(raw, question_id, lesson,file_path=None):
 
         "optionsPosition": "bottom",
 
-        "statement": None,
+        "statement": {
+            "content": {
+                "type": "text",
+                "text": "<p></p>"
+            }
+            },
 
         "sentence": sentence_val,
 

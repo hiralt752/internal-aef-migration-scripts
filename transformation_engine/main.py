@@ -15,7 +15,6 @@ from transformers.matching_transformer import MatchingTransformer
 from transformers.fib_transformer import FIBTransformer
 from transformers.fib_dnd_transformer import FIBDNDTransformer
 from helpers.debug_logger import DebugLogger
-from helpers.json_reader import load_question_ids_from_json, is_question_id_present
 from helpers.mojibake_repair import repair_question_mojibake
 
 logger = DebugLogger()
@@ -23,8 +22,15 @@ logger = DebugLogger()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-INPUT_ROOT = os.path.join(PROJECT_ROOT, "core_data")
-OUTPUT_ROOT = os.path.join(BASE_DIR, "transformation_output_core_data")
+# INPUT_ROOT = os.path.join(PROJECT_ROOT, "MCQ_ONLY")
+# OUTPUT_ROOT = os.path.join(BASE_DIR, "MCQ_ONLY_TRANSFORMED")
+
+INPUT_ROOT = os.path.join(PROJECT_ROOT, "08_08_2026")
+OUTPUT_ROOT = os.path.join(BASE_DIR, "08_08_2026_Transformed")
+
+if not os.path.exists(INPUT_ROOT):
+    INPUT_ROOT = os.path.join(PROJECT_ROOT, "Priority POOL DATA 14 Aug")
+    OUTPUT_ROOT = os.path.join(BASE_DIR, "Priority POOL DATA 14 Aug_transformed")
 
 FILTER_DIR = os.path.join(PROJECT_ROOT, "filter")
 TERM1_FILTER_DIR = os.path.join(FILTER_DIR, "Term1_json_filtering")
@@ -171,18 +177,20 @@ def load_json(path):
 def build_tasks(root):
     tasks = []
 
-    for lesson in os.scandir(root):
-        if not lesson.is_dir():
-            continue
-
-        for file in os.scandir(lesson.path):
-            if not file.is_file():
+    # Walk recursively so both the old flat layout (root/<lesson>/<qtype>.json)
+    # and nested batch layouts (root/<batch>/<lesson>/<lesson>_<QTYPE>.json,
+    # like 08_08_2026/output_fib_dnd_sideimage/Arabic/...) are picked up.
+    # "lesson" is the file's directory relative to root, so the output tree
+    # mirrors the input tree exactly, whatever its depth.
+    for dirpath, _dirnames, filenames in os.walk(root):
+        for name in filenames:
+            if not name.endswith(".json"):
                 continue
-            if not file.name.endswith(".json"):
-                continue
 
-            qtype = file.name.replace(".json", "")
-            tasks.append((file.path, qtype, lesson.name))
+            file_path = os.path.join(dirpath, name)
+            lesson = os.path.relpath(dirpath, root)
+            qtype = name[:-len(".json")]
+            tasks.append((file_path, qtype, lesson))
 
     return tasks
 
@@ -208,18 +216,13 @@ def process_file(task):
         if not q or qid in seen:
             continue
 
-        q = repair_question_mojibake(q)
-
         seen.add(qid)
+
+        q = repair_question_mojibake(q)
 
         # if contains_img(q):
         #     logger.log(qid, lesson, q.get("type"), "IMAGE SKIPPED", None)
         #     continue
-
-        # if not is_question_id_present(qid):
-        #     logger.log(qid, lesson, q.get("type"), "FILTERED", None)
-        #     continue
-
 
         t = q.get("type")
 
@@ -246,7 +249,6 @@ def run():
     log("START")
 
     init_csv()
-    # load_question_ids_from_json(MATCHED_QIDs_PATH)
     tasks = build_tasks(INPUT_ROOT)
     if not tasks:
         log("NO FILES FOUND")

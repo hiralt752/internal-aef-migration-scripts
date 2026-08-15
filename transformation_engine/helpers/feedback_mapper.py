@@ -1,5 +1,6 @@
 from parsers.content_parser import (
-    parse_html_content
+    parse_html_content,
+    split_html_only_feedback_content
 )
 
 
@@ -8,20 +9,22 @@ def map_hints_and_feedback(
     wrong_feedback,question_id,lesson
 ):
 
+    # wrongAnswerFeedback feeds outcomeDeclaration.feedback.incorrect, which
+    # is Html[] (text-only, no "table" field) - keep any table inline.
     parsed_wrong = parse_html_content(
-        wrong_feedback,question_id,lesson
+        wrong_feedback, question_id, lesson, extract_table=False
     )
 
-    for item in parsed_wrong:
-        if item.get("type") == "image":
-            item["text"] = ""
+    # Any parsed content (text, image, audio, ...) counts as wrongAnswerFeedback
+    # being present. Gating on "text" alone silently dropped table-only or
+    # image-only feedback in favor of the hints-derived fallback below.
+    wrong_has_content = bool(parsed_wrong)
 
-    wrong_has_text = any(
-        x["type"] == "text"
-        for x in parsed_wrong
-    )
+    if wrong_has_content:
 
-    if wrong_has_text:
+        incorrect_content, incorrect_audio = split_html_only_feedback_content(
+            parsed_wrong, question_id, lesson
+        )
 
         need_help = []
 
@@ -32,7 +35,8 @@ def map_hints_and_feedback(
             )
 
         return {
-            "incorrect": parsed_wrong,
+            "incorrect": incorrect_content,
+            "incorrect_audio": incorrect_audio,
             "needHelp": need_help
         }
 
@@ -40,6 +44,7 @@ def map_hints_and_feedback(
 
         return {
             "incorrect": None,
+            "incorrect_audio": None,
             "needHelp": []
         }
 
@@ -58,11 +63,13 @@ def map_hints_and_feedback(
 
             return {
                 "incorrect": None,
+                "incorrect_audio": None,
                 "needHelp": parsed
             }
 
         return {
             "incorrect": parsed,
+            "incorrect_audio": None,
             "needHelp": []
         }
 
@@ -90,5 +97,6 @@ def map_hints_and_feedback(
 
     return {
         "incorrect": incorrect,
+        "incorrect_audio": None,
         "needHelp": need_help
     }
